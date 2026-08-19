@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Gera um Nonce (Number Used Once) forte para garantir que apenas scripts autorizados rodem
   const nonce = crypto.randomUUID();
 
