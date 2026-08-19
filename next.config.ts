@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  // "Tratado de Paz" entre o Webpack (Docker Local) e o Turbopack (Build Produção)
+  turbopack: {},
 };
 
 export default nextConfig;
