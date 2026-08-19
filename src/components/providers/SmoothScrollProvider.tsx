@@ -15,6 +15,7 @@ export function SmoothScrollProvider({
 }: {
   children: React.ReactNode;
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lenisRef = useRef<any>(null);
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export function SmoothScrollProvider({
         Fazemos um cast seguro para 'any' porque o Lenis foi compilado com tipagens do React 18, 
         mas nosso projeto roda React 19 (onde ReactNode inclui 'bigint').
       */}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {children as any}
     </ReactLenis>
   );
