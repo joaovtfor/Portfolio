@@ -48,7 +48,11 @@ export function SmoothScrollProvider({
         smoothWheel: true,
       }}
     >
-      {children}
+      {/* 
+        Fazemos um cast seguro para 'any' porque o Lenis foi compilado com tipagens do React 18, 
+        mas nosso projeto roda React 19 (onde ReactNode inclui 'bigint').
+      */}
+      {children as any}
     </ReactLenis>
   );
 }
