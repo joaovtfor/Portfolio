@@ -1,7 +1,7 @@
 "use client";
 
 import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef, useEffect, useState } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import * as THREE from "three";
 
 // --- SHADERS GLSL ---
@@ -94,13 +94,14 @@ export function FluidMesh() {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const { viewport } = useThree(); // Usado para escalonar o plano e cobrir 100% da tela
   
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  // Usamos um Ref em vez de State para não engatilhar re-renders (evita ESLint setState in effect)
+  const isTouchDevice = useRef(false);
   const gyroTarget = useRef({ x: 0, y: 0 });
 
   // Detecção de Mobile e Setup do Giroscópio
   useEffect(() => {
     const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    setIsTouchDevice(hasTouch);
+    isTouchDevice.current = hasTouch;
 
     if (hasTouch) {
       const handleOrientation = (e: DeviceOrientationEvent) => {
@@ -143,8 +144,8 @@ export function FluidMesh() {
     materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
 
     // 2. Resolve o alvo interativo (Mouse ou Giroscópio)
-    const targetX = isTouchDevice ? gyroTarget.current.x : state.pointer.x;
-    const targetY = isTouchDevice ? gyroTarget.current.y : state.pointer.y;
+    const targetX = isTouchDevice.current ? gyroTarget.current.x : state.pointer.x;
+    const targetY = isTouchDevice.current ? gyroTarget.current.y : state.pointer.y;
 
     // 3. LERP (Linear Interpolation)
     // Em vez do ponteiro "teletransportar", a luz corre suavemente em direção ao alvo
