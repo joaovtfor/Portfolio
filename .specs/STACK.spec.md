@@ -23,3 +23,20 @@
 - **Comandos Agente:**
   - Dev: `pnpm run dev` (executado preferencialmente dentro do container Docker)
   - Prod Build: `pnpm run build`
+  
+## 5. Padrão de Especificação de Features (SDD Templates)
+Para manter o princípio YAGNI e guiar múltiplos agentes, toda nova funcionalidade deve ser documentada em .specs/tasks/ seguindo um de dois perfis:
+
+### Perfil A: UI/Visual Feature (Ex: Hero, WebGL, UI)
+Focado em visualização sem tráfego de dados sensíveis.
+1. **Responsabilidade:** Papel do componente na interface.
+2. **Contrato de Renderização:** Divisão estrita entre Server Components e Client Components.
+3. **Coreografias:** Definição de gatilhos visuais (GSAP, Framer, Shaders).
+4. **Crit�rios de Aceite:** Acessibilidade (WCAG), contraste e responsividade.
+
+### Perfil B: Data/Action Feature (Ex: Forms, APIs)
+Focado em rotas que interagem com o exterior ou mutacionam dados.
+1. **Responsabilidade:** Fluxo da informação.
+2. **Contrato de Dados:** Schemas estritos (Zod) isomórficos (Client/Server).
+3. **Segurança (OWASP):** Sanitização, tratativas contra Bots/Spam e Rate Limiting.
+4. **Integrações:** Tratamento de erros seguro (sem vazar stack trace) para APIs externas (ex: Resend).
