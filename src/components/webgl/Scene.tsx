@@ -43,7 +43,7 @@ export function WebGLScene({ children, className, eventSource, ...props }: WebGL
     >
       <Canvas
         // Define o elemento pai como fonte de eventos de mouse, evitando que o HTML sobreposto os bloqueie
-        eventSource={eventSource || containerRef}
+        eventSource={(eventSource || containerRef) as unknown as React.RefObject<HTMLElement>}
         eventPrefix="client"
         
         // Controle de Performance Absoluto:
