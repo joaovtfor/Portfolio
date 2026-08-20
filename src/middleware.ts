@@ -2,16 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Gera um Nonce (Number Used Once) forte para garantir que apenas scripts autorizados rodem
-  const nonce = crypto.randomUUID();
-
   // O ambiente de desenvolvimento do Next.js precisa de 'unsafe-eval' para o Hot Reload funcionar
   const isDev = process.env.NODE_ENV === 'development';
   
   // Montagem da Política de Segurança de Conteúdo (CSP)
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${isDev ? "'unsafe-eval'" : ""};
+    script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""};
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data:;
     font-src 'self';
@@ -22,9 +19,8 @@ export function middleware(request: NextRequest) {
     upgrade-insecure-requests;
   `.replace(/\s{2,}/g, ' ').trim(); // Minifica a string para evitar erros de header malformado
 
-  // 1. Injeta o CSP e o Nonce na Requisição (Para o Next.js ler e injetar nas tags <script> no Server-Side)
+  // 1. Injeta o CSP na Requisição
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-nonce', nonce);
   requestHeaders.set('Content-Security-Policy', cspHeader);
 
   // 2. Prossegue com a requisição carregando a nova bagagem
