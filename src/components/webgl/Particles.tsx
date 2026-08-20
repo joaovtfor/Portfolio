@@ -66,13 +66,20 @@ void main() {
 }
 `;
 
+// Helper determinístico para manter o useMemo "puro" (Evita o erro react-hooks/purity do ESLint)
+// Ele gera sempre o mesmo resultado para a mesma seed, o que é ideal para o React.
+function prng(seed: number) {
+  const x = Math.sin(seed * 99.9999) * 10000;
+  return x - Math.floor(x);
+}
+
 export function Particles() {
   const { viewport } = useThree();
   const materialRef = useRef<THREE.ShaderMaterial>(null);
 
   const count = 400; // Quantidade de partículas
 
-  // Pré-calcula posições, tamanhos e velocidades iniciais aleatórias (Executado 1x)
+  // Pré-calcula posições usando função pura
   const [positions, sizes, speeds] = useMemo(() => {
     const pos = new Float32Array(count * 3);
     const siz = new Float32Array(count);
@@ -80,12 +87,12 @@ export function Particles() {
 
     for (let i = 0; i < count; i++) {
       // Espalha as partículas em uma grande área 3D (X, Y, Z)
-      pos[i * 3] = (Math.random() - 0.5) * 20;     // X
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 20; // Y
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 8;  // Z (Profundidade)
+      pos[i * 3] = (prng(i * 3) - 0.5) * 20;         // X
+      pos[i * 3 + 1] = (prng(i * 3 + 1) - 0.5) * 20; // Y
+      pos[i * 3 + 2] = (prng(i * 3 + 2) - 0.5) * 8;  // Z (Profundidade)
 
-      siz[i] = Math.random() * 2.0 + 1.0; // Tamanho
-      spd[i] = Math.random() * 0.4 + 0.1; // Velocidade do drift
+      siz[i] = prng(i * 7) * 2.0 + 1.0; // Tamanho
+      spd[i] = prng(i * 11) * 0.4 + 0.1; // Velocidade do drift
     }
 
     return [pos, siz, spd];
