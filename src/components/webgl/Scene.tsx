@@ -6,9 +6,10 @@ import { cn } from "@/lib/utils";
 
 interface WebGLSceneProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
+  eventSource?: React.RefObject<HTMLElement | null>;
 }
 
-export function WebGLScene({ children, className, ...props }: WebGLSceneProps) {
+export function WebGLScene({ children, className, eventSource, ...props }: WebGLSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
 
@@ -41,19 +42,18 @@ export function WebGLScene({ children, className, ...props }: WebGLSceneProps) {
       {...props}
     >
       <Canvas
+        // Define o elemento pai como fonte de eventos de mouse, evitando que o HTML sobreposto os bloqueie
+        eventSource={eventSource || containerRef}
+        eventPrefix="client"
+        
         // Controle de Performance Absoluto:
-        // 'always': loop contínuo (necessário para Shaders e animações WebGL)
-        // 'never': desliga a GPU, poupa bateria e processamento no mobile
         frameloop={inView ? "always" : "never"}
         
         // Clamping do DevicePixelRatio:
-        // Telas Retina de celular têm DPR 3 ou 4. Renderizar 3D nisso destrói a GPU.
-        // Travamos o teto em 1.5. A qualidade visual se mantém altíssima, mas a performance decola.
         dpr={[1, 1.5]}
         
         camera={{ position: [0, 0, 5], fov: 45 }}
         
-        // Eventos ativados nativamente para o WebGL rastrear o ponteiro
         style={{
           position: "absolute",
           top: 0,
