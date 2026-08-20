@@ -45,9 +45,9 @@
     color: var(--background);
   }
 
-  /* Prevenir overflow horizontal no mobile e ocultar scrollbars globais para maior imersão */
+  /* Esconder barra de scroll e manter imersão */
   html, body {
-    overflow-x: hidden;
+    /* overflow-x: hidden REMOVIDO pois quebrava o position: sticky em vários browsers */
     /* Esconde barra de scroll no Firefox */
     scrollbar-width: none; 
   }

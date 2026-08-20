@@ -1,8 +1,10 @@
 import { create } from 'zustand';
+// Forcing HMR cache bust for clearInteractivePosition
 
 interface UIState {
   interactivePositions: { id: string; x: number; y: number }[];
   setInteractivePosition: (id: string, x: number, y: number) => void;
+  clearInteractivePosition: (id: string) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -19,4 +21,8 @@ export const useUIStore = create<UIState>((set) => ({
         ],
       };
     }),
+  clearInteractivePosition: (id) =>
+    set((state) => ({
+      interactivePositions: state.interactivePositions.filter((p) => p.id !== id),
+    })),
 }));

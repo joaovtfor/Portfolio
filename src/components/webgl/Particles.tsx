@@ -3,10 +3,13 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
+import { useUIStore } from "@/store/uiStore";
 
 const vertexShader = `
 uniform float uTime;
 uniform vec2 uMouseWorld;
+uniform vec2 uAttractor;
+uniform float uHasAttractor;
 
 attribute float aSize;
 attribute float aSpeed;
@@ -20,7 +23,26 @@ void main() {
     pos.x += sin(uTime * aSpeed + pos.y) * 0.8;
     pos.y += cos(uTime * aSpeed + pos.x) * 0.8;
     
-    // 2. Física de Repulsão do Mouse (Aplicada uniformemente em toda a tela)
+    // 2. Interação Magnética Suave com UI (Ex: Hover no ProjectCard)
+    if (uHasAttractor > 0.5) {
+        float distToAttractor = distance(pos.xy, uAttractor);
+        float effectRadius = 5.0; 
+        
+        if (distToAttractor < effectRadius) {
+            float pull = 1.0 - smoothstep(0.0, effectRadius, distToAttractor);
+            vec2 dir = normalize(uAttractor - pos.xy);
+            
+            // Puxa sutilmente as partículas em direção ao centro do card
+            pos.xy += dir * pull * 0.8;
+            // Eleva suavemente no eixo Z para destacar
+            pos.z += pull * 1.5;
+            
+            // Aumenta o brilho (tamanho) perto do card
+            pos.z += pull * aSize * 0.5;
+        }
+    }
+
+    // 3. Física de Repulsão do Mouse
     float dist = distance(pos.xy, uMouseWorld);
     float radius = 2.5; 
     
@@ -62,7 +84,6 @@ export function Particles() {
   const { viewport } = useThree();
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   
-  // Retornando para uma densidade mais limpa e minimalista
   const count = 400;
 
   const [positions, sizes, speeds] = useMemo(() => {
@@ -87,6 +108,8 @@ export function Particles() {
       uTime: { value: 0 },
       uMouseWorld: { value: new THREE.Vector2(0, 0) },
       uColor: { value: new THREE.Color("#A3D4D5") },
+      uAttractor: { value: new THREE.Vector2(0, 0) },
+      uHasAttractor: { value: 0.0 },
     }),
     []
   );
@@ -102,6 +125,25 @@ export function Particles() {
     const lerpFactor = 0.1;
     materialRef.current.uniforms.uMouseWorld.value.x += (targetX - materialRef.current.uniforms.uMouseWorld.value.x) * lerpFactor;
     materialRef.current.uniforms.uMouseWorld.value.y += (targetY - materialRef.current.uniforms.uMouseWorld.value.y) * lerpFactor;
+
+    // Attractor (Integração com ProjectCard)
+    const interactivePos = useUIStore.getState().interactivePositions[0];
+    
+    if (interactivePos) {
+      // Converte coordenadas da tela para coordenadas do WebGL
+      const ndcX = (interactivePos.x / state.size.width) * 2 - 1;
+      const ndcY = -(interactivePos.y / state.size.height) * 2 + 1;
+      
+      const worldX = (ndcX * viewport.width) / 2;
+      const worldY = (ndcY * viewport.height) / 2;
+      
+      materialRef.current.uniforms.uAttractor.value.set(worldX, worldY);
+      // Fade in suave do efeito atrator
+      materialRef.current.uniforms.uHasAttractor.value += (1.0 - materialRef.current.uniforms.uHasAttractor.value) * 0.1;
+    } else {
+      // Fade out suave
+      materialRef.current.uniforms.uHasAttractor.value += (0.0 - materialRef.current.uniforms.uHasAttractor.value) * 0.1;
+    }
   });
 
   return (

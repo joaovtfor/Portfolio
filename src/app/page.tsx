@@ -1,11 +1,14 @@
 import { HeroSection } from "@/components/hero/HeroSection";
+import { ProjectsWrapper } from "@/components/projects/ProjectsWrapper";
+import { ExperienceSection } from "@/components/experience/ExperienceSection";
+import { PageWrapper } from "@/components/layout/PageWrapper";
 
 export default function Home() {
   return (
-    <main className="flex flex-col w-full min-h-screen">
+    <PageWrapper>
       <HeroSection />
-      {/* Próximas seções (Projects, Contact) entrarão aqui */}
-      <div className="h-screen" /> {/* Placeholder para permitir scroll temporário para testar o shader desligando */}
-    </main>
+      <ProjectsWrapper />
+      <ExperienceSection />
+    </PageWrapper>
   );
 }
