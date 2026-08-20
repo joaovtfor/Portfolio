@@ -53,15 +53,13 @@ export function WebGLScene({ children, className, ...props }: WebGLSceneProps) {
         
         camera={{ position: [0, 0, 5], fov: 45 }}
         
-        // PointerEvents: none por padrão para não roubar o scroll do Lenis,
-        // a não ser que a cena exija interação com o mouse (raycaster).
+        // Eventos ativados nativamente para o WebGL rastrear o ponteiro
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           width: "100%",
           height: "100%",
-          pointerEvents: "none",
         }}
       >
         {/* Placeholder para as futuras malhas (meshes) e materiais */}
