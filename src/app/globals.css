@@ -45,8 +45,15 @@
     color: var(--background);
   }
 
-  /* Prevenir overflow horizontal no mobile causado por tipografia */
+  /* Prevenir overflow horizontal no mobile e ocultar scrollbars globais para maior imersão */
   html, body {
     overflow-x: hidden;
+    /* Esconde barra de scroll no Firefox */
+    scrollbar-width: none; 
+  }
+
+  /* Esconde barra de scroll no Chrome/Safari/Edge */
+  ::-webkit-scrollbar {
+    display: none;
   }
 }

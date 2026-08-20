@@ -3,20 +3,28 @@
 import { motion, Variants } from "framer-motion";
 
 export function HeroTitle() {
+  const title = "JOÃO DE FOR";
+  const letters = title.split("");
+
+  // Orquestração do Container
   const containerVariants: Variants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 1 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+      // O delayChildren atrasa o início para sincronizar com o fade-in do WebGL
+      // O staggerChildren define o intervalo entre o surgimento de cada letra
+      transition: { staggerChildren: 0.08, delayChildren: 0.5 },
     },
   };
 
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 30 },
+  // Física de Entrada de cada Letra
+  const letterVariants: Variants = {
+    hidden: { opacity: 0, y: 80, filter: "blur(15px)" },
     show: { 
       opacity: 1, 
       y: 0, 
-      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const }
+      filter: "blur(0px)",
+      transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } // Easing de "Ease Out Expo"
     },
   };
 
@@ -25,14 +33,31 @@ export function HeroTitle() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="flex flex-col items-center justify-center w-full z-10 select-none pointer-events-none"
+      className="flex items-center justify-center w-full z-10 select-none pointer-events-none"
     >
-      <motion.h1 
-        variants={itemVariants}
-        className="font-serif text-[12vw] md:text-[10vw] font-medium tracking-normal leading-none uppercase text-white mix-blend-difference whitespace-nowrap"
-      >
-        João de For
-      </motion.h1>
+      <h1 className="font-serif text-[12vw] md:text-[10vw] font-medium tracking-normal leading-none uppercase text-white mix-blend-difference whitespace-nowrap flex select-none">
+        {letters.map((char, i) => (
+          <motion.span
+            key={i}
+            variants={letterVariants}
+            // Mantemos apenas a física de levante sem o glow para uma estética mais limpa
+            whileHover={{
+              scale: 1.05,
+              y: -10, // Levanta levemente a letra
+              transition: { duration: 0.2, type: "spring", stiffness: 300 }
+            }}
+            // select-none bloqueia a seleção de texto
+            className="pointer-events-auto cursor-default select-none"
+            style={{ 
+              display: "inline-block",
+              width: char === " " ? "0.3em" : "auto",
+              willChange: "transform, filter"
+            }}
+          >
+            {char}
+          </motion.span>
+        ))}
+      </h1>
     </motion.div>
   );
 }
