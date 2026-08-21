@@ -15,28 +15,32 @@ export const RESUME_DATA = {
     {
       id: 1,
       period: "AGO 2025 - ATUAL",
-      role: "Front-End / Full-Stack Pleno, Rede Notre Dame",
+      company: "Rede Notre Dame",
+      role: "Front-End / Full-Stack Pleno",
       description: "Concepção arquitetural de sistemas web e mobile utilizando Vue.js, Laravel e Flutter. Alcance de nota 100 no Google Lighthouse (Performance e SEO). Desenvolvimento de Identity Provider (IdP) para SSO seguro via proxy reverso NGINX. Padronização Docker-first (CI/CD) e refatoração de sistemas legados de missão crítica.",
       skills: ["Vue.js", "Laravel", "Flutter", "Docker", "CI/CD", "SSO"]
     },
     {
       id: 2,
       period: "FEV 2025 - JUL 2025",
-      role: "Front-End / Full-Stack, Veplex",
+      company: "Veplex",
+      role: "Front-End / Full-Stack",
       description: "Reestruturação integral de UI/UX e design responsivo utilizando React.js e Vue.js integrados ao back-end Laravel. Prototipação de alta fidelidade (Figma) e desenvolvimento de dashboards complexos de BI focados em logística. Integração de IA no workflow de pair-programming.",
       skills: ["React.js", "Vue.js", "Laravel", "Figma", "BI"]
     },
     {
       id: 3,
       period: "OUT 2024 - JAN 2025",
-      role: "Front-End & Mobile, Sinapsys",
+      company: "Sinapsys",
+      role: "Front-End & Mobile",
       description: "Desenvolvimento multiplataforma mobile utilizando Flutter, focado em UX via Figma. Sustentação e evolução de back-ends corporativos legados (ASP.NET, VB.NET). Otimização de performance de consultas SQL criando índices operacionais e triggers.",
       skills: ["Flutter", "ASP.NET", "SQL", "Figma"]
     },
     {
       id: 4,
       period: "MAI 2023 - JUN 2024",
-      role: "Front-End Developer, IM9 Inteligência",
+      company: "IM9 Inteligência",
+      role: "Front-End",
       description: "Redução de 70% no tempo de carregamento de aplicações React.js legadas através de code splitting avançado e otimização de bundle size. Desenvolvimento de painéis de telemetria em tempo real via Server-Sent Events (SSE) com processamento massivo no client-side.",
       skills: ["React.js", "SSE", "Performance", "Code Splitting"]
     }

@@ -57,8 +57,16 @@ void main() {
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
     
-    gl_PointSize = aSize * (25.0 / -mvPosition.z);
-    vAlpha = 0.2 + 0.8 * abs(sin(uTime * aSpeed * 2.0 + pos.x));
+    // Size attenuation baseada na distância Z da câmera
+    gl_PointSize = aSize * (35.0 / -mvPosition.z);
+    
+    // Base de opacidade e pulsação orgânica
+    float baseAlpha = 0.2 + 0.8 * abs(sin(uTime * aSpeed * 2.0 + pos.x));
+    
+    // Z-Depth Fog (Profundidade: partículas mais distantes ficam mais escuras/transparentes)
+    // Se a câmera está em z=0, e o plano de partículas está a z=-15, mvPosition.z é negativo
+    float depthAlpha = smoothstep(-25.0, -2.0, mvPosition.z);
+    vAlpha = baseAlpha * depthAlpha;
 }
 `;
 
@@ -83,8 +91,10 @@ function prng(seed: number) {
 export function Particles() {
   const { viewport } = useThree();
   const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const groupRef = useRef<THREE.Group>(null);
   
-  const count = 400;
+  // Aumentado para 1500 partículas para preencher o volume 3D
+  const count = 1500;
 
   const [positions, sizes, speeds] = useMemo(() => {
     const pos = new Float32Array(count * 3);
@@ -92,11 +102,14 @@ export function Particles() {
     const spd = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
-      pos[i * 3] = (prng(i * 3) - 0.5) * 20;
-      pos[i * 3 + 1] = (prng(i * 3 + 1) - 0.5) * 20;
-      pos[i * 3 + 2] = (prng(i * 3 + 2) - 0.5) * 8;
+      // Espalhamento mais agressivo em X e Y
+      pos[i * 3] = (prng(i * 3) - 0.5) * 35;
+      pos[i * 3 + 1] = (prng(i * 3 + 1) - 0.5) * 35;
+      // Profundidade Z dramática (espalhadas de -12 a +12 aproximadamente, ou -24 spread)
+      pos[i * 3 + 2] = (prng(i * 3 + 2) - 0.5) * 25;
 
-      siz[i] = prng(i * 7) * 2.0 + 1.0;
+      // Tamanhos variados para enfatizar partículas gigantes perto da câmera
+      siz[i] = prng(i * 7) * 3.5 + 1.0;
       spd[i] = prng(i * 11) * 0.4 + 0.1;
     }
 
@@ -119,7 +132,14 @@ export function Particles() {
     
     materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
     
-    // Suavização do Mouse
+    // Parallax Constante (Rotação Global do Grupo Baseada no Mouse)
+    if (groupRef.current) {
+      // Rotação suave baseada na posição X e Y do mouse (inverte X e Y para inclinação 3D correta)
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, (state.pointer.y * Math.PI) / 8, 0.03);
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, (state.pointer.x * Math.PI) / 8, 0.03);
+    }
+    
+    // Suavização do Mouse para o Shader
     const targetX = (state.pointer.x * viewport.width) / 2;
     const targetY = (state.pointer.y * viewport.height) / 2;
     const lerpFactor = 0.1;
@@ -147,21 +167,23 @@ export function Particles() {
   });
 
   return (
-    <points>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={count} args={[positions, 3]} />
-        <bufferAttribute attach="attributes-aSize" count={count} args={[sizes, 1]} />
-        <bufferAttribute attach="attributes-aSpeed" count={count} args={[speeds, 1]} />
-      </bufferGeometry>
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        uniforms={uniforms}
-        transparent={true}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending} 
-      />
-    </points>
+    <group ref={groupRef}>
+      <points>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" count={count} args={[positions, 3]} />
+          <bufferAttribute attach="attributes-aSize" count={count} args={[sizes, 1]} />
+          <bufferAttribute attach="attributes-aSpeed" count={count} args={[speeds, 1]} />
+        </bufferGeometry>
+        <shaderMaterial
+          ref={materialRef}
+          vertexShader={vertexShader}
+          fragmentShader={fragmentShader}
+          uniforms={uniforms}
+          transparent={true}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending} 
+        />
+      </points>
+    </group>
   );
 }
