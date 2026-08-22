@@ -59,6 +59,16 @@ export function ProjectCard({ project, cardRef }: ProjectCardProps) {
           Privado
         </div>
       )}
+
+      {/* Ícone Direcional (Awwwards Style) para projetos públicos */}
+      {!project.isPrivate && project.link && (
+        <div className="absolute top-6 right-6 md:top-8 md:right-8 opacity-0 -translate-x-4 translate-y-4 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-700 ease-out z-20 text-white drop-shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </div>
+      )}
     </div>
   );
 

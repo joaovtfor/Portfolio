@@ -39,14 +39,19 @@ export function ProjectsWrapper() {
 
     // Ticker para o efeito côncavo 3D em tempo real
     const updateCards = () => {
-      if (!cardsRef.current) return;
+      if (!cardsRef.current || !scrollContainer) return;
       
       const windowCenter = window.innerWidth / 2;
+      const containerRect = scrollContainer.getBoundingClientRect();
       
       cardsRef.current.forEach((card) => {
         if (!card) return;
-        const rect = card.getBoundingClientRect();
-        const cardCenter = rect.left + rect.width / 2;
+        
+        // Correção de Glitch (Feedback Loop): 
+        // Não usar card.getBoundingClientRect() pois ele lê os transforms já aplicados (rotateY, scale),
+        // o que causa tremedeira quando interagimos (hover) ou atualizamos as propriedades.
+        // A matemática abaixo calcula o centro exato ignorando as transformações 3D:
+        const cardCenter = containerRect.left + card.offsetLeft + (card.offsetWidth / 2);
         
         // Distância do centro do cartão até o centro da tela
         const distance = cardCenter - windowCenter;
@@ -107,7 +112,7 @@ export function ProjectsWrapper() {
       */}
       <div 
         ref={scrollRef} 
-        className="flex items-center h-full w-max pl-[6vw] md:pl-[12vw] pr-[calc(50vw-160px)] md:pr-[calc(50vw-300px)] gap-6 md:gap-10 pointer-events-auto"
+        className="relative flex items-center h-full w-max pl-[6vw] md:pl-[12vw] pr-[calc(50vw-160px)] md:pr-[calc(50vw-300px)] gap-6 md:gap-10 pointer-events-auto"
       >
         
         {/* Intro (Esquerda) */}
