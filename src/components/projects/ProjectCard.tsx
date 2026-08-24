@@ -1,5 +1,7 @@
 "use client";
 
+import { motion, useMotionValue, useSpring } from "framer-motion";
+
 interface Project {
   id: string;
   title: string;
@@ -13,21 +15,45 @@ interface Project {
 interface ProjectCardProps {
   project: Project;
   cardRef: (el: HTMLDivElement | null) => void;
+  index?: string;
 }
 
-export function ProjectCard({ project, cardRef }: ProjectCardProps) {
+export function ProjectCard({ project, cardRef, index }: ProjectCardProps) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  
+  const springConfig = { damping: 20, stiffness: 100, mass: 0.5 };
+  const mouseX = useSpring(x, springConfig);
+  const mouseY = useSpring(y, springConfig);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    // Movimento sutil oposto ao cursor para efeito Parallax 3D
+    x.set((e.clientX - centerX) * -0.04);
+    y.set((e.clientY - centerY) * -0.04);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
   const CardContent = (
     <div
       ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       className="relative flex-shrink-0 w-[320px] h-[220px] md:w-[600px] md:h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-2xl overflow-hidden group cursor-pointer bg-black/40 backdrop-blur-md"
     >
       {/* Background Image (Hover Reveal) */}
-      <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img 
+      <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out overflow-hidden">
+        <motion.img 
           src={project.image} 
           alt={project.title} 
-          className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000 ease-out" 
+          style={{ x: mouseX, y: mouseY }}
+          className="w-[110%] h-[110%] -left-[5%] -top-[5%] absolute max-w-none object-cover scale-110 group-hover:scale-100 transition-transform duration-1000 ease-out" 
         />
         {/* Camada de escurecimento ajustada para maior nitidez da imagem (sem blur e levemente mais translúcida) */}
         <div className="absolute inset-0 bg-black/70" />
@@ -67,6 +93,13 @@ export function ProjectCard({ project, cardRef }: ProjectCardProps) {
             <line x1="7" y1="17" x2="17" y2="7"></line>
             <polyline points="7 7 17 7 17 17"></polyline>
           </svg>
+        </div>
+      )}
+
+      {/* Index do Projeto (e.g. 01, 02) */}
+      {index && (
+        <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20 text-white/30 font-serif text-lg md:text-xl italic font-light select-none">
+          {index}
         </div>
       )}
     </div>

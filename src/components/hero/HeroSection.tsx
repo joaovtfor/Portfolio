@@ -6,9 +6,11 @@ import { motion } from "framer-motion";
 import { HeroTitle } from "./HeroTitle";
 import { HeroButton } from "./HeroButton";
 import { RESUME_DATA } from "@/data/resume";
+import { useUIStore } from "@/store/uiStore";
 
 export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const isPreloaderDone = useUIStore((state) => state.isPreloaderDone);
 
   return (
     // 'h-[100dvh]' respeita a barra de endereços do celular (evita quebra de layout)
@@ -29,14 +31,14 @@ export function HeroSection() {
         */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 1.0, ease: "easeOut" }}
+          animate={isPreloaderDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ delay: 1.6, duration: 1.0, ease: "easeOut" }}
           className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 w-full pointer-events-auto"
         >
           {/* Metadados (Role, Focus, Stack) */}
           <div className="flex flex-col gap-1 font-sans text-[10px] sm:text-xs tracking-widest text-neutral-400 uppercase select-none">
-            <p><strong className="text-neutral-600 font-bold">Role:</strong> {RESUME_DATA.personalInfo.role}</p>
-            <p><strong className="text-neutral-600 font-bold">Focus:</strong> {RESUME_DATA.personalInfo.focus}</p>
+            <p><strong className="text-neutral-600 font-bold">Cargo:</strong> {RESUME_DATA.personalInfo.role}</p>
+            <p><strong className="text-neutral-600 font-bold">Foco:</strong> {RESUME_DATA.personalInfo.focus}</p>
             <p><strong className="text-neutral-600 font-bold">Stack:</strong> {RESUME_DATA.personalInfo.stack}</p>
           </div>
           

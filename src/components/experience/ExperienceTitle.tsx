@@ -1,32 +1,78 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useMemo } from "react";
+import { motion, useMotionValue, useSpring } from "framer-motion";
+import { RESUME_DATA } from "@/data/resume";
 
 export function ExperienceTitle() {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  
+  const springConfig = { damping: 15, stiffness: 150, mass: 0.1 };
+  const mouseX = useSpring(x, springConfig);
+  const mouseY = useSpring(y, springConfig);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    // Puxa o botão levemente na direção do mouse
+    x.set((e.clientX - centerX) * 0.25);
+    y.set((e.clientY - centerY) * 0.25);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  // Cálculo dinâmico dos anos de experiência
+  const yearsOfExperience = useMemo(() => {
+    const allYears = RESUME_DATA.experiences
+      .map(exp => exp.period)
+      .join(" ")
+      .match(/\b(19|20)\d{2}\b/g)
+      ?.map(Number);
+      
+    if (!allYears || allYears.length === 0) return 0;
+    
+    const minYear = Math.min(...allYears);
+    const currentYear = new Date().getFullYear();
+    return Math.max(1, currentYear - minYear); // Pelo menos 1 ano, mesmo que o ano atual seja o mesmo
+  }, []);
+
   return (
     <motion.div 
       initial={{ opacity: 0, x: -30 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 1, ease: "easeOut" }}
-      className="w-full md:w-2/5 lg:w-1/3 flex flex-col items-center md:sticky md:top-32 h-fit self-start md:pl-4 lg:pl-8"
+      className="w-full md:w-2/5 lg:w-1/3 flex flex-col items-center md:sticky md:top-1/2 md:-translate-y-1/2 h-fit self-start md:pl-4 lg:pl-8"
     >
-      <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-white tracking-[0.1em] select-none text-center">
-        EXPERIENCE
+      <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-white tracking-[0.1em] select-none text-center uppercase">
+        Experiência
       </h2>
       
-      <p className="text-neutral-400 mt-6 font-sans text-sm md:text-base leading-relaxed max-w-sm text-center">
-        Uma jornada dedicada a construir arquiteturas robustas e interfaces de alta performance, unindo design de ponta à engenharia de software.
-      </p>
+      <div className="mt-6 flex flex-col items-center">
+        <span className="text-[var(--foreground)] font-serif italic text-lg md:text-xl mb-1 text-center">
+          Há {yearsOfExperience} anos
+        </span>
+        <p className="text-neutral-400 font-sans text-sm md:text-base leading-relaxed max-w-sm text-center">
+          ... em uma jornada dedicada a construir arquiteturas robustas e interfaces de alta performance, unindo design de ponta à engenharia de software.
+        </p>
+      </div>
       
       <motion.a 
-        href="/cv.pdf" 
+        href="/cv_pt.pdf" 
         target="_blank"
         rel="noopener noreferrer"
         initial={{ boxShadow: "0px 0px 0px rgba(133,232,234,0)" }}
         whileInView={{ boxShadow: "0px 0px 15px rgba(133,232,234,0.3)" }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 1.5, delay: 0.8 }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{ x: mouseX, y: mouseY }}
         className="mt-10 group relative flex items-center justify-center gap-3 px-8 py-4 border border-white/10 rounded-full text-[10px] md:text-xs font-sans uppercase tracking-widest text-white/80 hover:text-white hover:border-[var(--foreground)] transition-colors duration-500 overflow-hidden"
       >
         <span className="relative z-10">Baixar Currículo</span>
