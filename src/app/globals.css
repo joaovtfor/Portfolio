@@ -21,7 +21,6 @@
   --text-2xl: clamp(1.95rem, 1.56vw + 1.56rem, 2.81rem);
   --text-3xl: clamp(2.44rem, 2.38vw + 1.85rem, 3.75rem);
   --text-4xl: clamp(3.05rem, 3.54vw + 2.17rem, 5rem);
-  --text-5xl: clamp(3.81rem, 5.18vw + 2.52rem, 6.66rem);
   --text-hero: clamp(4rem, 10vw + 1rem, 12rem); /* Escala massiva exclusiva para a dobra inicial */
 
   --font-sans: var(--font-geist-sans);
@@ -45,9 +44,9 @@
     color: var(--background);
   }
 
-  /* Prevenir overflow horizontal no mobile e ocultar scrollbars globais para maior imersão */
+  /* Esconder barra de scroll e manter imersão */
   html, body {
-    overflow-x: hidden;
+    /* overflow-x: hidden REMOVIDO pois quebrava o position: sticky em vários browsers */
     /* Esconde barra de scroll no Firefox */
     scrollbar-width: none; 
   }
@@ -55,5 +54,12 @@
   /* Esconde barra de scroll no Chrome/Safari/Edge */
   ::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Oculta cursor padrão em dispositivos que suportam cursor (PC/Mac) para dar espaço ao CustomCursor */
+  @media (pointer: fine) {
+    * {
+      cursor: none !important;
+    }
   }
 }

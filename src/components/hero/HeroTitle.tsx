@@ -1,8 +1,10 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
+import { useUIStore } from "@/store/uiStore";
 
 export function HeroTitle() {
+  const isPreloaderDone = useUIStore((state) => state.isPreloaderDone);
   const title = "JOÃO DE FOR";
   const letters = title.split("");
 
@@ -11,9 +13,9 @@ export function HeroTitle() {
     hidden: { opacity: 1 },
     show: {
       opacity: 1,
-      // O delayChildren atrasa o início para sincronizar com o fade-in do WebGL
-      // O staggerChildren define o intervalo entre o surgimento de cada letra
-      transition: { staggerChildren: 0.08, delayChildren: 0.5 },
+      // Atraso aumentado para 0.6s, aguardando a cortina preta subir quase por completo
+      // antes de iniciar a queda das letras.
+      transition: { staggerChildren: 0.08, delayChildren: 0.6 },
     },
   };
 
@@ -32,7 +34,7 @@ export function HeroTitle() {
     <motion.div
       variants={containerVariants}
       initial="hidden"
-      animate="show"
+      animate={isPreloaderDone ? "show" : "hidden"}
       className="flex items-center justify-center w-full z-10 select-none pointer-events-none"
     >
       <h1 className="font-serif text-[12vw] md:text-[10vw] font-medium tracking-normal leading-none uppercase text-white mix-blend-difference whitespace-nowrap flex select-none">

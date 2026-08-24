@@ -20,7 +20,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "João - Portfólio",
+  title: "João de For",
   description: "Creative Developer & Engineer",
 };
 
