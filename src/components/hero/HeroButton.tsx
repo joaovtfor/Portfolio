@@ -58,7 +58,7 @@ export function HeroButton({
         }}
         transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        Open to Work
+        Iniciar projeto
       </motion.span>
     </motion.button>
   );

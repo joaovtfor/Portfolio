@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion } from "framer-motion";
+import { useLenis } from "@studio-freight/react-lenis";
 
 import { HeroTitle } from "./HeroTitle";
 import { HeroButton } from "./HeroButton";
@@ -11,6 +12,23 @@ import { useUIStore } from "@/store/uiStore";
 export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const isPreloaderDone = useUIStore((state) => state.isPreloaderDone);
+  const lenis = useLenis();
+
+  const handleScrollToContact = () => {
+    if (lenis) {
+      // Lenis lida perfeitamente com os pins do GSAP e oferece uma rolagem suave
+      lenis.scrollTo("#contact", { 
+        duration: 8.0, 
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) 
+      });
+    } else {
+      // Fallback de segurança
+      const contactEl = document.getElementById("contact");
+      if (contactEl) {
+        contactEl.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
 
   return (
     // 'h-[100dvh]' respeita a barra de endereços do celular (evita quebra de layout)
@@ -43,7 +61,7 @@ export function HeroSection() {
           </div>
           
           <div className="flex items-center">
-            <HeroButton />
+            <HeroButton onClick={handleScrollToContact} />
           </div>
         </motion.div>
 
