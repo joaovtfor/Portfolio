@@ -1,36 +1,43 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { WebGLScene } from "@/components/webgl/Scene";
 import { FluidMesh } from "@/components/webgl/FluidMesh";
+import { MobileFluidMesh } from "@/components/webgl/MobileFluidMesh";
 import { Particles } from "@/components/webgl/Particles";
 import { Preloader } from "./Preloader";
 import { CustomCursor } from "./CustomCursor";
 
 export function PageWrapper({ children }: { children: React.ReactNode }) {
   const rootRef = useRef<HTMLElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Garante que o site sempre seja carregado no topo (Pixel 0),
-  // desativando o comportamento padrão do navegador de lembrar o último scroll.
-  // Isso é crucial para sites com GSAP ScrollTrigger e storytelling.
   useEffect(() => {
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
     }
     window.scrollTo(0, 0);
+
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    
+    setMounted(true);
+
+    return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
   return (
-    <main ref={rootRef} className="block w-full min-h-screen relative bg-background">
+    <main ref={rootRef} className="block w-full min-h-screen relative bg-background overflow-hidden">
       
       <Preloader />
-      <CustomCursor />
+      {!isMobile && mounted && <CustomCursor />}
 
       {/* 
         Canvas de Fundo Global (Fixed)
-        Substitui as múltiplas instâncias para otimizar memória e GPU.
-        Escuta eventos de mouse de todo o documento.
       */}
       <motion.div 
         initial={{ opacity: 0 }}
@@ -38,10 +45,12 @@ export function PageWrapper({ children }: { children: React.ReactNode }) {
         transition={{ duration: 3, ease: "easeInOut" }}
         className="fixed inset-0 w-full h-full z-0 pointer-events-none"
       >
-        <WebGLScene eventSource={rootRef}>
-          <FluidMesh />
-          <Particles />
-        </WebGLScene>
+        {mounted && (
+          <WebGLScene eventSource={rootRef}>
+            {isMobile ? <MobileFluidMesh /> : <FluidMesh />}
+            <Particles />
+          </WebGLScene>
+        )}
       </motion.div>
       
       {/* Camada de Conteúdo */}

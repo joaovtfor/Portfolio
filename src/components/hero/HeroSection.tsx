@@ -52,6 +52,7 @@ export function HeroSection() {
           animate={isPreloaderDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ delay: 1.6, duration: 1.0, ease: "easeOut" }}
           className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 w-full pointer-events-auto"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 1.5rem)' }}
         >
           {/* Metadados (Role, Focus, Stack) */}
           <div className="flex flex-col gap-1 font-sans text-[10px] sm:text-xs tracking-widest text-neutral-400 uppercase select-none">

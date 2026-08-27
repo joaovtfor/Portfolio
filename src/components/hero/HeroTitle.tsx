@@ -37,7 +37,7 @@ export function HeroTitle() {
       animate={isPreloaderDone ? "show" : "hidden"}
       className="flex items-center justify-center w-full z-10 select-none pointer-events-none"
     >
-      <h1 className="font-serif text-[12vw] md:text-[10vw] font-medium tracking-normal leading-none uppercase text-white mix-blend-difference whitespace-nowrap flex select-none">
+      <h1 className="font-serif text-[clamp(2.5rem,10vw,12rem)] font-medium tracking-normal leading-none uppercase text-white mix-blend-difference whitespace-nowrap flex select-none">
         {letters.map((char, i) => (
           <motion.span
             key={i}

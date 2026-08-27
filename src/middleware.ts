@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    upgrade-insecure-requests;
+    ${!isDev ? "upgrade-insecure-requests;" : ""}
   `.replace(/\s{2,}/g, ' ').trim(); // Minifica a string para evitar erros de header malformado
 
   // 1. Injeta o CSP na Requisição

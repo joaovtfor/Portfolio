@@ -107,11 +107,20 @@ export function ProjectCard({ project, cardRef, index }: ProjectCardProps) {
 
   if (project.link && !project.isPrivate) {
     return (
-      <a href={project.link} target="_blank" rel="noopener noreferrer" className="block outline-none">
+      <a 
+        href={project.link} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="block outline-none flex-shrink-0 snap-center md:snap-align-none perspective-1000 transform-style-3d"
+      >
         {CardContent}
       </a>
     );
   }
 
-  return CardContent;
+  return (
+    <div className="block outline-none flex-shrink-0 snap-center md:snap-align-none perspective-1000 transform-style-3d">
+      {CardContent}
+    </div>
+  );
 }
