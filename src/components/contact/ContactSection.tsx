@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { contactSchema, ContactFormData } from "@/lib/validations";
+import { sendContactEmail } from "@/actions/contact";
 
 export function ContactSection() {
   const [serverState, setServerState] = useState<{
@@ -34,22 +35,32 @@ export function ContactSection() {
   const onSubmit = async (data: ContactFormData) => {
     setServerState({ type: null, message: "" });
     try {
-      console.log("Formulário validado com sucesso! Iniciando envio...", data);
-      // Simulação da Server Action (que será implementada na próxima task via Resend/Edge)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      console.log("Disparando 5 requisições simultâneas para testar Rate Limiting...");
       
-      console.log("Dados enviados para o Edge:", data);
+      // Cria um array com 5 requisições para a Server Action
+      const promises = Array.from({ length: 5 }).map(() => sendContactEmail(data));
       
-      setServerState({
-        type: "success",
-        message: "Mensagem recebida com sucesso. Retornarei em breve!",
-      });
-      reset();
+      // Aguarda todas responderem
+      const responses = await Promise.all(promises);
+      
+      // Loga os resultados de todas as requisições para ver o bloqueio acontecendo
+      console.table(responses);
+      
+      // Pega o resultado da última requisição (que deve ser o bloqueio do Rate Limiter)
+      const finalResponse = responses[responses.length - 1];
+      
+      if (finalResponse.success) {
+        setServerState({ type: "success", message: finalResponse.message });
+        reset(); // Limpa o form após sucesso real
+      } else {
+        setServerState({ type: "error", message: finalResponse.message });
+      }
+
     } catch (error) {
       console.error("Erro no envio", error);
       setServerState({
         type: "error",
-        message: "Falha ao processar solicitação no servidor de borda.",
+        message: "Falha catastrófica ao processar solicitação no servidor.",
       });
     }
   };
