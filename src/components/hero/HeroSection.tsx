@@ -31,8 +31,9 @@ export function HeroSection() {
   };
 
   return (
-    // 'h-[100dvh]' respeita a barra de endereços do celular (evita quebra de layout)
-    <section ref={sectionRef} className="relative w-full h-[100dvh] overflow-hidden">
+    // 'h-[100svh]' fixa a altura considerando a barra de endereços visível,
+    // evitando saltos (stuttering) bruscos de layout quando a barra de rolagem sobe ou desce.
+    <section ref={sectionRef} className="relative w-full h-[100svh] overflow-hidden">
       
 
 

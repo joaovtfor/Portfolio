@@ -68,6 +68,9 @@ export function MobileFluidMesh() {
   
   // Posição final consolidada (suavizada)
   const currentPos = useRef({ x: 0, y: 0 });
+  
+  // Rastreador real de toque (corrige o bug do R3F manter o state.pointer preenchido)
+  const isActivelyTouching = useRef(false);
 
   const uniforms = useMemo(
     () => ({
@@ -79,32 +82,37 @@ export function MobileFluidMesh() {
   );
 
   useEffect(() => {
+    // Escuta os eventos de toque reais para devolver o controle ao giroscópio
+    const handleTouchStart = () => { isActivelyTouching.current = true; };
+    const handleTouchEnd = () => { isActivelyTouching.current = false; };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd);
+    window.addEventListener("touchcancel", handleTouchEnd);
+
     // Escuta os eventos do Giroscópio
     const handleOrientation = (e: DeviceOrientationEvent) => {
-      // Gamma: inclinação esquerda/direita (-90 a 90)
-      // Beta: inclinação frente/trás (-180 a 180)
+      let x = e.gamma ? e.gamma / 30 : 0;
+      let y = e.beta ? (e.beta - 45) / 30 : 0;
       
-      // Normalizamos os valores para criar um efeito de paralaxe que não saia da tela
-      let x = e.gamma ? e.gamma / 30 : 0; // Dividido por 30 graus para maior sensibilidade
-      let y = e.beta ? (e.beta - 45) / 30 : 0; // -45 assume que a pessoa segura o celular inclinado
-      
-      // Limita a -1 e 1 (coordenadas NDC)
       x = Math.max(-1, Math.min(1, x));
       y = Math.max(-1, Math.min(1, y));
 
-      gyroTarget.current = { x, y: -y }; // Inverte o Y para o WebGL
+      gyroTarget.current = { x, y: -y };
     };
 
     window.addEventListener("deviceorientation", handleOrientation);
     
-    // Tentativa automática de pedir permissão no iOS 13+
-    // (Geralmente precisa estar atrelado a um click, mas tentamos caso o usuário já tenha dado permissão antes)
     if (typeof window.DeviceOrientationEvent !== 'undefined' && typeof (window.DeviceOrientationEvent as any).requestPermission === 'function') {
-      // Deixamos comentado a chamada automática para não quebrar sem gesture, 
-      // mas o listener padrão ainda vai funcionar se estiver no Android.
+      // Ignorado para não bloquear a UI, depende do toque no Android.
     }
 
-    return () => window.removeEventListener("deviceorientation", handleOrientation);
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("touchcancel", handleTouchEnd);
+      window.removeEventListener("deviceorientation", handleOrientation);
+    };
   }, []);
 
   useFrame((state) => {
@@ -113,8 +121,8 @@ export function MobileFluidMesh() {
     materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
     materialRef.current.uniforms.uResolution.value.set(size.width, size.height);
     
-    // O Toque tem prioridade absoluta. Se estiver tocando, ignoramos o giroscópio (ou misturamos pouco)
-    const isTouching = state.pointer.x !== 0 || state.pointer.y !== 0;
+    // Agora o sistema sabe exatamente se o dedo está fisicamente na tela
+    const isTouching = isActivelyTouching.current;
     
     let targetX = 0;
     let targetY = 0;

@@ -66,7 +66,7 @@ export function ContactSection() {
   };
 
   return (
-    <section id="contact" className="relative w-full min-h-screen flex flex-col items-center justify-center bg-transparent z-20 py-24 px-6 md:px-12">
+    <section id="contact" className="relative w-full min-h-[100svh] flex flex-col items-center justify-center bg-transparent z-20 py-12 md:py-24 px-6 md:px-12">
       <div className="w-full max-w-2xl mx-auto flex flex-col gap-12">
         
         {/* Cabeçalho do Formulário */}

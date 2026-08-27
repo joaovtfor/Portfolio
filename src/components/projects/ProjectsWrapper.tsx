@@ -154,6 +154,15 @@ export function ProjectsWrapper() {
             <p className="text-neutral-400 font-sans text-[clamp(0.875rem,2vw,1rem)] mt-2 leading-relaxed">
               Unindo design refinado e código escalável para entregar <span className="text-[var(--foreground)] font-medium">soluções digitais únicas</span>, convertendo complexidade em conversão e performance.
             </p>
+            
+            {/* Mobile Scroll Hint (Pista visual para scroll horizontal) */}
+            <div className="flex md:hidden items-center gap-3 mt-8 text-neutral-500 animate-pulse">
+              <span className="text-[10px] tracking-widest uppercase font-bold font-sans">Deslize para explorar</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </div>
           </div>
 
           {/* Renderiza os Projetos */}
