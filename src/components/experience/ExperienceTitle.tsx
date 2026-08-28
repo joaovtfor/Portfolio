@@ -1,8 +1,18 @@
 "use client";
 
-import { useMemo } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { RESUME_DATA } from "@/data/resume";
+
+const yearsOfExperience = (() => {
+  const allYears = RESUME_DATA.experiences.flatMap((exp) => {
+    const matches = [exp.period].join(" ").match(/\b(19|20)\d{2}\b/g);
+    return matches ? matches.map(Number) : [];
+  });
+  if (allYears.length === 0) return 1;
+  const earliest = Math.min(...allYears);
+  const current = new Date().getFullYear();
+  return Math.max(1, current - earliest);
+})();
 
 export function ExperienceTitle() {
   const x = useMotionValue(0);
@@ -16,7 +26,6 @@ export function ExperienceTitle() {
     const rect = e.currentTarget.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    // Puxa o botão levemente na direção do mouse
     x.set((e.clientX - centerX) * 0.25);
     y.set((e.clientY - centerY) * 0.25);
   };
@@ -25,21 +34,6 @@ export function ExperienceTitle() {
     x.set(0);
     y.set(0);
   };
-
-  // Cálculo dinâmico dos anos de experiência
-  const yearsOfExperience = useMemo(() => {
-    const allYears = RESUME_DATA.experiences
-      .map(exp => exp.period)
-      .join(" ")
-      .match(/\b(19|20)\d{2}\b/g)
-      ?.map(Number);
-      
-    if (!allYears || allYears.length === 0) return 0;
-    
-    const minYear = Math.min(...allYears);
-    const currentYear = new Date().getFullYear();
-    return Math.max(1, currentYear - minYear); // Pelo menos 1 ano, mesmo que o ano atual seja o mesmo
-  }, []);
 
   return (
     <motion.div 
@@ -66,8 +60,8 @@ export function ExperienceTitle() {
         href="/cv_pt.pdf" 
         target="_blank"
         rel="noopener noreferrer"
-        initial={{ boxShadow: "0px 0px 0px rgba(133,232,234,0)" }}
-        whileInView={{ boxShadow: "0px 0px 15px rgba(133,232,234,0.3)" }}
+        initial={{ boxShadow: "0px 0px 0px transparent" }}
+        whileInView={{ boxShadow: "0px 0px 15px var(--foreground)" }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 1.5, delay: 0.8 }}
         onMouseMove={handleMouseMove}
@@ -79,7 +73,6 @@ export function ExperienceTitle() {
         <svg className="relative z-10 w-4 h-4 transform group-hover:translate-y-1 transition-transform duration-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>
-        {/* Efeito de brilho de fundo no hover */}
         <div className="absolute inset-0 bg-[var(--foreground)] opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
       </motion.a>
     </motion.div>

@@ -14,5 +14,3 @@ export default function Home() {
     </PageWrapper>
   );
 }
-
-// Fix hydration trigger

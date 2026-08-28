@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { contactSchema, ContactFormData } from "@/lib/validations";
 import { sendContactEmail } from "@/actions/contact";
 
+const INPUT_CLASSES = "w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50";
+
 export function ContactSection() {
   const [serverState, setServerState] = useState<{
     type: "success" | "error" | null;
@@ -93,7 +95,7 @@ export function ContactSection() {
                 id="name"
                 disabled={isSubmitting}
                 placeholder="Seu nome"
-                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50"
+                className={INPUT_CLASSES}
               />
               {errors.name && (
                 <span className="text-red-400 text-xs mt-1">{errors.name.message}</span>
@@ -111,7 +113,7 @@ export function ContactSection() {
                 type="email"
                 disabled={isSubmitting}
                 placeholder="Seu melhor e-mail"
-                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50"
+                className={INPUT_CLASSES}
               />
               {errors.email && (
                 <span className="text-red-400 text-xs mt-1">{errors.email.message}</span>
@@ -130,7 +132,7 @@ export function ContactSection() {
               disabled={isSubmitting}
               placeholder="Descreva seu projeto ou desafio..."
               rows={5}
-              className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all resize-none disabled:opacity-50"
+              className={`${INPUT_CLASSES} resize-none`}
             />
             {errors.message && (
               <span className="text-red-400 text-xs mt-1">{errors.message.message}</span>

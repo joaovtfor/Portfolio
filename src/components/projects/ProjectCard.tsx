@@ -1,7 +1,9 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import { motion, useMotionValue, useSpring, useInView } from "framer-motion";
+import { useUIStore } from "@/store/uiStore";
+import { useIsTouch } from "@/hooks/useIsTouch";
 
 interface Project {
   id: string;
@@ -29,12 +31,10 @@ export function ProjectCard({ project, cardRef, index }: ProjectCardProps) {
 
   const internalRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(internalRef, { margin: "0px -40% 0px -40%" });
-  const [isTouch, setIsTouch] = useState(false);
+  const isTouch = useIsTouch();
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsTouch(window.matchMedia("(hover: none)").matches);
-  }, []);
+  const setInteractivePosition = useUIStore((s) => s.setInteractivePosition);
+  const clearInteractivePosition = useUIStore((s) => s.clearInteractivePosition);
 
   const isActive = isTouch ? isInView : false;
 
@@ -49,11 +49,13 @@ export function ProjectCard({ project, cardRef, index }: ProjectCardProps) {
     const centerY = rect.top + rect.height / 2;
     x.set((e.clientX - centerX) * -0.04);
     y.set((e.clientY - centerY) * -0.04);
+    setInteractivePosition(project.id, rect.left + rect.width / 2, rect.top + rect.height / 2);
   };
 
   const handleMouseLeave = () => {
     x.set(0);
     y.set(0);
+    clearInteractivePosition(project.id);
   };
 
   const CardContent = (
@@ -78,7 +80,7 @@ export function ProjectCard({ project, cardRef, index }: ProjectCardProps) {
         <h3 className="text-2xl md:text-4xl font-serif text-white group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] group-data-[active=true]:drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] transition-all duration-500 text-center">
           {project.title}
         </h3>
-        <span className="mt-4 md:mt-6 text-[8px] md:text-[10px] tracking-[0.3em] text-neutral-200 md:text-neutral-300 md:text-neutral-500 font-sans uppercase font-bold group-hover:text-[var(--foreground)] group-data-[active=true]:text-[var(--foreground)] group-hover:drop-shadow-[0_0_10px_rgba(133,232,234,0.5)] group-data-[active=true]:drop-shadow-[0_0_10px_rgba(133,232,234,0.5)] transition-all duration-500 text-center">
+        <span className="mt-4 md:mt-6 text-[8px] md:text-[10px] tracking-[0.3em] text-neutral-200 md:text-neutral-300 md:text-neutral-500 font-sans uppercase font-bold group-hover:text-[var(--foreground)] group-data-[active=true]:text-[var(--foreground)] group-hover:drop-shadow-[0_0_10px_rgba(133,232,234,0.5)] /* theme: foreground */ group-data-[active=true]:drop-shadow-[0_0_10px_rgba(133,232,234,0.5)] /* theme: foreground */ transition-all duration-500 text-center">
           {project.subtitle}
         </span>
         

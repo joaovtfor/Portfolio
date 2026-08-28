@@ -14,15 +14,13 @@ export function WebGLScene({ children, className, eventSource, ...props }: WebGL
   const [inView, setInView] = useState(false);
 
   useEffect(() => {
-    // Intersection Observer Nativo
-    // Evita o uso pesado do requestAnimationFrame quando o canvas não está visível
     const observer = new IntersectionObserver(
       ([entry]) => {
         setInView(entry.isIntersecting);
       },
       {
-        threshold: 0, // Dispara exatamente ao cruzar o limite da tela
-        rootMargin: "50px", // Margem de segurança para acordar a GPU pouco antes de aparecer
+        threshold: 0,
+        rootMargin: "50px",
       }
     );
 
@@ -42,18 +40,11 @@ export function WebGLScene({ children, className, eventSource, ...props }: WebGL
       {...props}
     >
       <Canvas
-        // Define o elemento pai como fonte de eventos de mouse, evitando que o HTML sobreposto os bloqueie
         eventSource={(eventSource || containerRef) as unknown as React.RefObject<HTMLElement>}
         eventPrefix="client"
-        
-        // Controle de Performance Absoluto:
         frameloop={inView ? "always" : "never"}
-        
-        // Clamping do DevicePixelRatio:
         dpr={[1, 1.5]}
-        
         camera={{ position: [0, 0, 5], fov: 45 }}
-        
         style={{
           position: "absolute",
           top: 0,
@@ -62,7 +53,6 @@ export function WebGLScene({ children, className, eventSource, ...props }: WebGL
           height: "100%",
         }}
       >
-        {/* Placeholder para as futuras malhas (meshes) e materiais */}
         {children}
       </Canvas>
     </div>

@@ -9,23 +9,19 @@ export function CustomCursor() {
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
   
-  // Spring altamente responsivo
   const springConfig = { damping: 25, stiffness: 700, mass: 0.5 };
   const cursorXSpring = useSpring(cursorX, springConfig);
   const cursorYSpring = useSpring(cursorY, springConfig);
   
   useEffect(() => {
-    // Apenas ativa o listener se houver mouse (ignora mobile puro)
     if (window.matchMedia("(pointer: fine)").matches) {
       const moveCursor = (e: MouseEvent) => {
-        // -16 para centralizar o ponto exato da div de 32px (w-8 h-8)
         cursorX.set(e.clientX - 16); 
         cursorY.set(e.clientY - 16);
       };
       
       const handleMouseOver = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
-        // Expande o cursor se passar por cima de botões, links ou cards
         if (
           target.closest('a') || 
           target.closest('button') || 
@@ -56,7 +52,7 @@ export function CustomCursor() {
       }}
       animate={{
         scale: isHovered ? 1.5 : 0.4,
-        backgroundColor: isHovered ? "var(--foreground)" : "#FFFFFF",
+        backgroundColor: isHovered ? "var(--foreground)" : "rgb(255,255,255)",
       }}
       transition={{ duration: 0.2, ease: "easeOut" }}
     />
