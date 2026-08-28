@@ -10,7 +10,6 @@ export function Preloader() {
   const setPreloaderDone = useUIStore((state) => state.setPreloaderDone);
 
   useEffect(() => {
-    // No mobile, removemos o preloader para garantir performance máxima e acesso imediato
     if (window.matchMedia("(max-width: 768px)").matches) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setProgress(100);
@@ -20,16 +19,17 @@ export function Preloader() {
     }
 
     let current = 0;
+    let timeout: NodeJS.Timeout;
     
     const interval = setInterval(() => {
-      current += Math.random() * 20; // Progresso um pouco mais rápido
+      current += Math.random() * 20;
       
       if (current >= 100) {
         current = 100;
         setProgress(100);
         clearInterval(interval);
         
-        setTimeout(() => {
+        timeout = setTimeout(() => {
           setIsLoading(false);
           setPreloaderDone();
         }, 400);
@@ -38,7 +38,10 @@ export function Preloader() {
       }
     }, 40);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (timeout) clearTimeout(timeout);
+    };
   }, [setPreloaderDone]);
 
   return (
@@ -52,12 +55,10 @@ export function Preloader() {
           className="fixed inset-0 z-[50] bg-background flex flex-col items-center justify-center pointer-events-none"
         >
           <div className="flex flex-col items-center gap-4">
-            {/* Logo / Monograma */}
             <span className="font-serif text-[var(--foreground)] text-4xl md:text-5xl font-bold tracking-widest flex items-center">
               <span className="text-white mr-1">&gt;</span>_
             </span>
             
-            {/* Contador */}
             <div className="text-white/40 font-mono text-sm tracking-[0.3em] mt-4 flex items-center gap-4">
               <div className="w-[100px] h-[1px] bg-white/10 relative overflow-hidden">
                 <motion.div 
