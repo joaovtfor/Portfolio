@@ -47,17 +47,17 @@ export function ExperienceTitle() {
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 1, ease: "easeOut" }}
-      className="w-full md:w-2/5 lg:w-1/3 flex flex-col items-center md:sticky md:top-1/2 md:-translate-y-1/2 h-fit self-start md:pl-4 lg:pl-8"
+      className="w-full md:w-1/2 lg:w-1/2 flex flex-col items-center md:items-start md:sticky md:top-[30svh] h-fit self-start pt-12 md:pt-0 md:pl-4 lg:pl-8 z-20"
     >
-      <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-white tracking-[0.1em] select-none text-center uppercase">
+      <h2 className="text-2xl md:text-3xl lg:text-[clamp(2.5rem,4vw,4rem)] font-serif text-white tracking-[0.1em] select-none text-center md:text-left uppercase break-words w-full">
         Experiência
       </h2>
       
-      <div className="mt-6 flex flex-col items-center">
-        <span className="text-[var(--foreground)] font-serif italic text-lg md:text-xl mb-1 text-center">
+      <div className="mt-6 flex flex-col items-center md:items-start">
+        <span className="text-[var(--foreground)] font-serif italic text-lg md:text-xl mb-1 text-center md:text-left">
           Há {yearsOfExperience} anos
         </span>
-        <p className="text-neutral-400 font-sans text-sm md:text-base leading-relaxed max-w-sm text-center">
+        <p className="text-neutral-400 font-sans text-sm md:text-base leading-relaxed max-w-sm text-center md:text-left">
           ... em uma jornada dedicada a construir arquiteturas robustas e interfaces de alta performance, unindo design de ponta à engenharia de software.
         </p>
       </div>

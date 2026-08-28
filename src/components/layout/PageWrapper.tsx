@@ -8,6 +8,7 @@ import { MobileFluidMesh } from "@/components/webgl/MobileFluidMesh";
 import { Particles } from "@/components/webgl/Particles";
 import { Preloader } from "./Preloader";
 import { CustomCursor } from "./CustomCursor";
+import { MobileFloatingMenu } from "./MobileFloatingMenu";
 
 export function PageWrapper({ children }: { children: React.ReactNode }) {
   const rootRef = useRef<HTMLElement>(null);
@@ -31,7 +32,7 @@ export function PageWrapper({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <main ref={rootRef} className="block w-full min-h-[100svh] relative bg-background overflow-hidden">
+    <main ref={rootRef} className="block w-full min-h-[100svh] relative bg-background overflow-clip">
       
       <Preloader />
       {!isMobile && mounted && <CustomCursor />}
@@ -58,6 +59,7 @@ export function PageWrapper({ children }: { children: React.ReactNode }) {
         {children}
       </div>
 
+      <MobileFloatingMenu />
     </main>
   );
 }
