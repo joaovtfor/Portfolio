@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRef, useState, useEffect } from "react";
 import { motion, useMotionValue, useSpring, useInView } from "framer-motion";
@@ -32,6 +32,7 @@ export function ProjectCard({ project, cardRef, index }: ProjectCardProps) {
   const [isTouch, setIsTouch] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsTouch(window.matchMedia("(hover: none)").matches);
   }, []);
 

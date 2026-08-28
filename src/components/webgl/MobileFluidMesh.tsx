@@ -103,7 +103,7 @@ export function MobileFluidMesh() {
 
     window.addEventListener("deviceorientation", handleOrientation);
     
-    if (typeof window.DeviceOrientationEvent !== 'undefined' && typeof (window.DeviceOrientationEvent as any).requestPermission === 'function') {
+    if (typeof window.DeviceOrientationEvent !== 'undefined' && typeof (window.DeviceOrientationEvent as unknown as Record<string, unknown>).requestPermission === 'function') {
       // Ignorado para não bloquear a UI, depende do toque no Android.
     }
 

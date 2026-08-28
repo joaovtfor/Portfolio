@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useInView } from "framer-motion";
@@ -22,6 +22,7 @@ function ExperienceItemCard({ exp, i, total }: { exp: ExperienceItem; i: number;
   const [isTouch, setIsTouch] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsTouch(window.matchMedia("(hover: none)").matches);
   }, []);
 

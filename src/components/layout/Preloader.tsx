@@ -12,6 +12,7 @@ export function Preloader() {
   useEffect(() => {
     // No mobile, removemos o preloader para garantir performance máxima e acesso imediato
     if (window.matchMedia("(max-width: 768px)").matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProgress(100);
       setIsLoading(false);
       setPreloaderDone();

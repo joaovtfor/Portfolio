@@ -22,6 +22,7 @@ export function PageWrapper({ children }: { children: React.ReactNode }) {
     window.scrollTo(0, 0);
 
     const mediaQuery = window.matchMedia("(max-width: 768px)");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMobile(mediaQuery.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mediaQuery.addEventListener("change", handler);
