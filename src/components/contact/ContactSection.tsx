@@ -66,7 +66,7 @@ export function ContactSection() {
   };
 
   return (
-    <section id="contact" className="relative w-full min-h-screen flex flex-col items-center justify-center bg-transparent z-20 py-24 px-6 md:px-12">
+    <section id="contact" className="relative w-full min-h-[100svh] flex flex-col items-center justify-center bg-transparent z-20 py-12 md:py-24 px-6 md:px-12">
       <div className="w-full max-w-2xl mx-auto flex flex-col gap-12">
         
         {/* Cabeçalho do Formulário */}
@@ -93,7 +93,7 @@ export function ContactSection() {
                 id="name"
                 disabled={isSubmitting}
                 placeholder="Seu nome"
-                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50"
+                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50"
               />
               {errors.name && (
                 <span className="text-red-400 text-xs mt-1">{errors.name.message}</span>
@@ -111,7 +111,7 @@ export function ContactSection() {
                 type="email"
                 disabled={isSubmitting}
                 placeholder="Seu melhor e-mail"
-                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50"
+                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50"
               />
               {errors.email && (
                 <span className="text-red-400 text-xs mt-1">{errors.email.message}</span>
@@ -130,7 +130,7 @@ export function ContactSection() {
               disabled={isSubmitting}
               placeholder="Descreva seu projeto ou desafio..."
               rows={5}
-              className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all resize-none disabled:opacity-50"
+              className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all resize-none disabled:opacity-50"
             />
             {errors.message && (
               <span className="text-red-400 text-xs mt-1">{errors.message.message}</span>

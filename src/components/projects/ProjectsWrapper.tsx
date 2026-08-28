@@ -21,137 +21,116 @@ export function ProjectsWrapper() {
     const scrollContainer = scrollRef.current;
     if (!section || !scrollContainer) return;
 
-    // Cálculo do scroll horizontal baseado na largura total dos itens vs largura da tela
-    const scrollAmount = () => -(scrollContainer.scrollWidth - window.innerWidth);
+    // Configura o GSAP apenas para Desktop (Tablet pra cima)
+    const mm = gsap.matchMedia();
 
-    const tween = gsap.to(scrollContainer, {
-      x: scrollAmount,
-      ease: "none",
-    });
+    mm.add("(min-width: 768px)", () => {
+      // Cálculo do scroll horizontal baseado na largura total dos itens vs largura da tela
+      const scrollAmount = () => -(scrollContainer.scrollWidth - window.innerWidth);
 
-    ScrollTrigger.create({
-      trigger: section,
-      start: "top top",
-      end: () => `+=${scrollContainer.scrollWidth - window.innerWidth}`,
-      pin: true,
-      animation: tween,
-      scrub: 1, // Suavidade para interligar ao scroll vertical
-      invalidateOnRefresh: true, // Responsividade absoluta no resize
-      snap: {
-        snapTo: (value) => {
-          // Calcula dinamicamente onde cada cartão fica perfeitamente centralizado
-          const maxScroll = scrollContainer.scrollWidth - window.innerWidth;
-          const windowCenter = window.innerWidth / 2;
-          const points = [0]; // 0 é o bloco de introdução
-          
-          cardsRef.current.forEach((card) => {
-            if (card) {
-              // Encontra o centro do cartão
-              let targetX = (card.offsetLeft + card.offsetWidth / 2) - windowCenter;
-              // Previne valores impossíveis
-              targetX = Math.max(0, Math.min(targetX, maxScroll));
-              // Converte a posição horizontal em "progresso de scroll" de 0 a 1
-              points.push(targetX / maxScroll);
-            }
-          });
-
-          // Retorna o ponto mais próximo de onde o usuário soltou o scroll
-          return points.reduce((prev, curr) => 
-            Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
-          );
-        },
-        duration: { min: 0.2, max: 0.6 },
-        delay: 0.0, // Snap instantâneo sem pausa
-        ease: "power2.out"
-      },
-      onUpdate: (self) => {
-        // Atualiza a barra de progresso perfeitamente sincronizada com o ScrollTrigger
-        if (progressBarRef.current) {
-          gsap.set(progressBarRef.current, { scaleX: self.progress });
-        }
-      },
-      onToggle: (self) => {
-        // Faz a barra inteira aparecer gradativamente apenas quando a seção está travada (pin ativa)
-        // e desaparecer assim que o usuário sai da seção.
-        if (progressBarContainerRef.current) {
-          gsap.to(progressBarContainerRef.current, {
-            opacity: self.isActive ? 1 : 0,
-            duration: 0.4,
-            ease: "power2.out"
-          });
-        }
-      }
-    });
-
-    // Ticker para o efeito côncavo 3D em tempo real
-    const updateCards = () => {
-      if (!cardsRef.current || !scrollContainer) return;
-      
-      const windowCenter = window.innerWidth / 2;
-      const containerRect = scrollContainer.getBoundingClientRect();
-      
-      cardsRef.current.forEach((card) => {
-        if (!card) return;
-        
-        // Correção de Glitch (Feedback Loop): 
-        // Não usar card.getBoundingClientRect() pois ele lê os transforms já aplicados (rotateY, scale),
-        // o que causa tremedeira quando interagimos (hover) ou atualizamos as propriedades.
-        // A matemática abaixo calcula o centro exato ignorando as transformações 3D:
-        const cardCenter = containerRect.left + card.offsetLeft + (card.offsetWidth / 2);
-        
-        // Distância do centro do cartão até o centro da tela
-        const distance = cardCenter - windowCenter;
-        
-        // Normaliza a distância (-1 para borda esquerda, 0 para centro, 1 para borda direita)
-        // Usamos um valor um pouco maior que a largura da tela para suavizar a curva
-        const progress = distance / (window.innerWidth * 0.8);
-        
-        // Matemática do Côncavo (Cilindro Interno) - Curvatura suavizada
-        // Cartões na direita viram para a esquerda (-Y), cartões na esquerda viram para a direita (+Y)
-        const rotateY = progress * -15; // Reduzido de -35 para -15
-        
-        // Encolhe levemente nas bordas
-        const scale = 1 - Math.abs(progress) * 0.05; // Reduzido de 0.15 para 0.05
-        
-        // Empurra para trás no eixo Z criando profundidade
-        const z = -Math.abs(progress) * 50; // Reduzido de 150 para 50
-        
-        // Escurece um pouco os cartões que não estão no foco
-        const opacity = 1 - Math.abs(progress) * 0.2; // Reduzido de 0.3 para 0.2
-        
-        // Ajuste de zIndex dinâmico para evitar que as bordas giradas 3D roubem o clique do card central
-        const zIndex = Math.round((1 - Math.abs(progress)) * 100);
-        
-        gsap.set(card, {
-          rotateY,
-          scale,
-          z,
-          opacity,
-          zIndex,
-          transformPerspective: 1200,
-          transformOrigin: "center center"
-        });
+      const tween = gsap.to(scrollContainer, {
+        x: scrollAmount,
+        ease: "none",
       });
-    };
 
-    gsap.ticker.add(updateCards);
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: () => `+=${scrollContainer.scrollWidth - window.innerWidth}`,
+        pin: true,
+        animation: tween,
+        scrub: 1, // Suavidade para interligar ao scroll vertical
+        invalidateOnRefresh: true, // Responsividade absoluta no resize
+        snap: {
+          snapTo: (value) => {
+            // Calcula dinamicamente onde cada cartão fica perfeitamente centralizado
+            const maxScroll = scrollContainer.scrollWidth - window.innerWidth;
+            const windowCenter = window.innerWidth / 2;
+            const points = [0]; // 0 é o bloco de introdução
+            
+            cardsRef.current.forEach((card) => {
+              if (card) {
+                let targetX = (card.offsetLeft + card.offsetWidth / 2) - windowCenter;
+                targetX = Math.max(0, Math.min(targetX, maxScroll));
+                points.push(targetX / maxScroll);
+              }
+            });
 
-    return () => {
-      gsap.ticker.remove(updateCards);
-    };
+            return points.reduce((prev, curr) => 
+              Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+            );
+          },
+          duration: { min: 0.2, max: 0.6 },
+          delay: 0.0,
+          ease: "power2.out"
+        },
+        onUpdate: (self) => {
+          if (progressBarRef.current) {
+            gsap.set(progressBarRef.current, { scaleX: self.progress });
+          }
+        },
+        onToggle: (self) => {
+          if (progressBarContainerRef.current) {
+            gsap.to(progressBarContainerRef.current, {
+              opacity: self.isActive ? 1 : 0,
+              duration: 0.4,
+              ease: "power2.out"
+            });
+          }
+        }
+      });
 
+      // Ticker para o efeito côncavo 3D em tempo real
+      const updateCards = () => {
+        if (!cardsRef.current || !scrollContainer) return;
+        
+        const windowCenter = window.innerWidth / 2;
+        const containerRect = scrollContainer.getBoundingClientRect();
+        
+        cardsRef.current.forEach((card) => {
+          if (!card) return;
+          
+          const cardCenter = containerRect.left + card.offsetLeft + (card.offsetWidth / 2);
+          const distance = cardCenter - windowCenter;
+          const progress = distance / (window.innerWidth * 0.8);
+          
+          const rotateY = progress * -15; 
+          const scale = 1 - Math.abs(progress) * 0.05; 
+          const z = -Math.abs(progress) * 50; 
+          const opacity = 1 - Math.abs(progress) * 0.2; 
+          const zIndex = Math.round((1 - Math.abs(progress)) * 100);
+          
+          gsap.set(card, {
+            rotateY,
+            scale,
+            z,
+            opacity,
+            zIndex,
+            transformPerspective: 1200,
+            transformOrigin: "center center"
+          });
+        });
+      };
+
+      gsap.ticker.add(updateCards);
+
+      return () => {
+        gsap.ticker.remove(updateCards);
+      };
+    });
+
+    return () => mm.revert();
   }, { scope: sectionRef });
 
   return (
-    // z-20 para garantir que passe por cima do canvas de fundo 
     <section 
       ref={sectionRef} 
-      className="relative w-full h-screen bg-transparent z-20 pointer-events-none"
+      className="relative w-full h-[70vh] md:h-screen bg-transparent z-20 pointer-events-none"
     >
       
       {/* Wrapper com Máscara de Desfoque (Void) e Perspectiva 3D */}
       <div 
-        className="w-full h-full flex items-center overflow-hidden"
+        className="w-full h-full flex items-center overflow-x-auto md:overflow-hidden snap-x snap-mandatory hide-scrollbar"
         style={{ 
           perspective: "1500px",
           WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)",
@@ -160,24 +139,33 @@ export function ProjectsWrapper() {
       >
         {/* 
           Container de Scroll: 
-          Começa alinhado à esquerda (pl-[10vw]) para a introdução.
-          Termina com padding dinâmico (pr-[50vw-300px]) para o último card ficar exatamente no centro no final do scroll.
+          No mobile não tem padding maluco, para deixar o snap agir livremente.
         */}
         <div 
           ref={scrollRef} 
-          className="relative flex items-center h-full w-max pl-[6vw] md:pl-[12vw] pr-[calc(50vw-160px)] md:pr-[calc(50vw-300px)] gap-6 md:gap-10 pointer-events-auto"
+          className="relative flex items-center h-full w-max px-8 md:pl-[12vw] md:pr-[calc(50vw-300px)] gap-6 md:gap-10 pointer-events-auto"
         >
           
           {/* Intro (Esquerda) */}
-          <div className="flex-shrink-0 flex flex-col justify-center w-[300px] md:w-[400px] mr-8 md:mr-16">
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-serif text-white tracking-[0.1em] select-none uppercase">
+          <div className="flex-shrink-0 flex flex-col justify-center w-[300px] md:w-[400px] mr-2 md:mr-16 snap-center md:snap-align-none">
+            <h2 className="text-[clamp(2.5rem,5vw,4rem)] font-serif text-white tracking-[0.1em] select-none uppercase">
               Projetos
             </h2>
-            <p className="text-neutral-400 mt-6 font-sans text-sm md:text-base max-w-sm leading-relaxed">
+            <p className="text-neutral-400 font-sans text-[clamp(0.875rem,2vw,1rem)] mt-2 leading-relaxed">
               Unindo design refinado e código escalável para entregar <span className="text-[var(--foreground)] font-medium">soluções digitais únicas</span>, convertendo complexidade em conversão e performance.
             </p>
+            
+            {/* Mobile Scroll Hint (Pista visual para scroll horizontal) */}
+            <div className="flex md:hidden items-center gap-3 mt-8 text-neutral-500 animate-pulse">
+              <span className="text-[10px] tracking-widest uppercase font-bold font-sans">Deslize para explorar</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </div>
           </div>
 
+          {/* Renderiza os Projetos */}
           {PROJECTS_DATA.map((project, i) => (
             <ProjectCard 
               key={project.id}

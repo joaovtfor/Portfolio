@@ -10,29 +10,35 @@ export function Preloader() {
   const setPreloaderDone = useUIStore((state) => state.setPreloaderDone);
 
   useEffect(() => {
+    // No mobile, removemos o preloader para garantir performance máxima e acesso imediato
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setProgress(100);
+      setIsLoading(false);
+      setPreloaderDone();
+      return;
+    }
+
     let current = 0;
     
-    // Simula o progresso de carregamento de forma cinemática e rápida
-    const updateProgress = () => {
-      // Velocidade aleatória para parecer um carregamento real
-      current += Math.random() * 15;
+    const interval = setInterval(() => {
+      current += Math.random() * 20; // Progresso um pouco mais rápido
       
       if (current >= 100) {
         current = 100;
         setProgress(100);
-        // Pequena pausa no 100% para o usuário ler, antes de abrir a cortina
+        clearInterval(interval);
+        
         setTimeout(() => {
           setIsLoading(false);
-          setPreloaderDone(); // Avisa o restante do site que a animação inicial pode começar
-        }, 500); 
+          setPreloaderDone();
+        }, 400);
       } else {
         setProgress(Math.floor(current));
-        requestAnimationFrame(() => setTimeout(updateProgress, 30));
       }
-    };
-    
-    // Inicia após um curtíssimo delay
-    setTimeout(updateProgress, 100);
+    }, 40);
+
+    return () => clearInterval(interval);
   }, [setPreloaderDone]);
 
   return (
@@ -43,7 +49,7 @@ export function Preloader() {
           initial={{ y: 0 }}
           exit={{ y: "-100%" }}
           transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-          className="fixed inset-0 z-[10000] bg-background flex flex-col items-center justify-center pointer-events-none"
+          className="fixed inset-0 z-[50] bg-background flex flex-col items-center justify-center pointer-events-none"
         >
           <div className="flex flex-col items-center gap-4">
             {/* Logo / Monograma */}
