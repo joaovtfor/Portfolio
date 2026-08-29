@@ -50,10 +50,8 @@ export function MobileFloatingMenu({ dict = pt, locale = "pt" }: { dict?: Dictio
 
   const scrollToContact = () => {
     setIsOpen(false);
-    const contactSection = document.getElementById("contact");
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: "smooth" });
-    }
+    const el = document.getElementById("contact");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
   const nextLocale = locale === "pt" ? "en" : "pt";

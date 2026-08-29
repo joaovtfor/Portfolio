@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
 import { motion } from "framer-motion";
 import { useLenis } from "@studio-freight/react-lenis";
+import { useRef } from "react";
 
 import { HeroTitle } from "./HeroTitle";
 import { HeroButton } from "./HeroButton";

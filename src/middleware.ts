@@ -4,6 +4,22 @@ import type { NextRequest } from 'next/server';
 const locales = ['pt', 'en'];
 const defaultLocale = 'pt';
 
+const isDev = process.env.NODE_ENV === 'development';
+
+const cspHeader = `
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""};
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' blob: data:;
+  font-src 'self' data:;
+  connect-src 'self' https://api.resend.com;
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+  frame-ancestors 'none';
+  ${!isDev ? "upgrade-insecure-requests;" : ""}
+`.replace(/\s{2,}/g, ' ').trim();
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -11,15 +27,21 @@ export function middleware(request: NextRequest) {
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
 
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('Content-Security-Policy', cspHeader);
+
   if (pathnameHasLocale) {
-    const response = NextResponse.next();
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+    
+    response.headers.set('Content-Security-Policy', cspHeader);
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    response.headers.set(
-      'Content-Security-Policy',
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://api.resend.com; frame-src 'none'; object-src 'none';"
-    );
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     return response;
   }
 

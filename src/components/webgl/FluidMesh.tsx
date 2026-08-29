@@ -1,6 +1,6 @@
 "use client";
 
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef, useEffect } from "react";
 import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
@@ -14,9 +14,7 @@ void main() {
 `;
 
 const fragmentShader = `
-uniform float uTime;
 uniform vec2 uPointer;
-uniform vec3 uColor;
 uniform vec2 uResolution;
 varying vec2 vUv;
 
@@ -50,16 +48,15 @@ void main() {
 
 export function FluidMesh() {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
-  const { size } = useThree();
+
   
   const isTouchDevice = useRef(false);
   const gyroTarget = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    isTouchDevice.current = hasTouch;
+    isTouchDevice.current = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 
-    if (hasTouch) {
+    if (isTouchDevice.current) {
       const handleOrientation = (e: DeviceOrientationEvent) => {
         let x = e.gamma ? e.gamma / 45 : 0;
         let y = e.beta ? (e.beta - 45) / 45 : 0;
@@ -77,7 +74,6 @@ export function FluidMesh() {
 
   const uniforms = useMemo(
     () => ({
-      uTime: { value: 0 },
       uPointer: { value: new THREE.Vector2(0, 0) },
       uColor: { value: new THREE.Color("#85E8EA") },
       uResolution: { value: new THREE.Vector2(1, 1) },
@@ -90,11 +86,14 @@ export function FluidMesh() {
   useFrame((state) => {
     if (!materialRef.current) return;
 
-    if (!shouldReduceMotion) {
+    if (!shouldReduceMotion && materialRef.current.uniforms.uTime) {
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
     }
     
-    materialRef.current.uniforms.uResolution.value.set(size.width, size.height);
+    const res = materialRef.current.uniforms.uResolution.value;
+    if (res.x !== state.size.width || res.y !== state.size.height) {
+      res.set(state.size.width, state.size.height);
+    }
 
     const targetX = isTouchDevice.current ? gyroTarget.current.x : state.pointer.x;
     const targetY = isTouchDevice.current ? gyroTarget.current.y : state.pointer.y;

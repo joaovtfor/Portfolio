@@ -32,7 +32,6 @@ const PROJECTS_PT = [
     subtitle: "Single Sign On Identity Provider interno",
     description: "Unificação de autenticação dos sistemas internos via SSO IdP com foco no Google Workspace, com utilização do Laravel Passport e deploy dockerizado via Portainer.",
     image: "/projects/sso-idp.webp",
-    link: undefined,
     isPrivate: true,
   },
   {
@@ -41,7 +40,6 @@ const PROJECTS_PT = [
     subtitle: "Sistema interno para armazenamento de senhas",
     description: "Foco em segurança de ponta (Top 10 OWASP), abordando criptografia assíncrona AES 256, Rate Limiting, proteção contra XSS e CSRF, Logs, timeout e autenticação multi-fatores.",
     image: "/projects/gestao-senhas.webp",
-    link: undefined,
     isPrivate: true,
   },
   {
@@ -50,7 +48,6 @@ const PROJECTS_PT = [
     subtitle: "Sistema interno para solicitação de veículos",
     description: "Utilização de Websocket via Laravel Reverb, para atualização em tempo real de solicitações de veículos para viagens, com múltiplos níveis de acesso.",
     image: "/projects/gestao-frotas.webp",
-    link: undefined,
     isPrivate: true,
   },
   {
@@ -59,7 +56,6 @@ const PROJECTS_PT = [
     subtitle: "Solução de IAM/ILM baseada em processos de RH",
     description: "Sistema unificado 24/7 que atua com criação de contas em múltiplas plataformas via TOTVS. Conta com Logs constantes, relatórios diários e gestão via e-mail.",
     image: "/projects/automacao-iam.webp",
-    link: undefined,
     isPrivate: true,
   }
 ];

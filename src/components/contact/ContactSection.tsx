@@ -9,6 +9,8 @@ import { sendContactEmail } from "@/actions/contact";
 import type { Dictionary } from "@/dictionaries";
 import { pt } from "@/dictionaries/pt";
 
+const INPUT_CLASSES = "w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50 aria-[invalid=true]:border-red-500 aria-[invalid=true]:focus-visible:ring-red-500";
+
 export function ContactSection({ dict = pt }: { dict?: Dictionary }) {
   const contactSchema = getContactSchema(dict);
 
@@ -87,7 +89,7 @@ export function ContactSection({ dict = pt }: { dict?: Dictionary }) {
                 aria-invalid={errors.name ? "true" : "false"}
                 aria-required="true"
                 aria-describedby={errors.name ? "name-error" : undefined}
-                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50 aria-[invalid=true]:border-red-500 aria-[invalid=true]:focus-visible:ring-red-500"
+                className={INPUT_CLASSES}
               />
               {errors.name && (
                 <span id="name-error" className="text-red-400 text-xs mt-1">{errors.name.message}</span>
@@ -107,7 +109,7 @@ export function ContactSection({ dict = pt }: { dict?: Dictionary }) {
                 aria-invalid={errors.email ? "true" : "false"}
                 aria-required="true"
                 aria-describedby={errors.email ? "email-error" : undefined}
-                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50 aria-[invalid=true]:border-red-500 aria-[invalid=true]:focus-visible:ring-red-500"
+                className={INPUT_CLASSES}
               />
               {errors.email && (
                 <span id="email-error" className="text-red-400 text-xs mt-1">{errors.email.message}</span>
@@ -128,7 +130,7 @@ export function ContactSection({ dict = pt }: { dict?: Dictionary }) {
               aria-invalid={errors.message ? "true" : "false"}
               aria-required="true"
               aria-describedby={errors.message ? "message-error" : undefined}
-              className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all resize-none disabled:opacity-50 aria-[invalid=true]:border-red-500 aria-[invalid=true]:focus-visible:ring-red-500"
+              className={`${INPUT_CLASSES} resize-none`}
             />
             {errors.message && (
               <span id="message-error" className="text-red-400 text-xs mt-1">{errors.message.message}</span>

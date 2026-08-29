@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import { motion, useScroll, useInView } from "framer-motion";
+import { useIsTouch } from "@/hooks/useIsTouch";
 
 export interface ExperienceItem {
   id: number;
@@ -19,12 +20,7 @@ interface ExperienceListProps {
 function ExperienceItemCard({ exp, i, total }: { exp: ExperienceItem; i: number; total: number }) {
   const internalRef = useRef<HTMLLIElement>(null);
   const isInView = useInView(internalRef, { margin: "-40% 0px -40% 0px" });
-  const [isTouch, setIsTouch] = useState(false);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsTouch(window.matchMedia("(hover: none)").matches);
-  }, []);
+  const isTouch = useIsTouch();
 
   const isActive = isTouch ? isInView : false;
 
@@ -42,7 +38,7 @@ function ExperienceItemCard({ exp, i, total }: { exp: ExperienceItem; i: number;
       <div aria-hidden="true" className={`hidden md:block absolute left-0 top-0 bottom-0 w-[1px] transition-colors duration-300 md:duration-500 ${i === total - 1 ? 'bg-gradient-to-b from-white/5 to-transparent group-hover:from-white/10 group-data-[active=true]:from-white/10' : 'bg-white/5 group-hover:bg-white/10 group-data-[active=true]:bg-white/10'}`}>
         <motion.div 
           aria-hidden="true"
-          initial={{ backgroundColor: "#171717", borderColor: "rgba(255,255,255,0.2)", boxShadow: "0px 0px 0px rgba(133,232,234,0)" }}
+          initial={{ backgroundColor: "rgb(23,23,23)", borderColor: "rgba(255,255,255,0.2)", boxShadow: "0px 0px 0px transparent" }}
           whileInView={{ backgroundColor: "var(--foreground)", borderColor: "var(--foreground)", boxShadow: "0px 0px 12px var(--foreground)" }}
           viewport={{ once: false, margin: "1000px 0px -50% 0px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
@@ -88,7 +84,7 @@ export function ExperienceList({ experiences }: ExperienceListProps) {
 
   return (
     <div ref={listRef} className="relative w-full md:w-1/2 lg:w-1/2 flex flex-col mt-8 md:mt-0">
-      <div aria-hidden="true" className="hidden md:block absolute left-[31px] md:left-0 top-16 bottom-16 w-[1px] bg-transparent z-10">
+      <div aria-hidden="true" className="hidden md:block absolute md:left-0 top-16 bottom-16 w-[1px] bg-transparent z-10">
         <motion.div 
           className="w-full bg-[var(--foreground)] origin-top shadow-[0_0_15px_var(--foreground)]"
           style={{ scaleY: scrollYProgress, height: '100%' }}

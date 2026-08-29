@@ -106,7 +106,13 @@ export function Particles() {
     () => ({
       uTime: { value: 0 },
       uMouseWorld: { value: new THREE.Vector2(0, 0) },
-      uColor: { value: new THREE.Color("#A3D4D5") },
+      uColor: { value: (() => {
+        if (typeof document !== 'undefined') {
+          const fg = getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim();
+          if (fg) return new THREE.Color(fg);
+        }
+        return new THREE.Color(0.64, 0.83, 0.84);
+      })() },
       uAttractor: { value: new THREE.Vector2(0, 0) },
       uHasAttractor: { value: 0.0 },
     }),

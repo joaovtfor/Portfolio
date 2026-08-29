@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { Dictionary } from "@/dictionaries";
 
 import { getResume } from "@/data/resume";
+import { useMemo } from "react";
 
 interface ExperienceTitleProps {
   dict: Dictionary;
@@ -34,19 +34,17 @@ export function ExperienceTitle({ dict, resume, locale = 'pt' }: ExperienceTitle
   };
 
   const yearsOfExperience = useMemo(() => {
-    const allYears = resume.experiences
-      .map((exp) => exp.period)
-      .join(" ")
-      .match(/\b(19|20)\d{2}\b/g)
-      ?.map(Number);
-      
-    if (!allYears || allYears.length === 0) return 0;
+    const allYears = resume.experiences.flatMap((exp) => {
+      const matches = [exp.period].join(" ").match(/\b(19|20)\d{2}\b/g);
+      return matches ? matches.map(Number) : [];
+    });
     
-    const minYear = Math.min(...allYears);
-    const currentYear = new Date().getFullYear();
-    return Math.max(1, currentYear - minYear);
+    if (allYears.length === 0) return 1;
+    
+    const earliest = Math.min(...allYears);
+    const current = new Date().getFullYear();
+    return Math.max(1, current - earliest);
   }, [resume.experiences]);
-
   return (
     <motion.div 
       initial={{ opacity: 0, x: -30 }}
@@ -72,8 +70,8 @@ export function ExperienceTitle({ dict, resume, locale = 'pt' }: ExperienceTitle
         href={`/cv_${locale}.pdf`} 
         target="_blank"
         rel="noopener noreferrer"
-        initial={{ boxShadow: "0px 0px 0px rgba(133,232,234,0)" }}
-        whileInView={{ boxShadow: "0px 0px 15px rgba(133,232,234,0.3)" }}
+        initial={{ boxShadow: "0px 0px 0px transparent" }}
+        whileInView={{ boxShadow: "0px 0px 15px var(--foreground)" }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 1.5, delay: 0.8 }}
         onMouseMove={handleMouseMove}

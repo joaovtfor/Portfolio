@@ -7,7 +7,6 @@ import { pt } from "@/dictionaries/pt";
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
 const RATE_LIMIT_MAX = 3;
 const RATE_LIMIT_WINDOW = 1000 * 60 * 60;
-
 const serverSchema = getContactSchema(pt);
 
 export async function sendContactEmail(data: ContactFormData) {
@@ -20,13 +19,18 @@ export async function sendContactEmail(data: ContactFormData) {
     const { name, email, message } = parsed.data;
 
     const headersList = await headers();
-    const ip = headersList.get("x-forwarded-for") || "anonymous";
+    const rawIp = headersList.get("x-forwarded-for") || "anonymous";
+    const ip = rawIp.split(",")[0].trim();
     const now = Date.now();
     const limitRecord = rateLimitMap.get(ip) || { count: 0, lastReset: now };
 
     if (now - limitRecord.lastReset > RATE_LIMIT_WINDOW) {
       limitRecord.count = 0;
       limitRecord.lastReset = now;
+    }
+
+    for (const [key, record] of rateLimitMap.entries()) {
+      if (now - record.lastReset > RATE_LIMIT_WINDOW) rateLimitMap.delete(key);
     }
 
     if (limitRecord.count >= RATE_LIMIT_MAX) {

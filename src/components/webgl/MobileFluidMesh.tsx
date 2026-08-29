@@ -1,6 +1,6 @@
 "use client";
 
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef, useEffect } from "react";
 import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
@@ -56,12 +56,9 @@ void main() {
 
 export function MobileFluidMesh() {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
-  const { size } = useThree();
   
   const gyroTarget = useRef({ x: 0, y: 0 });
-  
   const currentPos = useRef({ x: 0, y: 0 });
-  
   const isActivelyTouching = useRef(false);
 
   const uniforms = useMemo(
@@ -93,9 +90,6 @@ export function MobileFluidMesh() {
 
     window.addEventListener("deviceorientation", handleOrientation);
     
-    if (typeof window.DeviceOrientationEvent !== 'undefined' && typeof (window.DeviceOrientationEvent as unknown as Record<string, unknown>).requestPermission === 'function') {
-    }
-
     return () => {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
@@ -112,7 +106,11 @@ export function MobileFluidMesh() {
     if (!shouldReduceMotion) {
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
     }
-    materialRef.current.uniforms.uResolution.value.set(size.width, size.height);
+    
+    const res = materialRef.current.uniforms.uResolution.value;
+    if (res.x !== state.size.width || res.y !== state.size.height) {
+      res.set(state.size.width, state.size.height);
+    }
     
     const isTouching = isActivelyTouching.current;
     

@@ -44,13 +44,13 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
         end: () => `+=${scrollContainer.scrollWidth - window.innerWidth}`,
         pin: true,
         animation: tween,
-        scrub: 1, 
-        invalidateOnRefresh: true, 
+        scrub: 1,
+        invalidateOnRefresh: true,
         snap: {
           snapTo: (value) => {
             const maxScroll = scrollContainer.scrollWidth - window.innerWidth;
             const windowCenter = window.innerWidth / 2;
-            const points = [0]; 
+            const points = [0];
             
             cardsRef.current.forEach((card) => {
               if (card) {
@@ -84,16 +84,32 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
         }
       });
 
+      let containerLeft = scrollContainer.getBoundingClientRect().left;
+      const cachedCards = cardsRef.current.map(card => {
+        if (!card) return null;
+        return {
+          offsetLeft: card.offsetLeft,
+          offsetWidth: card.offsetWidth
+        };
+      });
+
+      const updateMetrics = () => {
+        containerLeft = scrollContainer.getBoundingClientRect().left;
+      };
+
+      window.addEventListener("scroll", updateMetrics, { passive: true });
+      window.addEventListener("resize", updateMetrics, { passive: true });
+
       const updateCards = () => {
         if (!cardsRef.current || !scrollContainer) return;
         
         const windowCenter = window.innerWidth / 2;
-        const containerRect = scrollContainer.getBoundingClientRect();
         
-        cardsRef.current.forEach((card) => {
-          if (!card) return;
+        cardsRef.current.forEach((card, i) => {
+          if (!card || !cachedCards[i]) return;
           
-          const cardCenter = containerRect.left + card.offsetLeft + (card.offsetWidth / 2);
+          const cached = cachedCards[i]!;
+          const cardCenter = containerLeft + cached.offsetLeft + (cached.offsetWidth / 2);
           const distance = cardCenter - windowCenter;
           const progress = distance / (window.innerWidth * 0.8);
           
@@ -119,6 +135,8 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
 
       return () => {
         gsap.ticker.remove(updateCards);
+        window.removeEventListener("scroll", updateMetrics);
+        window.removeEventListener("resize", updateMetrics);
       };
     });
 
@@ -130,7 +148,6 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
       ref={sectionRef} 
       className="relative w-full h-[70vh] md:h-screen bg-transparent z-20 pointer-events-none"
     >
-      
       <div 
         className="w-full h-full flex items-center overflow-x-auto md:overflow-hidden snap-x snap-mandatory hide-scrollbar"
         style={{ 
@@ -143,7 +160,6 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
           ref={scrollRef} 
           className="relative flex items-center h-full w-max px-8 md:pl-[12vw] md:pr-[calc(50vw-300px)] gap-6 md:gap-10 pointer-events-auto"
         >
-          
           <div className="flex-shrink-0 flex flex-col justify-center w-[300px] md:w-[400px] mr-2 md:mr-16 snap-center md:snap-align-none">
             <h2 className="text-[clamp(2.5rem,5vw,4rem)] font-serif text-white tracking-[0.1em] select-none uppercase">
               {dict.projects.title}

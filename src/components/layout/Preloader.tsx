@@ -19,6 +19,7 @@ export function Preloader() {
     }
 
     let current = 0;
+    let timeout: NodeJS.Timeout;
     
     const interval = setInterval(() => {
       current += Math.random() * 20;
@@ -28,7 +29,7 @@ export function Preloader() {
         setProgress(100);
         clearInterval(interval);
         
-        setTimeout(() => {
+        timeout = setTimeout(() => {
           setIsLoading(false);
           setPreloaderDone();
         }, 400);
@@ -37,7 +38,10 @@ export function Preloader() {
       }
     }, 40);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (timeout) clearTimeout(timeout);
+    };
   }, [setPreloaderDone]);
 
   return (
@@ -61,7 +65,7 @@ export function Preloader() {
               aria-valuemin={0} 
               aria-valuemax={100}
               aria-label="Carregando"
-              className="text-white/60 font-mono text-sm tracking-[0.3em] mt-4 flex items-center gap-4"
+              className="text-white/40 font-mono text-sm tracking-[0.3em] mt-4 flex items-center gap-4"
             >
               <div aria-hidden="true" className="w-[100px] h-[1px] bg-white/10 relative overflow-hidden">
                 <motion.div 
