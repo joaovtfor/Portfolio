@@ -13,7 +13,7 @@ export const pt = {
   },
   experience: {
     title: "Experiência",
-    years: "Anos de",
+    years: "anos",
     description: "... em uma jornada dedicada a construir arquiteturas robustas e interfaces de alta performance, unindo design de ponta à engenharia de software.",
     downloadCV: "Baixar Currículo",
   },
@@ -45,7 +45,7 @@ export const pt = {
   menu: {
     downloadCV: "Baixar CV",
     contact: "Contato",
-    toggleLanguage: "Switch to English",
+    toggleLanguage: "EN-US",
   },
   a11y: {
     skipToContent: "Pular para o conteúdo principal",

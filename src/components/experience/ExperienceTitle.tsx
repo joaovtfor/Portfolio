@@ -60,8 +60,8 @@ export function ExperienceTitle({ dict, resume, locale = 'pt' }: ExperienceTitle
       </h2>
       
       <div className="mt-6 flex flex-col items-center md:items-start">
-        <span className="text-[var(--foreground)] font-serif italic text-lg md:text-xl mb-1 text-center md:text-left">
-          {dict.experience.years} {yearsOfExperience}
+        <span className="text-[var(--foreground)] font-serif text-lg md:text-xl mb-1 text-center md:text-left">
+          {yearsOfExperience} {dict.experience.years}
         </span>
         <p className="text-neutral-400 font-sans text-sm md:text-base leading-relaxed max-w-sm text-center md:text-left">
           {dict.experience.description}

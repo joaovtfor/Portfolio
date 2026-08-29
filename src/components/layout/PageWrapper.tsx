@@ -59,6 +59,18 @@ export function PageWrapper({ children, dict = pt, locale = 'pt' }: { children: 
         {children}
       </div>
 
+      {!isMobile && mounted && (
+        <a
+          href={locale === 'pt' ? '/en' : '/pt'}
+          className="fixed top-8 right-8 md:right-12 z-50 hidden md:flex items-center gap-2 text-neutral-500 hover:text-[var(--foreground)] font-sans text-xs uppercase tracking-widest transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none"
+          aria-label={dict.menu?.toggleLanguage || "Switch Language"}
+        >
+          <span className={locale === 'pt' ? 'text-white font-bold' : ''}>PT</span>
+          <span className="opacity-40">/</span>
+          <span className={locale === 'en' ? 'text-white font-bold' : ''}>EN</span>
+        </a>
+      )}
+
       <MobileFloatingMenu dict={dict} locale={locale} />
     </main>
   );

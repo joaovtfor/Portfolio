@@ -13,7 +13,7 @@ export const en = {
   },
   experience: {
     title: "Experience",
-    years: "Years of",
+    years: "years",
     description: "... on a journey dedicated to building robust architectures and high-performance interfaces, merging cutting-edge design with software engineering.",
     downloadCV: "Download CV",
   },
@@ -45,7 +45,7 @@ export const en = {
   menu: {
     downloadCV: "Download CV",
     contact: "Contact",
-    toggleLanguage: "Mudar para Português",
+    toggleLanguage: "PT-BR",
   },
   a11y: {
     skipToContent: "Skip to main content",
