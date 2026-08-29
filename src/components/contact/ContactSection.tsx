@@ -4,10 +4,14 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { contactSchema, ContactFormData } from "@/lib/validations";
+import { getContactSchema, ContactFormData } from "@/lib/validations";
 import { sendContactEmail } from "@/actions/contact";
+import type { Dictionary } from "@/dictionaries";
+import { pt } from "@/dictionaries/pt";
 
-export function ContactSection() {
+export function ContactSection({ dict = pt }: { dict?: Dictionary }) {
+  const contactSchema = getContactSchema(dict);
+
   const [serverState, setServerState] = useState<{
     type: "success" | "error" | null;
     message: string;
@@ -22,7 +26,6 @@ export function ContactSection() {
     resolver: zodResolver(contactSchema),
   });
 
-  // Limpa a mensagem automaticamente para ativar o fade out
   useEffect(() => {
     if (serverState.message) {
       const timer = setTimeout(() => {
@@ -35,32 +38,23 @@ export function ContactSection() {
   const onSubmit = async (data: ContactFormData) => {
     setServerState({ type: null, message: "" });
     try {
-      console.log("Disparando 5 requisições simultâneas para testar Rate Limiting...");
+      const response = await sendContactEmail(data);
       
-      // Cria um array com 5 requisições para a Server Action
-      const promises = Array.from({ length: 5 }).map(() => sendContactEmail(data));
-      
-      // Aguarda todas responderem
-      const responses = await Promise.all(promises);
-      
-      // Loga os resultados de todas as requisições para ver o bloqueio acontecendo
-      console.table(responses);
-      
-      // Pega o resultado da última requisição (que deve ser o bloqueio do Rate Limiter)
-      const finalResponse = responses[responses.length - 1];
-      
-      if (finalResponse.success) {
-        setServerState({ type: "success", message: finalResponse.message });
-        reset(); // Limpa o form após sucesso real
+      if (response.success) {
+        setServerState({ type: "success", message: dict.contact.successMsg });
+        reset();
       } else {
-        setServerState({ type: "error", message: finalResponse.message });
+        let msg = dict.contact.errorMsg;
+        if (response.errorType === "validation") msg = dict.contact.validationError;
+        else if (response.errorType === "rateLimit") msg = dict.contact.rateLimitError;
+        
+        setServerState({ type: "error", message: msg });
       }
-
     } catch (error) {
       console.error("Erro no envio", error);
       setServerState({
         type: "error",
-        message: "Falha catastrófica ao processar solicitação no servidor.",
+        message: dict.contact.errorMsg,
       });
     }
   };
@@ -69,76 +63,79 @@ export function ContactSection() {
     <section id="contact" className="relative w-full min-h-[100svh] flex flex-col items-center justify-center bg-transparent z-20 py-12 md:py-24 px-6 md:px-12">
       <div className="w-full max-w-2xl mx-auto flex flex-col gap-12">
         
-        {/* Cabeçalho do Formulário */}
         <div className="flex flex-col gap-4 text-center md:text-left">
           <h2 className="text-4xl md:text-6xl font-serif text-white tracking-[0.1em] uppercase select-none">
-            VAMOS CONVERSAR!
+            {dict.contact.title}
           </h2>
           <p className="text-neutral-400 font-sans text-sm md:text-base leading-relaxed max-w-md select-none">
-            Pronto para construir o próximo nível da sua aplicação? Me envie os detalhes do projeto e vamos arquitetar juntos.
+            {dict.contact.description}
           </p>
         </div>
 
-        {/* Formulário */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 w-full">
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Input Nome */}
             <div className="flex flex-col gap-2">
               <label htmlFor="name" className="text-xs uppercase tracking-widest text-neutral-500 font-bold">
-                Nome
+                {dict.contact.nameLabel}
               </label>
               <input
                 {...register("name")}
                 id="name"
                 disabled={isSubmitting}
-                placeholder="Seu nome"
-                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50"
+                placeholder={dict.contact.namePlaceholder}
+                aria-invalid={errors.name ? "true" : "false"}
+                aria-required="true"
+                aria-describedby={errors.name ? "name-error" : undefined}
+                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50 aria-[invalid=true]:border-red-500 aria-[invalid=true]:focus-visible:ring-red-500"
               />
               {errors.name && (
-                <span className="text-red-400 text-xs mt-1">{errors.name.message}</span>
+                <span id="name-error" className="text-red-400 text-xs mt-1">{errors.name.message}</span>
               )}
             </div>
 
-            {/* Input E-mail */}
             <div className="flex flex-col gap-2">
               <label htmlFor="email" className="text-xs uppercase tracking-widest text-neutral-500 font-bold">
-                E-mail
+                {dict.contact.emailLabel}
               </label>
               <input
                 {...register("email")}
                 id="email"
                 type="email"
                 disabled={isSubmitting}
-                placeholder="Seu melhor e-mail"
-                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50"
+                placeholder={dict.contact.emailPlaceholder}
+                aria-invalid={errors.email ? "true" : "false"}
+                aria-required="true"
+                aria-describedby={errors.email ? "email-error" : undefined}
+                className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all disabled:opacity-50 aria-[invalid=true]:border-red-500 aria-[invalid=true]:focus-visible:ring-red-500"
               />
               {errors.email && (
-                <span className="text-red-400 text-xs mt-1">{errors.email.message}</span>
+                <span id="email-error" className="text-red-400 text-xs mt-1">{errors.email.message}</span>
               )}
             </div>
           </div>
 
-          {/* Textarea Mensagem */}
           <div className="flex flex-col gap-2">
             <label htmlFor="message" className="text-xs uppercase tracking-widest text-neutral-500 font-bold">
-              Mensagem
+              {dict.contact.messageLabel}
             </label>
             <textarea
               {...register("message")}
               id="message"
               disabled={isSubmitting}
-              placeholder="Descreva seu projeto ou desafio..."
+              placeholder={dict.contact.messagePlaceholder}
               rows={5}
-              className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all resize-none disabled:opacity-50"
+              aria-invalid={errors.message ? "true" : "false"}
+              aria-required="true"
+              aria-describedby={errors.message ? "message-error" : undefined}
+              className="w-full bg-neutral-900/50 border border-white/10 rounded-none px-4 py-3 text-base md:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--foreground)] transition-all resize-none disabled:opacity-50 aria-[invalid=true]:border-red-500 aria-[invalid=true]:focus-visible:ring-red-500"
             />
             {errors.message && (
-              <span className="text-red-400 text-xs mt-1">{errors.message.message}</span>
+              <span id="message-error" className="text-red-400 text-xs mt-1">{errors.message.message}</span>
             )}
           </div>
 
-          {/* Feedback de Servidor */}
-          <div aria-live="polite" className="h-6 relative">
+          <div aria-live="polite" role="status" aria-atomic="true" className="h-6 relative">
             <AnimatePresence>
               {serverState.message && (
                 <motion.span
@@ -149,23 +146,22 @@ export function ContactSection() {
                   transition={{ duration: 0.3 }}
                   className={`absolute text-sm ${serverState.type === "success" ? "text-[var(--foreground)]" : "text-red-400"}`}
                 >
-                  {serverState.type === "success" ? `>_ ${serverState.message}` : `[ERRO] ${serverState.message}`}
+                  {serverState.type === "success" ? `${dict.contact.successPrefix} ${serverState.message}` : `${dict.contact.errorPrefix} ${serverState.message}`}
                 </motion.span>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Botão de Submit (CTA) */}
           <div className="flex justify-end mt-2">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="group relative overflow-hidden bg-white text-black font-sans uppercase tracking-widest text-xs font-bold px-10 py-4 hover:bg-[var(--foreground)] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative overflow-hidden bg-white text-black font-sans uppercase tracking-widest text-xs font-bold px-10 py-4 hover:bg-[var(--foreground)] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none"
             >
               <span className="relative z-10 flex items-center gap-2">
-                {isSubmitting ? "Enviando..." : "Enviar Mensagem"}
+                {isSubmitting ? dict.contact.sending : dict.contact.sendBtn}
                 {!isSubmitting && (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform">
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>
                   </svg>
@@ -175,7 +171,6 @@ export function ContactSection() {
           </div>
         </form>
 
-        {/* Terminal Grid Links */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-white/10 mt-8 w-full">
           {[
             { label: "Email", href: "mailto:joaovtfor@hotmail.com" },
@@ -187,9 +182,8 @@ export function ContactSection() {
               href={link.href}
               target={link.label !== "Email" ? "_blank" : undefined}
               rel={link.label !== "Email" ? "noopener noreferrer" : undefined}
-              className="group relative flex items-center justify-between p-6 border-r border-b border-white/10 overflow-hidden transition-colors duration-300"
+              className="group relative flex items-center justify-between p-6 border-r border-b border-white/10 overflow-hidden transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none"
             >
-              {/* Efeito de Preenchimento (Terminal Select) */}
               <div className="absolute inset-0 bg-white translate-y-[101%] group-hover:translate-y-0 transition-transform duration-300 ease-[0.16,1,0.3,1] z-0" />
 
               <span className="relative z-10 font-sans text-xs uppercase tracking-widest font-bold text-neutral-400 group-hover:text-black transition-colors duration-300">
@@ -197,6 +191,7 @@ export function ContactSection() {
               </span>
 
               <svg 
+                aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg" 
                 width="14" height="14" 
                 viewBox="0 0 24 24" 

@@ -3,30 +3,30 @@
 import { motion, Variants } from "framer-motion";
 import { useUIStore } from "@/store/uiStore";
 
-export function HeroTitle() {
+interface HeroTitleProps {
+  name: string;
+}
+
+export function HeroTitle({ name }: HeroTitleProps) {
   const isPreloaderDone = useUIStore((state) => state.isPreloaderDone);
-  const title = "JOÃO DE FOR";
+  const title = name || "JOÃO DE FOR";
   const letters = title.split("");
 
-  // Orquestração do Container
   const containerVariants: Variants = {
     hidden: { opacity: 1 },
     show: {
       opacity: 1,
-      // Atraso aumentado para 0.6s, aguardando a cortina preta subir quase por completo
-      // antes de iniciar a queda das letras.
       transition: { staggerChildren: 0.08, delayChildren: 0.6 },
     },
   };
 
-  // Física de Entrada de cada Letra
   const letterVariants: Variants = {
     hidden: { opacity: 0, y: 80, filter: "blur(15px)" },
     show: { 
       opacity: 1, 
       y: 0, 
       filter: "blur(0px)",
-      transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } // Easing de "Ease Out Expo"
+      transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } 
     },
   };
 
@@ -37,18 +37,17 @@ export function HeroTitle() {
       animate={isPreloaderDone ? "show" : "hidden"}
       className="flex items-center justify-center w-full z-10 select-none pointer-events-none"
     >
-      <h1 className="font-serif text-[clamp(2.5rem,10vw,12rem)] font-medium tracking-normal leading-none uppercase text-white mix-blend-difference whitespace-nowrap flex select-none">
+      <h1 aria-label={title} className="font-serif text-[clamp(2.5rem,10vw,12rem)] font-medium tracking-normal leading-none uppercase text-white mix-blend-difference whitespace-nowrap flex select-none">
         {letters.map((char, i) => (
           <motion.span
             key={i}
+            aria-hidden="true"
             variants={letterVariants}
-            // Mantemos apenas a física de levante sem o glow para uma estética mais limpa
             whileHover={{
               scale: 1.05,
-              y: -10, // Levanta levemente a letra
+              y: -10, 
               transition: { duration: 0.2, type: "spring", stiffness: 300 }
             }}
-            // select-none bloqueia a seleção de texto
             className="pointer-events-auto cursor-default select-none"
             style={{ 
               display: "inline-block",

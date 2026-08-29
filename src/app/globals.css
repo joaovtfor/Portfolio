@@ -6,13 +6,10 @@
 }
 
 @theme inline {
-  /* Cores Absolutas da Identidade */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-brand: var(--foreground); /* Alias semântico para interações */
+  --color-brand: var(--foreground);
 
-  /* Tipografia Fluida (clamp: MinMobile, Cálculo de Crescimento, MaxDesktop) */
-  /* Isso garante que a fonte não quebre o layout no celular e não fique colossal no 4K */
   --text-xs: clamp(0.75rem, 0.1vw + 0.72rem, 0.8rem);
   --text-sm: clamp(0.8rem, 0.17vw + 0.76rem, 0.89rem);
   --text-base: clamp(1rem, 0.34vw + 0.91rem, 1.19rem);
@@ -21,7 +18,7 @@
   --text-2xl: clamp(1.95rem, 1.56vw + 1.56rem, 2.81rem);
   --text-3xl: clamp(2.44rem, 2.38vw + 1.85rem, 3.75rem);
   --text-4xl: clamp(3.05rem, 3.54vw + 2.17rem, 5rem);
-  --text-hero: clamp(4rem, 10vw + 1rem, 12rem); /* Escala massiva exclusiva para a dobra inicial */
+  --text-hero: clamp(4rem, 10vw + 1rem, 12rem);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -33,33 +30,20 @@
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-    /* Suavização de renderização para o tema escuro */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Personalização da seleção de texto (identidade Monolito/Fluido) */
   ::selection {
     background-color: var(--foreground);
     color: var(--background);
   }
 
-  /* Esconder barra de scroll e manter imersão */
   html, body {
-    /* overflow-x: hidden REMOVIDO pois quebrava o position: sticky em vários browsers */
-    /* Esconde barra de scroll no Firefox */
     scrollbar-width: none; 
   }
 
-  /* Esconde barra de scroll no Chrome/Safari/Edge */
   ::-webkit-scrollbar {
     display: none;
-  }
-
-  /* Oculta cursor padrão em dispositivos que suportam cursor (PC/Mac) para dar espaço ao CustomCursor */
-  @media (pointer: fine) {
-    * {
-      cursor: none !important;
-    }
   }
 }

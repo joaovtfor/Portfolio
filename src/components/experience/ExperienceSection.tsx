@@ -3,9 +3,16 @@
 import { useRef } from "react";
 import { ExperienceTitle } from "./ExperienceTitle";
 import { ExperienceList } from "./ExperienceList";
-import { RESUME_DATA } from "@/data/resume";
+import { Dictionary } from "@/dictionaries";
+import { getResume } from "@/data/resume";
 
-export function ExperienceSection() {
+interface ExperienceSectionProps {
+  dict: Dictionary;
+  resume: ReturnType<typeof getResume>;
+  locale?: string;
+}
+
+export function ExperienceSection({ dict, resume, locale }: ExperienceSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
 
   return (
@@ -13,8 +20,8 @@ export function ExperienceSection() {
       
       <div className="relative z-10 max-w-[1440px] mx-auto px-6 md:px-12 lg:px-20 flex flex-col md:flex-row gap-12 lg:gap-20">
         
-        <ExperienceTitle />
-        <ExperienceList experiences={RESUME_DATA.experiences} />
+        <ExperienceTitle dict={dict} resume={resume} locale={locale} />
+        <ExperienceList experiences={resume.experiences} />
 
       </div>
     </section>

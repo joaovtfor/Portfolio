@@ -2,11 +2,17 @@
 
 import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Dictionary } from "@/dictionaries";
+
+interface HeroButtonProps extends HTMLMotionProps<"button"> {
+  dict: Dictionary;
+}
 
 export function HeroButton({
   className,
+  dict,
   ...props
-}: HTMLMotionProps<"button">) {
+}: HeroButtonProps) {
   return (
     <motion.button
       initial="initial"
@@ -25,15 +31,12 @@ export function HeroButton({
       }}
       className={cn(
         "relative px-6 py-2 rounded-full font-sans text-[10px] sm:text-xs uppercase tracking-[0.2em] font-bold overflow-hidden pointer-events-auto",
-        "bg-transparent flex items-center justify-center border border-white/20",
+        "bg-transparent flex items-center justify-center border border-white/20 focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none",
         className
       )}
+      aria-label={dict.hero.scrollText}
       {...props}
     >
-      {/* 
-        Preenchimento Total do Botão (Efeito Cortina)
-        Sobe do fundo (101%) para cobrir todo o botão (0%)
-      */}
       <motion.div
         className="absolute inset-0 z-0 pointer-events-none"
         style={{ backgroundColor: "var(--foreground)" }}
@@ -45,10 +48,6 @@ export function HeroButton({
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       />
 
-      {/* 
-        Texto do Botão
-        Inverte a cor para garantir contraste (Branco no fundo transparente -> Preto no fundo Ciano)
-      */}
       <motion.span
         className="relative z-10"
         variants={{
@@ -58,7 +57,7 @@ export function HeroButton({
         }}
         transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        Iniciar projeto
+        {dict.hero.scrollText}
       </motion.span>
     </motion.button>
   );

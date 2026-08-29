@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { motion, useMotionValue, useSpring, useInView } from "framer-motion";
+import { Dictionary } from "@/dictionaries";
 
 interface Project {
   id: string;
@@ -17,9 +18,10 @@ interface ProjectCardProps {
   project: Project;
   cardRef: (el: HTMLDivElement | null) => void;
   index?: string;
+  dict: Dictionary;
 }
 
-export function ProjectCard({ project, cardRef, index }: ProjectCardProps) {
+export function ProjectCard({ project, cardRef, index, dict }: ProjectCardProps) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   
@@ -83,7 +85,7 @@ export function ProjectCard({ project, cardRef, index }: ProjectCardProps) {
         </span>
         
         {project.description && (
-          <div className="absolute top-full mt-4 w-[90%] md:w-[75%] opacity-0 group-hover:opacity-100 group-data-[active=true]:opacity-100 transition-opacity duration-300 md:duration-700 delay-100 ease-out">
+          <div className="absolute top-full mt-4 w-[90%] md:w-[75%] opacity-0 group-hover:opacity-100 group-data-[active=true]:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 md:duration-700 delay-100 ease-out">
             <p className="text-[9px] md:text-sm text-neutral-200 md:text-neutral-300 font-sans text-center leading-relaxed font-light">
               {project.description}
             </p>
@@ -94,12 +96,12 @@ export function ProjectCard({ project, cardRef, index }: ProjectCardProps) {
       {project.isPrivate && (
         <div className="absolute top-4 md:top-5 left-1/2 -translate-x-1/2 flex items-center justify-center gap-2 w-[120px] h-[28px] bg-white/5 border border-white/10 rounded-full text-white/70 text-[10px] uppercase tracking-widest font-sans backdrop-blur-md z-20">
           <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Privado
+          {dict.projects.private}
         </div>
       )}
 
       {!project.isPrivate && project.link && (
-        <div className="absolute top-6 right-6 md:top-8 md:right-8 opacity-0 -translate-x-4 translate-y-4 group-hover:opacity-100 group-data-[active=true]:opacity-100 group-hover:translate-x-0 group-data-[active=true]:translate-x-0 group-hover:translate-y-0 group-data-[active=true]:translate-y-0 transition-all duration-300 md:duration-700 ease-out z-20 text-white drop-shadow-md">
+        <div className="absolute top-6 right-6 md:top-8 md:right-8 opacity-0 -translate-x-4 translate-y-4 group-hover:opacity-100 group-data-[active=true]:opacity-100 group-focus-within:opacity-100 group-hover:translate-x-0 group-data-[active=true]:translate-x-0 group-focus-within:translate-x-0 group-hover:translate-y-0 group-data-[active=true]:translate-y-0 group-focus-within:translate-y-0 transition-all duration-300 md:duration-700 ease-out z-20 text-white drop-shadow-md">
           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="7" y1="17" x2="17" y2="7"></line>
             <polyline points="7 7 17 7 17 17"></polyline>
@@ -121,7 +123,7 @@ export function ProjectCard({ project, cardRef, index }: ProjectCardProps) {
         href={project.link} 
         target="_blank" 
         rel="noopener noreferrer" 
-        className="block outline-none flex-shrink-0 snap-center md:snap-align-none perspective-1000 transform-style-3d"
+        className="block flex-shrink-0 snap-center md:snap-align-none perspective-1000 transform-style-3d focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none rounded-2xl"
       >
         {CardContent}
       </a>
@@ -129,7 +131,7 @@ export function ProjectCard({ project, cardRef, index }: ProjectCardProps) {
   }
 
   return (
-    <div className="block outline-none flex-shrink-0 snap-center md:snap-align-none perspective-1000 transform-style-3d">
+    <div className="block flex-shrink-0 snap-center md:snap-align-none perspective-1000 transform-style-3d focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none rounded-2xl">
       {CardContent}
     </div>
   );
