@@ -1,4 +1,4 @@
-export const RESUME_DATA = {
+const RESUME_PT = {
   personalInfo: {
     name: "João Vitor de For dos Santos",
     location: "Passo Fundo, RS",
@@ -57,3 +57,67 @@ export const RESUME_DATA = {
     "Single Sign-On (SSO)", "Clean Code", "OWASP", "SDD", "Git"
   ]
 };
+
+const RESUME_EN = {
+  personalInfo: {
+    name: "João Vitor de For dos Santos",
+    location: "Passo Fundo, RS",
+    phone: "(54) 9 9930-3946",
+    email: "joaovtfor@hotmail.com",
+    linkedin: "https://linkedin.com/in/joaodefor",
+    github: "https://github.com/joaovtfor",
+    role: "Front-End & Full-Stack Engineer",
+    focus: "High Performance Interfaces",
+    stack: "Next.js, Vue.js, Laravel, Flutter"
+  },
+  summary: "Front-End and Full-Stack Software Engineer specialized in building high-performance, scalable, and resilient interfaces. I master the modern ecosystem using Next.js, Tailwind CSS, and Framer Motion for optimized rendering, with a solid background in Vue.js and React.js integrated with Laravel architectures. I apply Artificial Intelligence methodologies executing Spec-Driven Development (SDD) to accelerate deliveries. In infrastructure, I use isolated local environments with standalone Docker containers via Docker Desktop (with advanced mapping in docker-compose.yml files), orchestrating production deployments through Portainer. I act with Security by Design, mitigating vulnerabilities from the Top 10 OWASP (XSS, CSRF) since the conception of the code.",
+  experiences: [
+    {
+      id: 1,
+      period: "AUG 2025 - PRESENT",
+      company: "Rede Notre Dame",
+      role: "Mid-level Front-End / Full-Stack",
+      description: "Architectural design of web and mobile systems using Vue.js, Laravel, and Flutter. Achieved a score of 100 in Google Lighthouse (Performance and SEO). Development of Identity Provider (IdP) for secure SSO via NGINX reverse proxy. Docker-first (CI/CD) standardization and refactoring of mission-critical legacy systems.",
+      skills: ["Vue.js", "Typescript", "Figma", "UI/UX Design", "Laravel", "Flutter", "Docker", "Single Sign-On (SSO)", "CI/CD", "NGINX"]
+    },
+    {
+      id: 2,
+      period: "FEB 2025 - JUL 2025",
+      company: "Veplex",
+      role: "Front-End / Full-Stack",
+      description: "Complete UI/UX and responsive design restructuring using React.js and Vue.js integrated with Laravel back-end. High-fidelity prototyping (Figma) and development of complex BI dashboards focused on logistics sector management. Integration of Artificial Intelligence tools in pair-programming workflow.",
+      skills: ["React.js", "Vue.js", "Typescript", "Figma", "UI/UX Design", "Laravel", "AI (SDD)", "Docker", "BI"]
+    },
+    {
+      id: 3,
+      period: "OCT 2024 - JAN 2025",
+      company: "Sinapsys",
+      role: "Front-End & Mobile",
+      description: "Cross-platform mobile development using Flutter, focused on UX via Figma. Maintenance and evolution of legacy corporate back-ends (ASP.NET, VB.NET). SQL query performance optimization by creating operational indexes and triggers.",
+      skills: ["Flutter", "Figma", "UI/UX Design", "ASP.NET", "VB.NET", "SQL"]
+    },
+    {
+      id: 4,
+      period: "MAY 2023 - JUN 2024",
+      company: "IM9 Inteligência",
+      role: "Front-End",
+      description: "70% reduction in loading time of legacy React.js applications through advanced code splitting and bundle size optimization. Development of real-time telemetry dashboards via Server-Sent Events (SSE) with massive client-side processing.",
+      skills: ["React.js", "Figma", "UI/UX Design", "Typescript", "Web Vitals", "SSE", "Code Splitting"]
+    }
+  ],
+  education: {
+    degree: "Systems Analysis and Development (ADS)",
+    institution: "University of Passo Fundo (UPF)",
+    conclusion: "12/2026"
+  },
+  skills: [
+    "React.js", "Next.js", "Vue.js", "Tailwind CSS", "Framer Motion",
+    "JavaScript", "TypeScript", "Flutter", "Laravel", "PHP", 
+    "Docker", "Portainer", "CI/CD", "SQL", "Figma", "UI/UX",
+    "Single Sign-On (SSO)", "Clean Code", "OWASP", "SDD", "Git"
+  ]
+};
+
+export function getResume(locale: 'pt' | 'en') {
+  return locale === 'pt' ? RESUME_PT : RESUME_EN;
+}

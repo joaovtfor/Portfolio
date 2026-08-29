@@ -2,6 +2,7 @@
 
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 import { useUIStore } from "@/store/uiStore";
 
@@ -22,7 +23,6 @@ void main() {
     pos.x += sin(uTime * aSpeed + pos.y) * 0.8;
     pos.y += cos(uTime * aSpeed + pos.x) * 0.8;
     
-    // 2. Interação Magnética Suave com UI (Ex: Hover no ProjectCard)
     if (uHasAttractor > 0.5) {
         float distToAttractor = distance(pos.xy, uAttractor);
         float effectRadius = 5.0; 
@@ -31,12 +31,9 @@ void main() {
             float pull = 1.0 - smoothstep(0.0, effectRadius, distToAttractor);
             vec2 dir = normalize(uAttractor - pos.xy);
             
-            // Puxa sutilmente as partículas em direção ao centro do card
             pos.xy += dir * pull * 0.8;
-            // Eleva suavemente no eixo Z para destacar
             pos.z += pull * 1.5;
             
-            // Aumenta o brilho (tamanho) perto do card
             pos.z += pull * aSize * 0.5;
         }
     }
@@ -122,14 +119,20 @@ export function Particles() {
     []
   );
 
+  const shouldReduceMotion = useReducedMotion();
+
   useFrame((state) => {
     if (!materialRef.current) return;
     
-    materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
+    if (!shouldReduceMotion) {
+      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
+    }
     
-    if (groupRef.current) {
-      groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, (state.pointer.y * Math.PI) / 8, 0.03);
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, (state.pointer.x * Math.PI) / 8, 0.03);
+    if (!shouldReduceMotion) {
+      if (groupRef.current) {
+        groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, (state.pointer.y * Math.PI) / 8, 0.03);
+        groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, (state.pointer.x * Math.PI) / 8, 0.03);
+      }
     }
     
     const targetX = (state.pointer.x * viewport.width) / 2;

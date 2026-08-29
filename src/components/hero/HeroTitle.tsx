@@ -3,9 +3,6 @@
 import { motion, Variants } from "framer-motion";
 import { useUIStore } from "@/store/uiStore";
 
-const title = "JOÃO DE FOR";
-const letters = title.split("");
-
 const containerVariants: Variants = {
   hidden: { opacity: 1 },
   show: {
@@ -24,8 +21,14 @@ const letterVariants: Variants = {
   },
 };
 
-export function HeroTitle() {
+interface HeroTitleProps {
+  name: string;
+}
+
+export function HeroTitle({ name }: HeroTitleProps) {
   const isPreloaderDone = useUIStore((state) => state.isPreloaderDone);
+  const title = name || "JOÃO DE FOR";
+  const letters = title.split("");
 
   return (
     <motion.div
@@ -34,10 +37,11 @@ export function HeroTitle() {
       animate={isPreloaderDone ? "show" : "hidden"}
       className="flex items-center justify-center w-full z-10 select-none pointer-events-none"
     >
-      <h1 className="font-serif text-[clamp(2.5rem,10vw,12rem)] font-medium tracking-normal leading-none uppercase text-white mix-blend-difference whitespace-nowrap flex select-none">
+      <h1 aria-label={title} className="font-serif text-[clamp(2.5rem,10vw,12rem)] font-medium tracking-normal leading-none uppercase text-white mix-blend-difference whitespace-nowrap flex select-none">
         {letters.map((char, i) => (
           <motion.span
             key={i}
+            aria-hidden="true"
             variants={letterVariants}
             whileHover={{
               scale: 1.05,

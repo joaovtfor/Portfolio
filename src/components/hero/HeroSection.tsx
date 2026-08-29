@@ -2,13 +2,21 @@
 
 import { motion } from "framer-motion";
 import { useLenis } from "@studio-freight/react-lenis";
+import { useRef } from "react";
 
 import { HeroTitle } from "./HeroTitle";
 import { HeroButton } from "./HeroButton";
-import { RESUME_DATA } from "@/data/resume";
 import { useUIStore } from "@/store/uiStore";
+import { Dictionary } from "@/dictionaries";
+import { getResume } from "@/data/resume";
 
-export function HeroSection() {
+interface HeroSectionProps {
+  dict: Dictionary;
+  resume: ReturnType<typeof getResume>;
+}
+
+export function HeroSection({ dict, resume }: HeroSectionProps) {
+  const sectionRef = useRef<HTMLElement>(null);
   const isPreloaderDone = useUIStore((state) => state.isPreloaderDone);
   const lenis = useLenis();
 
@@ -27,12 +35,12 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative w-full h-[100svh] overflow-hidden">
+    <section ref={sectionRef} className="relative w-full h-[100svh] overflow-hidden">
       
       <div className="relative z-10 flex flex-col w-full h-full max-w-[1440px] mx-auto pointer-events-none p-6 md:p-12">
         
         <div className="flex-1 flex items-center justify-center">
-          <HeroTitle />
+          <HeroTitle name="JOÃO DE FOR" />
         </div>
         
         <motion.div 
@@ -43,13 +51,13 @@ export function HeroSection() {
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 1.5rem)' }}
         >
           <div className="flex flex-col gap-1 font-sans text-[10px] sm:text-xs tracking-widest text-neutral-400 uppercase select-none">
-            <p><strong className="text-neutral-600 font-bold">Cargo:</strong> {RESUME_DATA.personalInfo.role}</p>
-            <p><strong className="text-neutral-600 font-bold">Foco:</strong> {RESUME_DATA.personalInfo.focus}</p>
-            <p><strong className="text-neutral-600 font-bold">Stack:</strong> {RESUME_DATA.personalInfo.stack}</p>
+            <p><strong className="text-neutral-400 font-bold">{dict.hero.roleLabel}:</strong> {resume.personalInfo.role}</p>
+            <p><strong className="text-neutral-400 font-bold">{dict.hero.focusLabel}:</strong> {resume.personalInfo.focus}</p>
+            <p><strong className="text-neutral-400 font-bold">{dict.hero.stackLabel}:</strong> {resume.personalInfo.stack}</p>
           </div>
           
           <div className="flex items-center">
-            <HeroButton onClick={handleScrollToContact} />
+            <HeroButton dict={dict} onClick={handleScrollToContact} />
           </div>
         </motion.div>
 

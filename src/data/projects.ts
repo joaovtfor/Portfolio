@@ -1,4 +1,4 @@
-export const PROJECTS_DATA = [
+const PROJECTS_PT = [
   {
     id: "1",
     title: "ABC Guinchos",
@@ -59,3 +59,73 @@ export const PROJECTS_DATA = [
     isPrivate: true,
   }
 ];
+
+const PROJECTS_EN = [
+  {
+    id: "1",
+    title: "ABC Guinchos",
+    subtitle: "Tow Truck Management",
+    description: "Massive real-time data processing (via SSE), along with a UI/UX-focused interface built on top of a Design System via Figma.",
+    image: "/projects/abc-guinchos.webp",
+    link: "https://www.guinchosassociacao.com.br/",
+    isPrivate: false,
+  },
+  {
+    id: "2",
+    title: "Efesus 2.0",
+    subtitle: "Distributor Management",
+    description: "Structuring of data analysis in multiple BI modules, focusing on performance with a 70% reduction in loading time and maximum score in Web Vitals.",
+    image: "/projects/efesus.webp",
+    link: "https://braveo.veplex.com.br/login",
+    isPrivate: false,
+  },
+  {
+    id: "3",
+    title: "Nomade EQ",
+    subtitle: "Construction and Engineering Solution",
+    description: "Optimization of performance, interface, and code structure. Implementation of Clean Code and refactoring of main modules.",
+    image: "/projects/nomade-eq.webp",
+    link: "https://play.google.com/store/apps/details?id=com.nomade_eq.flutter&hl=pt_BR",
+    isPrivate: false,
+  },
+  {
+    id: "4",
+    title: "SSO Idp",
+    subtitle: "Internal Single Sign On Identity Provider",
+    description: "Unification of internal systems authentication via SSO IdP focusing on Google Workspace, using Laravel Passport and dockerized deploy via Portainer.",
+    image: "/projects/sso-idp.webp",
+    link: undefined,
+    isPrivate: true,
+  },
+  {
+    id: "5",
+    title: "Password Management",
+    subtitle: "Internal system for password storage",
+    description: "Focus on top-tier security (Top 10 OWASP), addressing asynchronous AES 256 encryption, Rate Limiting, protection against XSS and CSRF, Logs, timeout, and multi-factor authentication.",
+    image: "/projects/gestao-senhas.webp",
+    link: undefined,
+    isPrivate: true,
+  },
+  {
+    id: "6",
+    title: "Fleet Management",
+    subtitle: "Internal system for vehicle requests",
+    description: "Use of Websocket via Laravel Reverb for real-time updates of vehicle requests for trips, with multiple access levels.",
+    image: "/projects/gestao-frotas.webp",
+    link: undefined,
+    isPrivate: true,
+  },
+  {
+    id: "7",
+    title: "IAM Automation",
+    subtitle: "IAM/ILM solution based on HR processes",
+    description: "Unified 24/7 system that operates by creating accounts across multiple platforms via TOTVS. Features constant logging, daily reports, and email management.",
+    image: "/projects/automacao-iam.webp",
+    link: undefined,
+    isPrivate: true,
+  }
+];
+
+export function getProjects(locale: 'pt' | 'en') {
+  return locale === 'pt' ? PROJECTS_PT : PROJECTS_EN;
+}

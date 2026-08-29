@@ -5,11 +5,18 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { ProjectCard } from "./ProjectCard";
-import { PROJECTS_DATA } from "@/data/projects";
+import { Dictionary } from "@/dictionaries";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export function ProjectsWrapper() {
+import { getProjects } from "@/data/projects";
+
+interface ProjectsWrapperProps {
+  dict: Dictionary;
+  projects: ReturnType<typeof getProjects>;
+}
+
+export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -155,14 +162,12 @@ export function ProjectsWrapper() {
         >
           <div className="flex-shrink-0 flex flex-col justify-center w-[300px] md:w-[400px] mr-2 md:mr-16 snap-center md:snap-align-none">
             <h2 className="text-[clamp(2.5rem,5vw,4rem)] font-serif text-white tracking-[0.1em] select-none uppercase">
-              Projetos
+              {dict.projects.title}
             </h2>
-            <p className="text-neutral-400 font-sans text-[clamp(0.875rem,2vw,1rem)] mt-2 leading-relaxed">
-              Unindo design refinado e código escalável para entregar <span className="text-[var(--foreground)] font-medium">soluções digitais únicas</span>, convertendo complexidade em conversão e performance.
-            </p>
+            <p className="text-neutral-400 font-sans text-[clamp(0.875rem,2vw,1rem)] mt-2 leading-relaxed" dangerouslySetInnerHTML={{ __html: dict.projects.description.replace('<highlight>', '<span class="text-[var(--foreground)] font-medium">').replace('</highlight>', '</span>') }} />
             
             <div className="flex md:hidden items-center gap-3 mt-8 text-neutral-500 animate-pulse">
-              <span className="text-[10px] tracking-widest uppercase font-bold font-sans">Deslize para explorar</span>
+              <span className="text-[10px] tracking-widest uppercase font-bold font-sans">{dict.projects.mobileHint}</span>
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14"/>
                 <path d="m12 5 7 7-7 7"/>
@@ -170,10 +175,11 @@ export function ProjectsWrapper() {
             </div>
           </div>
 
-          {PROJECTS_DATA.map((project, i) => (
+          {projects.map((project, i) => (
             <ProjectCard 
               key={project.id}
               project={project} 
+              dict={dict}
               index={String(i + 1).padStart(2, "0")}
               cardRef={(el) => { cardsRef.current[i] = el; }} 
             />

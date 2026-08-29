@@ -2,6 +2,11 @@
 
 import { motion, HTMLMotionProps, Variants } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Dictionary } from "@/dictionaries";
+
+interface HeroButtonProps extends HTMLMotionProps<"button"> {
+  dict: Dictionary;
+}
 
 const buttonVariants: Variants = {
   initial: { opacity: 0, y: 20 },
@@ -28,8 +33,9 @@ const textVariants: Variants = {
 
 export function HeroButton({
   className,
+  dict,
   ...props
-}: HTMLMotionProps<"button">) {
+}: HeroButtonProps) {
   return (
     <motion.button
       initial="initial"
@@ -39,9 +45,10 @@ export function HeroButton({
       variants={buttonVariants}
       className={cn(
         "relative px-6 py-2 rounded-full font-sans text-[10px] sm:text-xs uppercase tracking-[0.2em] font-bold overflow-hidden pointer-events-auto",
-        "bg-transparent flex items-center justify-center border border-white/20",
+        "bg-transparent flex items-center justify-center border border-white/20 focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none",
         className
       )}
+      aria-label={dict.hero.scrollText}
       {...props}
     >
       <motion.div
@@ -56,7 +63,7 @@ export function HeroButton({
         variants={textVariants}
         transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        Iniciar projeto
+        {dict.hero.scrollText}
       </motion.span>
     </motion.button>
   );

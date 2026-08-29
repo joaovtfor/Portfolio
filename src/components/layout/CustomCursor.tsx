@@ -45,6 +45,7 @@ export function CustomCursor() {
 
   return (
     <motion.div
+      aria-hidden="true"
       className="fixed top-0 left-0 w-8 h-8 rounded-full pointer-events-none z-[9999] mix-blend-difference hidden md:block"
       style={{
         x: cursorXSpring,

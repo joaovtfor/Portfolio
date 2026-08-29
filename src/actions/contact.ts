@@ -1,17 +1,19 @@
 "use server";
 
-import { contactSchema, ContactFormData } from "@/lib/validations";
+import { getContactSchema, ContactFormData } from "@/lib/validations";
 import { headers } from "next/headers";
+import { pt } from "@/dictionaries/pt";
 
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
 const RATE_LIMIT_MAX = 3;
 const RATE_LIMIT_WINDOW = 1000 * 60 * 60;
+const serverSchema = getContactSchema(pt);
 
 export async function sendContactEmail(data: ContactFormData) {
   try {
-    const parsed = contactSchema.safeParse(data);
+    const parsed = serverSchema.safeParse(data);
     if (!parsed.success) {
-      return { success: false, message: "Dados inválidos detectados na camada de segurança." };
+      return { success: false, errorType: "validation" };
     }
 
     const { name, email, message } = parsed.data;
@@ -32,7 +34,7 @@ export async function sendContactEmail(data: ContactFormData) {
     }
 
     if (limitRecord.count >= RATE_LIMIT_MAX) {
-      return { success: false, message: "Muitas tentativas. Por favor, tente novamente mais tarde." };
+      return { success: false, errorType: "rateLimit" };
     }
 
     limitRecord.count += 1;
@@ -44,9 +46,9 @@ export async function sendContactEmail(data: ContactFormData) {
       console.error("ERRO: RESEND_API_KEY não configurada no ambiente.");
       if (process.env.NODE_ENV === "development") {
         console.log("[DEV MODE] E-mail simulado:", parsed.data);
-        return { success: true, message: "Mensagem recebida com sucesso. Retornarei em breve!" };
+        return { success: true };
       }
-      return { success: false, message: "Erro de configuração no servidor de e-mail." };
+      return { success: false, errorType: "serverError" };
     }
 
     const resendResponse = await fetch("https://api.resend.com/emails", {
@@ -67,13 +69,13 @@ export async function sendContactEmail(data: ContactFormData) {
     if (!resendResponse.ok) {
       const errorData = await resendResponse.json();
       console.error("Falha ao disparar Resend:", errorData);
-      return { success: false, message: "Falha na comunicação com a provedora de e-mails." };
+      return { success: false, errorType: "serverError" };
     }
 
-    return { success: true, message: "Mensagem recebida com sucesso. Retornarei em breve!" };
+    return { success: true };
     
   } catch (error) {
     console.error("Erro interno na Server Action:", error);
-    return { success: false, message: "Erro de execução na camada Edge." };
+    return { success: false, errorType: "serverError" };
   }
 }

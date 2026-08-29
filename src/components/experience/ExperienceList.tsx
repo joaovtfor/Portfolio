@@ -18,14 +18,14 @@ interface ExperienceListProps {
 }
 
 function ExperienceItemCard({ exp, i, total }: { exp: ExperienceItem; i: number; total: number }) {
-  const internalRef = useRef<HTMLDivElement>(null);
+  const internalRef = useRef<HTMLLIElement>(null);
   const isInView = useInView(internalRef, { margin: "-40% 0px -40% 0px" });
   const isTouch = useIsTouch();
 
   const isActive = isTouch ? isInView : false;
 
   return (
-    <motion.div 
+    <motion.li 
       ref={internalRef}
       data-active={isActive}
       key={exp.id} 
@@ -35,8 +35,9 @@ function ExperienceItemCard({ exp, i, total }: { exp: ExperienceItem; i: number;
       transition={{ duration: 0.8, delay: i * 0.15, ease: "easeOut" }}
       className="group relative flex flex-col py-8 md:py-12 border-t border-white/5 first:border-t-transparent transition-colors hover:bg-white/[0.02] px-4 md:pl-12 md:pr-8 -mx-4 md:-mx-8 md:mx-0 rounded-2xl select-none cursor-default"
     >
-      <div className={`hidden md:block absolute left-0 top-0 bottom-0 w-[1px] transition-colors duration-300 md:duration-500 ${i === total - 1 ? 'bg-gradient-to-b from-white/5 to-transparent group-hover:from-white/10 group-data-[active=true]:from-white/10' : 'bg-white/5 group-hover:bg-white/10 group-data-[active=true]:bg-white/10'}`}>
+      <div aria-hidden="true" className={`hidden md:block absolute left-0 top-0 bottom-0 w-[1px] transition-colors duration-300 md:duration-500 ${i === total - 1 ? 'bg-gradient-to-b from-white/5 to-transparent group-hover:from-white/10 group-data-[active=true]:from-white/10' : 'bg-white/5 group-hover:bg-white/10 group-data-[active=true]:bg-white/10'}`}>
         <motion.div 
+          aria-hidden="true"
           initial={{ backgroundColor: "rgb(23,23,23)", borderColor: "rgba(255,255,255,0.2)", boxShadow: "0px 0px 0px transparent" }}
           whileInView={{ backgroundColor: "var(--foreground)", borderColor: "var(--foreground)", boxShadow: "0px 0px 12px var(--foreground)" }}
           viewport={{ once: false, margin: "1000px 0px -50% 0px" }}
@@ -46,7 +47,7 @@ function ExperienceItemCard({ exp, i, total }: { exp: ExperienceItem; i: number;
       </div>
 
       <span className="text-[var(--foreground)] text-[10px] font-bold uppercase tracking-widest mb-3 font-sans">
-        {exp.company} <span className="text-white/30 mx-2">&bull;</span> {exp.period}
+        {exp.company} <span aria-hidden="true" className="text-white/30 mx-2">&bull;</span> {exp.period}
       </span>
       
       <h3 className="text-xl md:text-3xl font-serif text-white mb-2 transform-gpu transition-transform duration-300 md:duration-700 ease-out group-hover:translate-x-3 group-data-[active=true]:translate-x-3">
@@ -65,12 +66,12 @@ function ExperienceItemCard({ exp, i, total }: { exp: ExperienceItem; i: number;
           >
             {skill}
             {index < exp.skills.length - 1 && (
-              <span className="text-white/20 mx-2">&bull;</span>
+              <span aria-hidden="true" className="text-white/20 mx-2">&bull;</span>
             )}
           </span>
         ))}
       </div>
-    </motion.div>
+    </motion.li>
   );
 }
 
@@ -83,16 +84,18 @@ export function ExperienceList({ experiences }: ExperienceListProps) {
 
   return (
     <div ref={listRef} className="relative w-full md:w-1/2 lg:w-1/2 flex flex-col mt-8 md:mt-0">
-      <div className="hidden md:block absolute md:left-0 top-16 bottom-16 w-[1px] bg-transparent z-10">
+      <div aria-hidden="true" className="hidden md:block absolute md:left-0 top-16 bottom-16 w-[1px] bg-transparent z-10">
         <motion.div 
           className="w-full bg-[var(--foreground)] origin-top shadow-[0_0_15px_var(--foreground)]"
           style={{ scaleY: scrollYProgress, height: '100%' }}
         />
       </div>
 
-      {experiences.map((exp, i) => (
-        <ExperienceItemCard key={exp.id} exp={exp} i={i} total={experiences.length} />
-      ))}
+      <ol className="w-full relative">
+        {experiences.map((exp, i) => (
+          <ExperienceItemCard key={exp.id} exp={exp} i={i} total={experiences.length} />
+        ))}
+      </ol>
     </div>
   );
 }

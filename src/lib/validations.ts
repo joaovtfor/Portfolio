@@ -1,11 +1,20 @@
 import { z } from "zod";
+import type { Dictionary } from "@/dictionaries";
 
-export const contactSchema = z.object({
-  name: z.string().trim().min(2, "Nome muito curto").max(100, "Nome muito longo"),
-  email: z.string().trim().email("Por favor, insira um e-mail válido"),
-  message: z.string()
-    .min(10, "Sua mensagem deve ter no mínimo 10 caracteres")
-    .max(1000, "Sua mensagem atingiu o limite de caracteres (1000)"),
-});
+export function getContactSchema(dict: Dictionary) {
+  return z.object({
+    name: z.string()
+      .trim()
+      .min(2, dict.contact.validation.nameMin)
+      .max(100, dict.contact.validation.nameMax),
+    email: z.string()
+      .trim()
+      .email(dict.contact.validation.emailInvalid),
+    message: z.string()
+      .trim()
+      .min(10, dict.contact.validation.messageMin)
+      .max(1000, dict.contact.validation.messageMax),
+  });
+}
 
-export type ContactFormData = z.infer<typeof contactSchema>;
+export type ContactFormData = z.infer<ReturnType<typeof getContactSchema>>;

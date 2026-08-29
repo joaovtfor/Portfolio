@@ -55,12 +55,19 @@ export function Preloader() {
           className="fixed inset-0 z-[50] bg-background flex flex-col items-center justify-center pointer-events-none"
         >
           <div className="flex flex-col items-center gap-4">
-            <span className="font-serif text-[var(--foreground)] text-4xl md:text-5xl font-bold tracking-widest flex items-center">
+            <span aria-hidden="true" className="font-serif text-[var(--foreground)] text-4xl md:text-5xl font-bold tracking-widest flex items-center">
               <span className="text-white mr-1">&gt;</span>_
             </span>
             
-            <div className="text-white/40 font-mono text-sm tracking-[0.3em] mt-4 flex items-center gap-4">
-              <div className="w-[100px] h-[1px] bg-white/10 relative overflow-hidden">
+            <div 
+              role="progressbar" 
+              aria-valuenow={progress} 
+              aria-valuemin={0} 
+              aria-valuemax={100}
+              aria-label="Carregando"
+              className="text-white/40 font-mono text-sm tracking-[0.3em] mt-4 flex items-center gap-4"
+            >
+              <div aria-hidden="true" className="w-[100px] h-[1px] bg-white/10 relative overflow-hidden">
                 <motion.div 
                   className="absolute top-0 left-0 h-full bg-[var(--foreground)]"
                   animate={{ width: `${progress}%` }}

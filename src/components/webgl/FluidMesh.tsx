@@ -2,6 +2,7 @@
 
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef, useEffect } from "react";
+import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 
 const vertexShader = `
@@ -47,6 +48,7 @@ void main() {
 
 export function FluidMesh() {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
+
   
   const isTouchDevice = useRef(false);
   const gyroTarget = useRef({ x: 0, y: 0 });
@@ -73,13 +75,20 @@ export function FluidMesh() {
   const uniforms = useMemo(
     () => ({
       uPointer: { value: new THREE.Vector2(0, 0) },
+      uColor: { value: new THREE.Color("#85E8EA") },
       uResolution: { value: new THREE.Vector2(1, 1) },
     }),
     []
   );
 
+  const shouldReduceMotion = useReducedMotion();
+
   useFrame((state) => {
     if (!materialRef.current) return;
+
+    if (!shouldReduceMotion && materialRef.current.uniforms.uTime) {
+      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
+    }
     
     const res = materialRef.current.uniforms.uResolution.value;
     if (res.x !== state.size.width || res.y !== state.size.height) {

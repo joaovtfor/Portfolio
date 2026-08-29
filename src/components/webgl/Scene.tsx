@@ -36,6 +36,7 @@ export function WebGLScene({ children, className, eventSource, ...props }: WebGL
   return (
     <div
       ref={containerRef}
+      aria-hidden="true"
       className={cn("w-full h-full relative", className)}
       {...props}
     >
