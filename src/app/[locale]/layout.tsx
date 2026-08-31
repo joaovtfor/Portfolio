@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "../globals.css";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
 
+export const runtime = 'edge';
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

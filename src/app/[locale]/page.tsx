@@ -7,6 +7,8 @@ import { getDictionary } from "@/dictionaries";
 import { getProjects } from "@/data/projects";
 import { getResume } from "@/data/resume";
 
+export const runtime = 'edge';
+
 export default async function Home({ params }: { params: Promise<{ locale: 'pt' | 'en' }> }) {
   const { locale } = await params;
   const dict = getDictionary(locale);
