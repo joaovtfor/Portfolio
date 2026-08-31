@@ -1,15 +1,15 @@
 version: 2
 updates:
-  - package-ecosystem: "npm" # Dependabot usa "npm" para ler pnpm-lock.yaml automaticamente
+  - package-ecosystem: "npm"
     directory: "/"
+    target-branch: "develop"
     schedule:
       interval: "weekly"
-      day: "monday" # Roda toda segunda-feira para manter a segurança em dia
+      day: "monday"
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "security"
-    # Agrupa todas as atualizações não-críticas em um único PR para evitar spam no repositório
     groups:
       all-deps:
         patterns:
