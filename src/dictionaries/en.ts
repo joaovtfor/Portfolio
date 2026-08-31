@@ -1,0 +1,58 @@
+export const en = {
+  hero: {
+    roleLabel: "Role",
+    focusLabel: "Focus",
+    stackLabel: "Stack",
+    scrollText: "Contact me!",
+  },
+  projects: {
+    title: "Projects",
+    private: "Private",
+    description: "Combining refined design and scalable code to deliver <highlight>unique digital solutions</highlight>, converting complexity into conversion and performance.",
+    mobileHint: "Swipe to explore",
+  },
+  experience: {
+    title: "Experience",
+    years: "years",
+    description: "... on a journey dedicated to building robust architectures and high-performance interfaces, merging cutting-edge design with software engineering.",
+    downloadCV: "Download CV",
+  },
+  contact: {
+    title: "LET'S TALK!",
+    description: "Ready to build the next level of your application? Send me the project details and let's architect it together.",
+    nameLabel: "Name",
+    namePlaceholder: "Your name",
+    emailLabel: "Email",
+    emailPlaceholder: "Your best email",
+    messageLabel: "Message",
+    messagePlaceholder: "Describe your project or challenge...",
+    sending: "Sending...",
+    sendBtn: "Send Message",
+    successMsg: "Message sent successfully!",
+    errorMsg: "Catastrophic failure processing request on the server.",
+    errorPrefix: "[ERROR]",
+    successPrefix: ">_",
+    validationError: "Invalid data detected at the security layer.",
+    rateLimitError: "Too many attempts. Please try again later.",
+    validation: {
+      nameMin: "Name too short",
+      nameMax: "Name too long",
+      emailInvalid: "Please enter a valid email",
+      messageMin: "Your message must be at least 10 characters",
+      messageMax: "Your message reached the character limit (1000)",
+    },
+  },
+  menu: {
+    downloadCV: "Download CV",
+    contact: "Contact",
+    toggleLanguage: "PT-BR",
+  },
+  a11y: {
+    skipToContent: "Skip to main content",
+    toggleMenu: "Toggle menu",
+  },
+  notFound: {
+    message: "Signal lost. The route does not exist.",
+    back: "Return to Base",
+  },
+};

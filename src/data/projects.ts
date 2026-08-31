@@ -1,0 +1,131 @@
+const PROJECTS_PT = [
+  {
+    id: "1",
+    title: "ABC Guinchos",
+    subtitle: "Gestão para Guinchos",
+    description: "Processamento massivo de dados em tempo real (via SSE), juntamente com uma interface focada em UI/UX construída em cima de um Design System via Figma.",
+    image: "/projects/abc-guinchos.webp",
+    link: "https://www.guinchosassociacao.com.br/",
+    isPrivate: false,
+  },
+  {
+    id: "2",
+    title: "Efesus 2.0",
+    subtitle: "Gestão para Distribuidoras",
+    description: "Estruturação de análises de dados em múltiplos módulos de BI, com foco em performance com redução de 70% no tempo de carregamento e nota máxima em Web Vitals.",
+    image: "/projects/efesus.webp",
+    link: "https://braveo.veplex.com.br/login",
+    isPrivate: false,
+  },
+  {
+    id: "3",
+    title: "Nomade EQ",
+    subtitle: "Solução para Obras e Engenharia",
+    description: "Otimização da performance, interface e estrutura de código. Implementação de Clean Code e refatoração de módulos principais.",
+    image: "/projects/nomade-eq.webp",
+    link: "https://play.google.com/store/apps/details?id=com.nomade_eq.flutter&hl=pt_BR",
+    isPrivate: false,
+  },
+  {
+    id: "4",
+    title: "SSO Idp",
+    subtitle: "Single Sign On Identity Provider interno",
+    description: "Unificação de autenticação dos sistemas internos via SSO IdP com foco no Google Workspace, com utilização do Laravel Passport e deploy dockerizado via Portainer.",
+    image: "/projects/sso-idp.webp",
+    isPrivate: true,
+  },
+  {
+    id: "5",
+    title: "Gestão de Senhas",
+    subtitle: "Sistema interno para armazenamento de senhas",
+    description: "Foco em segurança de ponta (Top 10 OWASP), abordando criptografia assíncrona AES 256, Rate Limiting, proteção contra XSS e CSRF, Logs, timeout e autenticação multi-fatores.",
+    image: "/projects/gestao-senhas.webp",
+    isPrivate: true,
+  },
+  {
+    id: "6",
+    title: "Gestão de Frotas",
+    subtitle: "Sistema interno para solicitação de veículos",
+    description: "Utilização de Websocket via Laravel Reverb, para atualização em tempo real de solicitações de veículos para viagens, com múltiplos níveis de acesso.",
+    image: "/projects/gestao-frotas.webp",
+    isPrivate: true,
+  },
+  {
+    id: "7",
+    title: "Automação IAM",
+    subtitle: "Solução de IAM/ILM baseada em processos de RH",
+    description: "Sistema unificado 24/7 que atua com criação de contas em múltiplas plataformas via TOTVS. Conta com Logs constantes, relatórios diários e gestão via e-mail.",
+    image: "/projects/automacao-iam.webp",
+    isPrivate: true,
+  }
+];
+
+const PROJECTS_EN = [
+  {
+    id: "1",
+    title: "ABC Guinchos",
+    subtitle: "Tow Truck Management",
+    description: "Massive real-time data processing (via SSE), along with a UI/UX-focused interface built on top of a Design System via Figma.",
+    image: "/projects/abc-guinchos.webp",
+    link: "https://www.guinchosassociacao.com.br/",
+    isPrivate: false,
+  },
+  {
+    id: "2",
+    title: "Efesus 2.0",
+    subtitle: "Distributor Management",
+    description: "Structuring of data analysis in multiple BI modules, focusing on performance with a 70% reduction in loading time and maximum score in Web Vitals.",
+    image: "/projects/efesus.webp",
+    link: "https://braveo.veplex.com.br/login",
+    isPrivate: false,
+  },
+  {
+    id: "3",
+    title: "Nomade EQ",
+    subtitle: "Construction and Engineering Solution",
+    description: "Optimization of performance, interface, and code structure. Implementation of Clean Code and refactoring of main modules.",
+    image: "/projects/nomade-eq.webp",
+    link: "https://play.google.com/store/apps/details?id=com.nomade_eq.flutter&hl=pt_BR",
+    isPrivate: false,
+  },
+  {
+    id: "4",
+    title: "SSO Idp",
+    subtitle: "Internal Single Sign On Identity Provider",
+    description: "Unification of internal systems authentication via SSO IdP focusing on Google Workspace, using Laravel Passport and dockerized deploy via Portainer.",
+    image: "/projects/sso-idp.webp",
+    link: undefined,
+    isPrivate: true,
+  },
+  {
+    id: "5",
+    title: "Password Management",
+    subtitle: "Internal system for password storage",
+    description: "Focus on top-tier security (Top 10 OWASP), addressing asynchronous AES 256 encryption, Rate Limiting, protection against XSS and CSRF, Logs, timeout, and multi-factor authentication.",
+    image: "/projects/gestao-senhas.webp",
+    link: undefined,
+    isPrivate: true,
+  },
+  {
+    id: "6",
+    title: "Fleet Management",
+    subtitle: "Internal system for vehicle requests",
+    description: "Use of Websocket via Laravel Reverb for real-time updates of vehicle requests for trips, with multiple access levels.",
+    image: "/projects/gestao-frotas.webp",
+    link: undefined,
+    isPrivate: true,
+  },
+  {
+    id: "7",
+    title: "IAM Automation",
+    subtitle: "IAM/ILM solution based on HR processes",
+    description: "Unified 24/7 system that operates by creating accounts across multiple platforms via TOTVS. Features constant logging, daily reports, and email management.",
+    image: "/projects/automacao-iam.webp",
+    link: undefined,
+    isPrivate: true,
+  }
+];
+
+export function getProjects(locale: 'pt' | 'en') {
+  return locale === 'pt' ? PROJECTS_PT : PROJECTS_EN;
+}
