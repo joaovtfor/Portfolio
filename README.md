@@ -1,4 +1,4 @@
-﻿# João de For — Creative Developer Portfolio 🚀
+﻿# João de For — Frontend Developer Portfolio 🚀
 
 A high-performance, interactive portfolio blending clean, minimalist UI with advanced 3D WebGL architectures. Built to showcase software engineering skills, creative development, and a pixel-perfect attention to detail.
 
