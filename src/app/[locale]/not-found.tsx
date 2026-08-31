@@ -4,12 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { WebGLScene } from "@/components/webgl/Scene";
-import { FluidMesh } from "@/components/webgl/FluidMesh";
-import { MobileFluidMesh } from "@/components/webgl/MobileFluidMesh";
-import { Particles } from "@/components/webgl/Particles";
+import dynamic from "next/dynamic";
 import { CustomCursor } from "@/components/layout/CustomCursor";
 import { getDictionary, type Locale } from "@/dictionaries";
+
+const WebGLBackground = dynamic(() => import("@/components/webgl/WebGLBackground"), { ssr: false });
 
 export const runtime = "edge";
 
@@ -48,12 +47,7 @@ export default function NotFound() {
         className="fixed top-0 left-0 w-screen h-[100vh] z-0 pointer-events-none"
         aria-hidden="true"
       >
-        {mounted && (
-          <WebGLScene eventSource={rootRef}>
-            {isMobile ? <MobileFluidMesh /> : <FluidMesh />}
-            <Particles />
-          </WebGLScene>
-        )}
+        {mounted && <WebGLBackground eventSource={rootRef} isMobile={isMobile} />}
       </motion.div>
 
       <div className="z-10 flex flex-col items-center text-center px-6">

@@ -2,15 +2,14 @@
 
 import { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { WebGLScene } from "@/components/webgl/Scene";
-import { FluidMesh } from "@/components/webgl/FluidMesh";
-import { MobileFluidMesh } from "@/components/webgl/MobileFluidMesh";
-import { Particles } from "@/components/webgl/Particles";
+import dynamic from "next/dynamic";
 import { Preloader } from "./Preloader";
 import { CustomCursor } from "./CustomCursor";
 import { MobileFloatingMenu } from "./MobileFloatingMenu";
 import type { Dictionary, Locale } from "@/dictionaries";
 import { pt } from "@/dictionaries/pt";
+
+const WebGLBackground = dynamic(() => import("@/components/webgl/WebGLBackground"), { ssr: false });
 
 export function PageWrapper({ children, dict = pt, locale = 'pt' }: { children: React.ReactNode; dict?: Dictionary; locale?: Locale }) {
   const rootRef = useRef<HTMLElement>(null);
@@ -24,11 +23,10 @@ export function PageWrapper({ children, dict = pt, locale = 'pt' }: { children: 
     window.scrollTo(0, 0);
 
     const mediaQuery = window.matchMedia("(max-width: 768px)");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMobile(mediaQuery.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mediaQuery.addEventListener("change", handler);
     
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
 
     return () => mediaQuery.removeEventListener("change", handler);
@@ -47,12 +45,7 @@ export function PageWrapper({ children, dict = pt, locale = 'pt' }: { children: 
         className="fixed top-0 left-0 w-screen h-[100vh] z-0 pointer-events-none"
         aria-hidden="true"
       >
-        {mounted && (
-          <WebGLScene eventSource={rootRef}>
-            {isMobile ? <MobileFluidMesh /> : <FluidMesh />}
-            <Particles />
-          </WebGLScene>
-        )}
+        {mounted && <WebGLBackground eventSource={rootRef} isMobile={isMobile} />}
       </motion.div>
       
       <div className="relative z-10 block w-full">
