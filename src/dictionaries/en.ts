@@ -51,4 +51,8 @@ export const en = {
     skipToContent: "Skip to main content",
     toggleMenu: "Toggle menu",
   },
+  notFound: {
+    message: "Signal lost. The route does not exist.",
+    back: "Return to Base",
+  },
 };

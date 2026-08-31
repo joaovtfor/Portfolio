@@ -23,9 +23,45 @@ const playfair = Playfair_Display({
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  
+  const title = "João de For";
+  const description = locale === "en" ? "Front-End & Full-Stack Engineer specializing in high performance interfaces." : "Engenheiro Front-End & Full-Stack especializado em interfaces de alta performance.";
+  
   return {
-    title: "João de For",
-    description: locale === "en" ? "Creative Developer & Engineer" : "Desenvolvedor Criativo & Engenheiro de Software",
+    title,
+    description,
+    authors: [{ name: "João Vitor de For dos Santos" }],
+    metadataBase: new URL("https://joaovtfor.dev"),
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        'pt-BR': '/pt',
+        'en-US': '/en',
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://joaovtfor.dev/${locale}`,
+      siteName: title,
+      locale: locale === "en" ? "en_US" : "pt_BR",
+      type: "website",
+      images: [
+        {
+          url: '/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: "João de For - Portfolio",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      creator: "@joaovtfor",
+      images: ['/og-image.png'],
+    },
   };
 }
 

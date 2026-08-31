@@ -51,4 +51,8 @@ export const pt = {
     skipToContent: "Pular para o conteúdo principal",
     toggleMenu: "Abrir menu",
   },
+  notFound: {
+    message: "Sinal perdido. A rota não existe.",
+    back: "Voltar à Base",
+  },
 };
