@@ -38,7 +38,7 @@ A storytelling portfolio where engineering and motion are the same craft: a GPU-
 | Variable | Purpose |
 | --- | --- |
 | `RESEND_API_KEY` | Contact form delivery (Worker secret: `wrangler secret put RESEND_API_KEY`; locally in `.env`/`.dev.vars`). |
-| `NEXT_PUBLIC_SITE_URL` | Canonical URL for metadata, sitemap and robots (defaults to `https://joaodefor.pages.dev`). |
+| `NEXT_PUBLIC_SITE_URL` | Canonical URL for metadata, sitemap and robots (defaults to `https://joaodefor.portfolio.workers.dev`). |
 | `NEXT_PUBLIC_CF_ANALYTICS_TOKEN` | Optional Cloudflare Web Analytics token (cookieless); enables the beacon with the CSP nonce. |
 | `ALLOWED_DEV_ORIGINS` | Optional comma-separated LAN origins allowed to reach the dev server (e.g. testing on a phone). |
 
@@ -54,6 +54,6 @@ pnpm run deploy     # Build and deploy the Worker (`pnpm deploy` alone is a pnpm
 The OpenNext build relies on symlinks; on Windows run it inside Docker/WSL (CI runs it on Linux). The rate limit in the Server Action is per isolate. WAF rate-limiting rules can only match POST requests on Business plans and above; on Free/Pro use the Workers Rate Limiting binding for a stronger limit.
 
 ---
-Designed and developed by [João Vitor de For dos Santos](https://joaodefor.pages.dev).
+Designed and developed by [João Vitor de For dos Santos](https://joaodefor.portfolio.workers.dev).
 
 LinkedIn: [@joaodefor](https://linkedin.com/in/joaodefor).
