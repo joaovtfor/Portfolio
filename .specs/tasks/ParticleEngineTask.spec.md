@@ -5,7 +5,7 @@ Renderizar o sistema de partículas do fundo com simulação inteiramente na GPU
 
 ## 2. Contrato de Renderização
 - `ParticleField` (Client, dentro do Canvas R3F): `GPUComputationRenderer` com texturas de posição e velocidade (ping-pong). 256² partículas no desktop, 128² no mobile; `HalfFloatType` quando float não é renderizável.
-- Formas geradas uma vez na CPU (e regeneradas em resize) como `DataTexture`: `hero` (monolito), `about` (esfera), `work` (grade ondulada), `lab` (torus knot), `experience` (hélice vertical), `contact` (glifo `>_`). ~18% das partículas são "poeira" compartilhada entre formas para dar continuidade.
+- Formas geradas uma vez na CPU (e regeneradas em resize) como `DataTexture`: `hero` (monolito), `about` (esfera), `work` (grade ondulada), `lab` (torus knot), `experience` (corda dinâmica + anéis, ver `ExperienceTask.spec.md`), `contact` (glifo `>_`). ~18% das partículas são "poeira" compartilhada entre formas para dar continuidade.
 - Comunicação com o DOM exclusivamente via `sceneStore`/`uiStore` (Zustand): progresso narrativo, velocidade do scroll (Lenis) e atrator de card.
 
 ## 3. Coreografias (shader de velocidade)

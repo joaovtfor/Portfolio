@@ -5,7 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 import { GPUComputationRenderer, type Variable } from "three/examples/jsm/misc/GPUComputationRenderer.js";
-import { generateShapes, SHAPE_STYLE } from "./particles/shapes";
+import { EXPERIENCE_SHAPE, generateShapes, MAX_MILESTONES, SHAPE_STYLE } from "./particles/shapes";
 import {
   positionShader,
   renderFragmentShader,
@@ -29,6 +29,10 @@ interface Simulation {
 }
 
 const SHAPE_COUNT = SCENES.length;
+const MAX_ROPE_VERTICES = 12;
+// Profundidade da corda e meia-altura visível nessa profundidade (câmera em z=5, fov 45°).
+const ROPE_DEPTH = -3;
+const ROPE_HALF_HEIGHT = (5 - ROPE_DEPTH) * Math.tan(Math.PI / 8);
 
 interface RenderUniforms {
   [uniform: string]: THREE.IUniform;
@@ -78,6 +82,16 @@ function createSimulation(gl: THREE.WebGLRenderer, side: number, initial: Float3
     uAttractor: { value: new THREE.Vector3() },
     uViewProjection: { value: new THREE.Matrix4() },
     uAspect: { value: 1 },
+    uRopeParams: { value: null },
+    uRopeA: { value: 0 },
+    uRopeB: { value: 0 },
+    uRopePath: { value: Array.from({ length: MAX_ROPE_VERTICES }, () => new THREE.Vector2()) },
+    uRopeCum: { value: new Array<number>(MAX_ROPE_VERTICES).fill(0) },
+    uRopeCount: { value: 0 },
+    uRopeFill: { value: 0 },
+    uMilestones: { value: Array.from({ length: MAX_MILESTONES }, () => new THREE.Vector4()) },
+    uRopeDepth: { value: ROPE_DEPTH },
+    uRopeHalf: { value: new THREE.Vector2(ROPE_HALF_HEIGHT, ROPE_HALF_HEIGHT) },
   });
 
   const error = gpu.init();
@@ -100,11 +114,21 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
   // Formas regeneradas apenas quando a proporção muda de forma perceptível.
   const aspect = Math.round((size.width / Math.max(size.height, 1)) * 10) / 10;
 
-  const shapeTextures = useMemo(
-    () => generateShapes(side, aspect).map((data) => createDataTexture(data, side)),
-    [side, aspect]
+  const generated = useMemo(() => {
+    const { shapes, ropeParams } = generateShapes(side, aspect);
+    return {
+      shapeTextures: shapes.map((data) => createDataTexture(data, side)),
+      ropeTexture: createDataTexture(ropeParams, side),
+    };
+  }, [side, aspect]);
+  const { shapeTextures, ropeTexture } = generated;
+  useEffect(
+    () => () => {
+      generated.shapeTextures.forEach((texture) => texture.dispose());
+      generated.ropeTexture.dispose();
+    },
+    [generated]
   );
-  useEffect(() => () => shapeTextures.forEach((texture) => texture.dispose()), [shapeTextures]);
 
   // Objetos mutados a cada frame vivem em refs (o loop do R3F roda fora do ciclo de render do React).
   const simulationRef = useRef<Simulation | null>(null);
@@ -150,6 +174,7 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
   );
 
   const progress = useRef(0);
+  const ropeFill = useRef(0);
   const clickTarget = useRef(0);
   const pointer = useRef({ lastMove: -Infinity, strength: 0, touching: false, previous: new THREE.Vector2(), velocity: new THREE.Vector2() });
 
@@ -255,6 +280,37 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
       attractorUniform.y = -(attractor.y / state.size.height) * 2 + 1;
     }
     attractorUniform.z += (attractorTarget - attractorUniform.z) * (1 - Math.exp(-dt * 5));
+
+    // Corda da Experiência: caminho e marcos medidos no DOM (pixels) convertidos para NDC.
+    const rope = frame.rope;
+    const width = state.size.width;
+    const height = Math.max(state.size.height, 1);
+    const vertexCount = Math.min(Math.floor(rope.path.length / 2), MAX_ROPE_VERTICES);
+    const ropePath: THREE.Vector2[] = velocityUniforms.uRopePath.value;
+    const ropeCum: number[] = velocityUniforms.uRopeCum.value;
+    for (let i = 0; i < vertexCount; i++) {
+      ropePath[i].set((rope.path[i * 2] / width) * 2 - 1, 1 - (rope.path[i * 2 + 1] / height) * 2);
+      ropeCum[i] = rope.cumulative[i] ?? 1;
+    }
+    ropeFill.current += (rope.fill - ropeFill.current) * (1 - Math.exp(-dt * 10));
+    velocityUniforms.uRopeCount.value = vertexCount;
+    velocityUniforms.uRopeFill.value = ropeFill.current;
+    velocityUniforms.uRopeHalf.value.set(ROPE_HALF_HEIGHT * aspect, ROPE_HALF_HEIGHT);
+    velocityUniforms.uRopeParams.value = ropeTexture;
+    velocityUniforms.uRopeA.value = from === EXPERIENCE_SHAPE ? 1 : 0;
+    velocityUniforms.uRopeB.value = to === EXPERIENCE_SHAPE ? 1 : 0;
+
+    const milestones: THREE.Vector4[] = velocityUniforms.uMilestones.value;
+    milestones.forEach((uniform, k) => {
+      const milestone = rope.milestones[k];
+      if (milestone) {
+        uniform.x = (milestone.x / width) * 2 - 1;
+        uniform.y = 1 - (milestone.y / height) * 2;
+        uniform.z += (milestone.scale - uniform.z) * (1 - Math.exp(-dt * 8));
+      }
+      const active = milestone?.reached ? 1 : 0;
+      uniform.w += (active - uniform.w) * (1 - Math.exp(-dt * 4));
+    });
 
     simulation.position.material.uniforms.uDelta.value = dt;
     simulation.gpu.compute();

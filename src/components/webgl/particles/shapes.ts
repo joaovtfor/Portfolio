@@ -7,7 +7,7 @@ const DUST_FRACTION = 0.12;
 
 /** Opacidade e intensidade do fluxo por cena (menores nas seções de leitura). */
 export const SHAPE_STYLE = {
-  opacity: [0.45, 0.3, 0.6, 0.7, 0.35, 0.28],
+  opacity: [0.45, 0.3, 0.6, 0.7, 0.55, 0.28],
   flow: [0.12, 0.1, 0.12, 0.18, 0.1, 0.08],
 };
 
@@ -117,24 +117,21 @@ const torusKnot: ShapeBuilder = (rand, frame, out) => {
   );
 };
 
-// Experiência: hélice dupla vertical envolvendo a linha do tempo (no desktop, entre título e lista).
-const helix: ShapeBuilder = (rand, frame, out) => {
-  const zc = -3;
-  const cx = frame.compact ? frame.halfW(zc) * 0.7 : frame.halfW(zc) * 0.09;
-  const height = frame.halfH(zc) * 2.4;
-  const radius = frame.compact ? 0.35 : 0.32;
-  const t = rand();
-  const y = (t - 0.5) * height;
-  if (rand() < 0.75) {
-    const strand = rand() < 0.5 ? 0 : Math.PI;
-    const angle = t * height * 2.2 + strand;
-    set(out, cx + Math.cos(angle) * radius + spread(rand, 0.04), y, zc + Math.sin(angle) * radius + spread(rand, 0.04));
-  } else {
-    const angle = rand() * Math.PI * 2;
-    const r = radius * Math.sqrt(rand());
-    set(out, cx + Math.cos(angle) * r, y, zc + Math.sin(angle) * r);
-  }
+// Experiência: posições de "espera" das partículas da corda e dos anéis. A corda em si é dinâmica
+// (segue a timeline do DOM) e é calculada no shader a partir de ROPE_PARAMS (ver ExperienceTask.spec.md).
+const ropeWaiting: ShapeBuilder = (rand, frame, out) => {
+  const z = -4 + spread(rand, 1.5);
+  const cx = frame.compact ? 0 : frame.halfW(z) * 0.09;
+  const halfWidth = frame.compact ? frame.halfW(z) * 1.05 : frame.halfW(z) * 0.35;
+  set(out, cx + spread(rand, halfWidth), spread(rand, frame.halfH(z) * 1.1), z);
 };
+
+/** Índice da forma da Experiência em SCENES. */
+export const EXPERIENCE_SHAPE = 4;
+/** Máximo de marcos (anéis) suportados pelo shader. */
+export const MAX_MILESTONES = 6;
+/** Tipos de partícula na textura de parâmetros da corda (canal R). */
+export const ROPE_KIND = { waiting: 0, rope: 1, ring: 2 } as const;
 
 // Contato: glifo `>_` amostrado de um canvas 2D com a fonte mono do site.
 function sampleGlyph(): [number, number][] {
@@ -194,7 +191,13 @@ function glyphBuilder(points: [number, number][]): ShapeBuilder {
   };
 }
 
-export function generateShapes(side: number, aspect: number): Float32Array[] {
+export interface GeneratedShapes {
+  shapes: Float32Array[];
+  /** Por partícula: (tipo, t na corda ou ângulo no anel, índice do anel, jitter). */
+  ropeParams: Float32Array;
+}
+
+export function generateShapes(side: number, aspect: number): GeneratedShapes {
   const count = side * side;
   const rand = mulberry32(1337);
   const frame: Frame = {
@@ -216,10 +219,21 @@ export function generateShapes(side: number, aspect: number): Float32Array[] {
     dust[i * 3 + 2] = z;
   }
 
-  const builders = [monolith, sphere, waveGrid, torusKnot, helix, glyphBuilder(sampleGlyph())];
+  const builders = [monolith, sphere, waveGrid, torusKnot, ropeWaiting, glyphBuilder(sampleGlyph())];
   const out: Vec3 = [0, 0, 0];
 
-  return builders.map((build) => {
+  // 55% das partículas (não-poeira) formam a corda, 20% os anéis e o restante fica em espera.
+  const ropeParams = new Float32Array(count * 4);
+  for (let i = 0; i < count; i++) {
+    const roll = rand();
+    const kind = isDust[i] ? ROPE_KIND.waiting : roll < 0.55 ? ROPE_KIND.rope : roll < 0.75 ? ROPE_KIND.ring : ROPE_KIND.waiting;
+    ropeParams[i * 4] = kind;
+    ropeParams[i * 4 + 1] = rand();
+    ropeParams[i * 4 + 2] = Math.floor(rand() * MAX_MILESTONES);
+    ropeParams[i * 4 + 3] = rand();
+  }
+
+  const shapes = builders.map((build) => {
     const data = new Float32Array(count * 4);
     for (let i = 0; i < count; i++) {
       if (isDust[i]) {
@@ -234,4 +248,6 @@ export function generateShapes(side: number, aspect: number): Float32Array[] {
     }
     return data;
   });
+
+  return { shapes, ropeParams };
 }

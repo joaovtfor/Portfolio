@@ -23,18 +23,19 @@ export function SceneDirector() {
 
       const center = window.innerHeight / 2;
       let index = 0;
-      let local = 0;
+      let t = 0;
 
       elements.forEach((el, i) => {
         const rect = el.getBoundingClientRect();
         if (rect.top <= center) {
           index = i;
-          local = Math.min(1, Math.max(0, (center - rect.top) / Math.max(rect.height, 1)));
+          // A transição para a forma seguinte ocupa o fim da seção: 25% dela, limitado a 35% da
+          // viewport (seções longas, como a Experiência, mantêm a forma até o último conteúdo).
+          const span = Math.max(1, Math.min(rect.height * 0.25, window.innerHeight * 0.35));
+          t = Math.min(1, Math.max(0, (center - (rect.bottom - span)) / span));
         }
       });
 
-      // A transição para a forma seguinte acontece no último quarto da seção (smoothstep).
-      const t = Math.min(1, Math.max(0, (local - 0.75) / 0.25));
       frame.progress = index + t * t * (3 - 2 * t);
 
       const scene = SCENES.find((name) => name === elements[index].dataset.scene) ?? "hero";
