@@ -2,20 +2,22 @@
 
 import { RefObject } from "react";
 import { WebGLScene } from "./Scene";
-import { FluidMesh } from "./FluidMesh";
-import { MobileFluidMesh } from "./MobileFluidMesh";
-import { Particles } from "./Particles";
+import { BackgroundMesh } from "./BackgroundMesh";
+import { ParticleField } from "./ParticleField";
+import { AdaptiveDpr } from "./AdaptiveDpr";
 
 interface WebGLBackgroundProps {
   eventSource: RefObject<HTMLElement | null>;
   isMobile: boolean;
+  paused: boolean;
 }
 
-export default function WebGLBackground({ eventSource, isMobile }: WebGLBackgroundProps) {
+export default function WebGLBackground({ eventSource, isMobile, paused }: WebGLBackgroundProps) {
   return (
-    <WebGLScene eventSource={eventSource as RefObject<HTMLElement>}>
-      {isMobile ? <MobileFluidMesh /> : <FluidMesh />}
-      <Particles isMobile={isMobile} />
+    <WebGLScene eventSource={eventSource} paused={paused}>
+      <BackgroundMesh quality={isMobile ? "low" : "high"} />
+      <ParticleField isMobile={isMobile} />
+      <AdaptiveDpr />
     </WebGLScene>
   );
 }

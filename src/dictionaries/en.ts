@@ -1,15 +1,66 @@
-export const en = {
+import type { pt } from "./pt";
+
+export const en: typeof pt = {
+  nav: {
+    about: "About",
+    work: "Work",
+    lab: "Lab",
+    experience: "Experience",
+    contact: "Contact",
+    home: "Home",
+  },
   hero: {
+    statement: "High-performance interfaces built with WebGL, motion and solid engineering.",
     roleLabel: "Role",
     focusLabel: "Focus",
     stackLabel: "Stack",
-    scrollText: "Contact me!",
+    cta: "View work",
+  },
+  about: {
+    title: "About",
+    stackTitle: "Stack",
+    educationLabel: "Education",
+    languageLabel: "Language",
   },
   projects: {
-    title: "Projects",
+    title: "Work",
     private: "Private",
     description: "Combining refined design and scalable code to deliver <highlight>unique digital solutions</highlight>, converting complexity into conversion and performance.",
     mobileHint: "Swipe to explore",
+    viewCase: "View case study",
+  },
+  caseStudy: {
+    back: "Back to work",
+    overview: "Overview",
+    highlights: "Highlights",
+    stack: "Stack",
+    access: "Access",
+    visit: "Visit project",
+    privateNotice: "Internal project: code and access restricted to the organization.",
+    next: "Next project",
+  },
+  lab: {
+    title: "Lab",
+    description: "WebGL and shader experiments: where I test ideas before taking them to production.",
+    open: "Open experiment",
+    back: "Back to Lab",
+    techniques: "Techniques",
+    reducedMotion: "Reduced motion: the experiment is shown in static mode.",
+    webglError: "Your browser could not start WebGL for this experiment.",
+    experiments: {
+      "flow-field": {
+        title: "Flow Field",
+        description: "Up to 65k particles simulated on the GPU with curl noise, reacting to the pointer and switching shapes.",
+        instructions: "Move the pointer to disturb the flow. Click to switch shapes.",
+        techniques: ["GPGPU", "Curl noise", "GLSL"],
+      },
+      "liquid-image": {
+        title: "Liquid Image",
+        description: "Shader-based image distortion, with ripples driven by pointer velocity and RGB split.",
+        instructions: "Move the pointer quickly over the image to create waves.",
+        techniques: ["Fragment shader", "Velocity field", "RGB shift"],
+      },
+    },
   },
   experience: {
     title: "Experience",
@@ -18,8 +69,8 @@ export const en = {
     downloadCV: "Download CV",
   },
   contact: {
-    title: "LET'S TALK!",
-    description: "Ready to build the next level of your application? Send me the project details and let's architect it together.",
+    title: "Let's talk",
+    description: "Got a project, a role or an idea that needs motion? Tell me the details and I'll get back to you soon.",
     nameLabel: "Name",
     namePlaceholder: "Your name",
     emailLabel: "Email",
@@ -28,11 +79,11 @@ export const en = {
     messagePlaceholder: "Describe your project or challenge...",
     sending: "Sending...",
     sendBtn: "Send Message",
-    successMsg: "Message sent successfully!",
-    errorMsg: "Catastrophic failure processing request on the server.",
+    successMsg: "Message sent. Thanks for reaching out!",
+    errorMsg: "Couldn't send right now. Please try again in a moment.",
     errorPrefix: "[ERROR]",
     successPrefix: ">_",
-    validationError: "Invalid data detected at the security layer.",
+    validationError: "Some fields are invalid. Please review and try again.",
     rateLimitError: "Too many attempts. Please try again later.",
     validation: {
       nameMin: "Name too short",
@@ -41,6 +92,15 @@ export const en = {
       messageMin: "Your message must be at least 10 characters",
       messageMax: "Your message reached the character limit (1000)",
     },
+  },
+  footer: {
+    localTime: "Local time",
+    backToTop: "Back to top",
+    rights: "All rights reserved.",
+  },
+  cursor: {
+    view: "View",
+    open: "Open",
   },
   menu: {
     downloadCV: "Download CV",
@@ -51,6 +111,9 @@ export const en = {
     skipToContent: "Skip to main content",
     toggleMenu: "Toggle menu",
     loading: "Loading",
+    mainNav: "Main navigation",
+    switchLanguage: "Switch language to Portuguese",
+    currentSection: "Current section",
   },
   notFound: {
     message: "Signal lost. The route does not exist.",

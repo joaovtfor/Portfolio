@@ -1,9 +1,10 @@
 "use client";
 
-import { ReactLenis } from "@studio-freight/react-lenis";
+import { ReactLenis, useLenis, type LenisRef } from "lenis/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef, useState } from "react";
+import "lenis/dist/lenis.css";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -28,16 +29,16 @@ export function SmoothScrollProvider({
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const lenisRef = useRef<any>(null);
+  const lenisRef = useRef<LenisRef>(null);
 
+  // Lenis é dirigido pelo ticker do GSAP (um único loop de animação para scroll e timelines).
   useEffect(() => {
     function update(time: number) {
       lenisRef.current?.lenis?.raf(time * 1000);
     }
 
     gsap.ticker.add(update);
-
+    gsap.ticker.lagSmoothing(0);
     ScrollTrigger.config({ ignoreMobileResize: true });
 
     return () => {
@@ -49,15 +50,20 @@ export function SmoothScrollProvider({
     <ReactLenis
       ref={lenisRef}
       root
-      autoRaf={false} 
       options={{
-        lerp: 0.1, 
-        duration: reduceMotion ? 0 : 1.2,
+        autoRaf: false,
+        lerp: 0.1,
         smoothWheel: !reduceMotion,
       }}
     >
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      {children as any}
+      <ScrollTriggerSync />
+      {children}
     </ReactLenis>
   );
+}
+
+// Notifica o ScrollTrigger a cada frame de scroll do Lenis.
+function ScrollTriggerSync() {
+  useLenis(ScrollTrigger.update);
+  return null;
 }

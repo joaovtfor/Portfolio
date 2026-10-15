@@ -27,7 +27,7 @@ interface HeroTitleProps {
 
 export function HeroTitle({ name }: HeroTitleProps) {
   const isPreloaderDone = useUIStore((state) => state.isPreloaderDone);
-  const title = name || "JOÃO DE FOR";
+  const title = name.toUpperCase();
   const letters = title.split("");
 
   return (
@@ -35,9 +35,9 @@ export function HeroTitle({ name }: HeroTitleProps) {
       variants={containerVariants}
       initial="hidden"
       animate={isPreloaderDone ? "show" : "hidden"}
-      className="flex items-center justify-center w-full z-10 select-none pointer-events-none"
+      className="flex items-center justify-center w-full z-10 pointer-events-none"
     >
-      <h1 aria-label={title} className="font-serif text-[clamp(2.5rem,10vw,12rem)] font-medium tracking-normal leading-none uppercase text-white mix-blend-difference whitespace-nowrap flex select-none">
+      <h1 aria-label={name} className="font-serif text-hero font-medium tracking-normal leading-none uppercase text-ink mix-blend-difference whitespace-nowrap flex">
         {letters.map((char, i) => (
           <motion.span
             key={i}
@@ -48,7 +48,7 @@ export function HeroTitle({ name }: HeroTitleProps) {
               y: -10,
               transition: { duration: 0.2, type: "spring", stiffness: 300 }
             }}
-            className="pointer-events-auto cursor-default select-none"
+            className="pointer-events-auto cursor-default"
             style={{ 
               display: "inline-block",
               width: char === " " ? "0.3em" : "auto",

@@ -44,3 +44,9 @@ next-env.d.ts
 .pnpm-store/
 **/.pnpm-store
 .pnpm-store/**
+
+# cloudflare / opennext
+.open-next/
+.wrangler/
+.dev.vars*
+cloudflare-env.d.ts

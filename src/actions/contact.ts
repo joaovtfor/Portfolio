@@ -25,7 +25,7 @@ export async function sendContactEmail(data: ContactFormData) {
 
     // `cf-connecting-ip` é definido pela Cloudflare e não pode ser forjado pelo cliente,
     // ao contrário do primeiro item do `x-forwarded-for`.
-    // O Map abaixo é por isolate (best-effort); o limite global deve ficar numa regra de rate limiting do WAF.
+    // O Map abaixo é por isolate (best-effort); um limite mais forte exige o binding de Rate Limiting do Workers.
     const headersList = await headers();
     const ip = headersList.get("cf-connecting-ip") || "anonymous";
     const now = Date.now();

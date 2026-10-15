@@ -1,14 +1,35 @@
 @import "tailwindcss";
 
+/* Tokens de marca ("Monolito e Fluido") e derivados de hierarquia. Únicas cores literais do projeto. */
 :root {
   --background: #000000;
   --foreground: #85E8EA;
+  --ink: #ffffff;
+  --muted: #a3a3a3;
+  --subtle: #737373;
+  --surface: #0d0d0e;
+  --line: rgb(255 255 255 / 0.1);
+  --danger: #f87171;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-brand: var(--foreground);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-danger: var(--danger);
+
+  --shadow-glow: 0 0 20px color-mix(in srgb, var(--foreground) 30%, transparent);
+  --shadow-glow-strong: 0 0 12px var(--foreground);
+  --drop-shadow-glow: 0 0 10px color-mix(in srgb, var(--foreground) 50%, transparent);
+  --drop-shadow-ink: 0 0 20px color-mix(in srgb, var(--ink) 60%, transparent);
+
+  --ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-quart-in-out: cubic-bezier(0.76, 0, 0.24, 1);
 
   --text-xs: clamp(0.75rem, 0.1vw + 0.72rem, 0.8rem);
   --text-sm: clamp(0.8rem, 0.17vw + 0.76rem, 0.89rem);
@@ -18,17 +39,20 @@
   --text-2xl: clamp(1.95rem, 1.56vw + 1.56rem, 2.81rem);
   --text-3xl: clamp(2.44rem, 2.38vw + 1.85rem, 3.75rem);
   --text-4xl: clamp(3.05rem, 3.54vw + 2.17rem, 5rem);
-  --text-hero: clamp(4rem, 10vw + 1rem, 12rem);
+  --text-hero: clamp(2.5rem, 10vw, 12rem);
 
+  /* Tríade tipográfica: Geist Sans (texto), Geist Mono (voz técnica), Playfair Display (display) */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-serif);
+  --font-serif: var(--font-playfair);
 }
 
 @layer base {
   body {
+    /* Fallback quando o WebGL não está disponível: o canvas opaco cobre este gradiente. */
+    background: radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--foreground) 7%, var(--background)) 0%, var(--background) 65%) fixed;
     background-color: var(--background);
-    color: var(--foreground);
+    color: var(--ink);
     font-family: var(--font-sans), Arial, Helvetica, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -40,10 +64,39 @@
   }
 
   html, body {
-    scrollbar-width: none; 
+    scrollbar-width: none;
   }
 
   ::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* View transitions: morph do card para o hero do estudo de caso */
+::view-transition-group(.morph) {
+  animation-duration: 600ms;
+  animation-timing-function: var(--ease-expo-out);
+}
+
+::view-transition-image-pair(.morph) {
+  animation-name: via-blur;
+}
+
+@keyframes via-blur {
+  30% {
+    filter: blur(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* Esmaece as bordas laterais do trilho horizontal de projetos (máscara usa só o alfa). */
+@utility mask-fade-x {
+  mask-image: linear-gradient(to right, transparent 0%, var(--background) 12%, var(--background) 88%, transparent 100%);
 }

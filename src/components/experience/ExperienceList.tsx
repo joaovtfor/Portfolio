@@ -3,15 +3,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useInView } from "framer-motion";
 import { useIsTouch } from "@/hooks/useIsTouch";
-
-export interface ExperienceItem {
-  id: number;
-  period: string;
-  company?: string;
-  role: string;
-  description: string;
-  skills: string[];
-}
+import type { ExperienceItem } from "@/data/resume";
 
 interface ExperienceListProps {
   experiences: ExperienceItem[];
@@ -25,52 +17,55 @@ function ExperienceItemCard({ exp, i, total }: { exp: ExperienceItem; i: number;
   const isActive = isTouch ? isInView : false;
 
   return (
-    <motion.li 
+    <motion.li
       ref={internalRef}
       data-active={isActive}
-      key={exp.id} 
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.8, delay: i * 0.15, ease: "easeOut" }}
-      className="group relative flex flex-col py-8 md:py-12 border-t border-white/5 first:border-t-transparent transition-colors hover:bg-white/[0.02] px-4 md:pl-12 md:pr-8 -mx-4 md:-mx-8 md:mx-0 rounded-2xl select-none cursor-default"
+      className="group relative flex flex-col py-8 md:py-12 border-t border-line first:border-t-transparent transition-colors hover:bg-ink/[0.02] px-4 md:pl-12 md:pr-8 -mx-4 md:mx-0 rounded-2xl"
     >
-      <div aria-hidden="true" className={`hidden md:block absolute left-0 top-0 bottom-0 w-[1px] transition-colors duration-300 md:duration-500 ${i === total - 1 ? 'bg-gradient-to-b from-white/5 to-transparent group-hover:from-white/10 group-data-[active=true]:from-white/10' : 'bg-white/5 group-hover:bg-white/10 group-data-[active=true]:bg-white/10'}`}>
-        <motion.div 
+      <div aria-hidden="true" className={`hidden md:block absolute left-0 top-0 bottom-0 w-[1px] transition-colors duration-500 ${i === total - 1 ? 'bg-gradient-to-b from-ink/5 to-transparent group-hover:from-ink/10 group-data-[active=true]:from-ink/10' : 'bg-ink/5 group-hover:bg-ink/10 group-data-[active=true]:bg-ink/10'}`}>
+        <motion.div
           aria-hidden="true"
-          initial={{ backgroundColor: "rgb(23,23,23)", borderColor: "rgba(255,255,255,0.2)", boxShadow: "0px 0px 0px transparent" }}
+          initial={{ backgroundColor: "var(--surface)", borderColor: "var(--line)", boxShadow: "0px 0px 0px transparent" }}
           whileInView={{ backgroundColor: "var(--foreground)", borderColor: "var(--foreground)", boxShadow: "0px 0px 12px var(--foreground)" }}
           viewport={{ once: false, margin: "1000px 0px -50% 0px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="absolute top-12 -left-[5px] w-3 h-3 rounded-full border border-white/20 bg-neutral-900 group-hover:bg-[var(--foreground)] group-data-[active=true]:bg-[var(--foreground)] group-hover:border-[var(--foreground)] group-data-[active=true]:border-[var(--foreground)] group-hover:shadow-[0_0_12px_var(--foreground)] group-data-[active=true]:shadow-[0_0_12px_var(--foreground)]" 
+          className="absolute top-12 -left-[5px] w-3 h-3 rounded-full border border-line bg-surface group-hover:bg-foreground group-data-[active=true]:bg-foreground group-hover:border-foreground group-data-[active=true]:border-foreground group-hover:shadow-glow-strong group-data-[active=true]:shadow-glow-strong"
         />
       </div>
 
-      <span className="text-[var(--foreground)] text-[10px] font-bold uppercase tracking-widest mb-3 font-sans">
-        {exp.company} <span aria-hidden="true" className="text-white/30 mx-2">&bull;</span> {exp.period}
-      </span>
-      
-      <h3 className="text-xl md:text-3xl font-serif text-white mb-2 transform-gpu transition-transform duration-300 md:duration-700 ease-out group-hover:translate-x-3 group-data-[active=true]:translate-x-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3 font-mono text-xs uppercase tracking-widest">
+        <span className="text-foreground font-bold">{exp.company}</span>
+        <span aria-hidden="true" className="text-ink/30">&bull;</span>
+        <span className="text-subtle">{exp.period}</span>
+        {exp.highlight && (
+          <span className="ml-auto md:ml-0 px-2.5 py-1 rounded-full border border-foreground/40 text-foreground normal-case tracking-normal shadow-glow">
+            {exp.highlight}
+          </span>
+        )}
+      </div>
+
+      <h3 className="text-xl md:text-3xl font-serif text-ink mb-2 transform-gpu transition-transform duration-300 md:duration-700 ease-out group-hover:translate-x-3 group-data-[active=true]:translate-x-3">
         {exp.role}
       </h3>
-      
-      <p className="text-neutral-300 md:text-neutral-400 text-xs md:text-sm leading-loose md:leading-relaxed mb-6 max-w-2xl font-sans transition-colors duration-300 md:duration-500 group-hover:text-neutral-300 group-data-[active=true]:text-neutral-300">
+
+      <p className="text-muted text-sm leading-relaxed mb-6 max-w-2xl font-sans transition-colors duration-500 group-hover:text-ink/80 group-data-[active=true]:text-ink/80">
         {exp.description}
       </p>
-      
-      <div className="flex flex-wrap items-center mt-2">
+
+      <ul className="flex flex-wrap items-center gap-y-1 font-mono text-xs text-subtle uppercase tracking-widest transition-colors duration-500 group-hover:text-muted group-data-[active=true]:text-muted">
         {exp.skills.map((skill, index) => (
-          <span 
-            key={skill} 
-            className="text-[9px] sm:text-[10px] text-neutral-500 font-sans tracking-widest uppercase transition-colors duration-300 md:duration-500 group-hover:text-neutral-300 md:text-neutral-400 group-data-[active=true]:text-neutral-300 md:text-neutral-400"
-          >
+          <li key={skill}>
             {skill}
             {index < exp.skills.length - 1 && (
-              <span aria-hidden="true" className="text-white/20 mx-2">&bull;</span>
+              <span aria-hidden="true" className="text-ink/20 mx-2">&bull;</span>
             )}
-          </span>
+          </li>
         ))}
-      </div>
+      </ul>
     </motion.li>
   );
 }
@@ -83,10 +78,10 @@ export function ExperienceList({ experiences }: ExperienceListProps) {
   });
 
   return (
-    <div ref={listRef} className="relative w-full md:w-1/2 lg:w-1/2 flex flex-col mt-8 md:mt-0">
+    <div ref={listRef} className="relative w-full md:w-1/2 flex flex-col mt-8 md:mt-0">
       <div aria-hidden="true" className="hidden md:block absolute md:left-0 top-16 bottom-16 w-[1px] bg-transparent z-10">
-        <motion.div 
-          className="w-full bg-[var(--foreground)] origin-top shadow-[0_0_15px_var(--foreground)]"
+        <motion.div
+          className="w-full bg-foreground origin-top shadow-glow-strong"
           style={{ scaleY: scrollYProgress, height: '100%' }}
         />
       </div>

@@ -1,123 +1,146 @@
+// Fonte da verdade: currículo (public/cv_*.pdf). Métricas e afirmações devem refletir o CV.
+
+export interface ExperienceItem {
+  id: number;
+  period: string;
+  company: string;
+  role: string;
+  description: string;
+  skills: string[];
+  highlight?: string;
+}
+
+const PERSONAL_INFO = {
+  name: "João Vitor de For dos Santos",
+  shortName: "João de For",
+  location: "Passo Fundo, RS",
+  timeZone: "America/Sao_Paulo",
+  email: "joaovtfor@hotmail.com",
+  linkedin: "https://linkedin.com/in/joaodefor",
+  github: "https://github.com/joaovtfor",
+  role: "Creative Front-End Engineer",
+};
+
 const RESUME_PT = {
   personalInfo: {
-    name: "João Vitor de For dos Santos",
-    location: "Passo Fundo, RS",
-    phone: "(54) 9 9930-3946",
-    email: "joaovtfor@hotmail.com",
-    linkedin: "https://linkedin.com/in/joaodefor",
-    github: "https://github.com/joaovtfor",
-    role: "Engenheiro Front-End & Full-Stack",
-    focus: "Interfaces de Alta Performance",
-    stack: "Next.js, Vue.js, Laravel, Flutter"
+    ...PERSONAL_INFO,
+    focus: "WebGL, Motion e Interfaces de Alta Performance",
+    stack: "Next.js · React · Three.js · GLSL · GSAP",
   },
-  summary: "Engenheiro de Software Front-End e Full-Stack especialista na construção de interfaces de alta performance, escaláveis e resilientes. Domino o ecossistema moderno utilizando Next.js, Tailwind CSS e Framer Motion para renderização otimizada, com sólida bagagem em Vue.js e React.js integrados a arquiteturas Laravel. Aplico metodologias de Inteligência Artificial executando Spec-Driven Development (SDD) para acelerar entregas. Na infraestrutura, utilizo ambientes locais isolados com containers Docker standalone via Docker Desktop (com mapeamento avançado em arquivos docker-compose.yml), orquestrando os deploys em produção através do Portainer. Atuo com Security by Design mitigando vulnerabilidades do Top 10 OWASP (XSS, CSRF) desde a concepção do código.",
+  manifesto: "Construo interfaces onde engenharia e movimento são o mesmo ofício: performance como fundação, segurança como padrão e cada animação com um motivo para existir.",
+  summary: "Engenheiro Front-End com visão Full-Stack. Next.js, React e TypeScript no núcleo; Three.js, GLSL e GSAP na camada de experiência; Vue.js, Laravel e Docker quando o produto pede entrega ponta a ponta. Aplico Clean Code, YAGNI e Security by Design (OWASP) e acelero entregas com Spec-Driven Development guiado por IA.",
+  skillGroups: [
+    { label: "Criativo & Motion", items: ["Three.js", "React Three Fiber", "GLSL", "GSAP", "Framer Motion"] },
+    { label: "Core Front-End", items: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Vue.js"] },
+    { label: "UI/UX", items: ["Figma", "Design Systems", "Design Responsivo", "Material UI"] },
+    { label: "Engenharia & Infra", items: ["Clean Code", "Security by Design (OWASP)", "SDD com IA", "Docker / Portainer", "CI/CD"] },
+    { label: "Back-end & Mobile", items: ["Laravel / PHP", "Flutter", "Python", "SQL"] },
+  ],
+  education: {
+    degree: "Análise e Desenvolvimento de Sistemas",
+    institution: "Universidade de Passo Fundo (UPF)",
+    conclusion: "Conclusão 12/2026",
+  },
+  language: "Inglês — Intermediário B2 (EF Test)",
   experiences: [
     {
       id: 1,
       period: "AGO 2025 - ATUAL",
       company: "Rede Notre Dame",
       role: "Front-End / Full-Stack Pleno",
-      description: "Concepção arquitetural de sistemas web e mobile utilizando Vue.js, Laravel e Flutter. Alcance de nota 100 no Google Lighthouse (Performance e SEO). Desenvolvimento de Identity Provider (IdP) para SSO seguro via proxy reverso NGINX. Padronização Docker-first (CI/CD) e refatoração de sistemas legados de missão crítica.",
-      skills: ["Vue.js", "Typescript", "Figma", "UI/UX Design", "Laravel", "Flutter", "Docker", "Single Sign-On (SSO)", "CI/CD", "NGINX"]
+      description: "Concepção arquitetural de aplicações em Vue.js e React com design system modular, atingindo nota 100 no Google Lighthouse. Desenvolvimento do provedor de identidade (IdP) centralizado para SSO, com requisições protegidas por proxy NGINX. Ambientes Docker/Portainer e modernização crítica de aplicações PHP legadas (7.2 para 8.3).",
+      skills: ["Vue.js", "React", "TypeScript", "Figma", "Laravel", "Docker", "Single Sign-On (SSO)", "NGINX"],
+      highlight: "Lighthouse 100",
     },
     {
       id: 2,
       period: "FEV 2025 - JUL 2025",
       company: "Veplex",
       role: "Front-End / Full-Stack",
-      description: "Reestruturação integral de UI/UX e design responsivo utilizando React.js e Vue.js integrados ao back-end Laravel. Prototipação de alta fidelidade (Figma) e desenvolvimento de dashboards complexos de BI focados na gestão do setor logístico. Integração de ferramentas de Inteligência Artificial no workflow de pair-programming.",
-      skills: ["React.js", "Vue.js", "Typescript", "Figma", "UI/UX Design", "Laravel", "IA (SDD)", "Docker", "BI"]
+      description: "Reconstrução integral da base de design (React e Vue.js acoplados ao Laravel), resolvendo gargalos visuais críticos em múltiplos dispositivos. Prototipação e renderização de matrizes de dados complexas para dashboards de BI no setor de distribuição, garantindo tempo de resposta e fluidez visual.",
+      skills: ["React", "Vue.js", "TypeScript", "Figma", "Laravel", "BI"],
     },
     {
       id: 3,
       period: "OUT 2024 - JAN 2025",
       company: "Sinapsys",
       role: "Front-End & Mobile",
-      description: "Desenvolvimento multiplataforma mobile utilizando Flutter, focado em UX via Figma. Sustentação e evolução de back-ends corporativos legados (ASP.NET, VB.NET). Otimização de performance de consultas SQL criando índices operacionais e triggers.",
-      skills: ["Flutter", "Figma", "UI/UX Design", "ASP.NET", "VB.NET", "SQL"]
+      description: "Reestruturação de UX e desenvolvimento mobile avançado com Flutter. Manutenção da estabilidade transacional em ecossistemas ASP.NET/.NET corporativos e otimização de performance em consultas SQL complexas.",
+      skills: ["Flutter", "Figma", "UI/UX", "ASP.NET", "SQL"],
     },
     {
       id: 4,
       period: "MAI 2023 - JUN 2024",
-      company: "IM9 Inteligência",
+      company: "IM9 Inteligência em Mobilidade",
       role: "Front-End",
-      description: "Redução de 70% no tempo de carregamento de aplicações React.js legadas através de code splitting avançado e otimização de bundle size. Desenvolvimento de painéis de telemetria em tempo real via Server-Sent Events (SSE) com processamento massivo no client-side.",
-      skills: ["React.js", "Figma", "UI/UX Design", "Typescript", "Web Vitals", "SSE", "Code Splitting"]
-    }
-  ],
-  education: {
-    degree: "Análise e Desenvolvimento de Sistemas (ADS)",
-    institution: "Universidade de Passo Fundo (UPF)",
-    conclusion: "12/2026"
-  },
-  skills: [
-    "React.js", "Next.js", "Vue.js", "Tailwind CSS", "Framer Motion",
-    "JavaScript", "TypeScript", "Flutter", "Laravel", "PHP", 
-    "Docker", "Portainer", "CI/CD", "SQL", "Figma", "UI/UX",
-    "Single Sign-On (SSO)", "Clean Code", "OWASP", "SDD", "Git"
-  ]
+      description: "Liderança na refatoração de aplicação React que reduziu em 70% o tempo de carregamento das interfaces principais, via code splitting e compressão avançada. Painéis em tempo real com Server-Sent Events (SSE) para telemetria veicular, com processamento e sanitização no front-end.",
+      skills: ["React", "TypeScript", "Web Vitals", "SSE", "Code Splitting"],
+      highlight: "−70% no carregamento",
+    },
+  ] satisfies ExperienceItem[],
 };
 
-const RESUME_EN = {
+const RESUME_EN: typeof RESUME_PT = {
   personalInfo: {
-    name: "João Vitor de For dos Santos",
-    location: "Passo Fundo, RS",
-    phone: "(54) 9 9930-3946",
-    email: "joaovtfor@hotmail.com",
-    linkedin: "https://linkedin.com/in/joaodefor",
-    github: "https://github.com/joaovtfor",
-    role: "Front-End & Full-Stack Engineer",
-    focus: "High Performance Interfaces",
-    stack: "Next.js, Vue.js, Laravel, Flutter"
+    ...PERSONAL_INFO,
+    focus: "WebGL, Motion & High-Performance Interfaces",
+    stack: "Next.js · React · Three.js · GLSL · GSAP",
   },
-  summary: "Front-End and Full-Stack Software Engineer specialized in building high-performance, scalable, and resilient interfaces. I master the modern ecosystem using Next.js, Tailwind CSS, and Framer Motion for optimized rendering, with a solid background in Vue.js and React.js integrated with Laravel architectures. I apply Artificial Intelligence methodologies executing Spec-Driven Development (SDD) to accelerate deliveries. In infrastructure, I use isolated local environments with standalone Docker containers via Docker Desktop (with advanced mapping in docker-compose.yml files), orchestrating production deployments through Portainer. I act with Security by Design, mitigating vulnerabilities from the Top 10 OWASP (XSS, CSRF) since the conception of the code.",
+  manifesto: "I build interfaces where engineering and motion are the same craft: performance as the foundation, security as the default, and every animation with a reason to exist.",
+  summary: "Front-End Engineer with a Full-Stack mindset. Next.js, React and TypeScript at the core; Three.js, GLSL and GSAP for the experience layer; Vue.js, Laravel and Docker when the product needs end-to-end delivery. I apply Clean Code, YAGNI and Security by Design (OWASP), and speed up delivery with AI-driven Spec-Driven Development.",
+  skillGroups: [
+    { label: "Creative & Motion", items: ["Three.js", "React Three Fiber", "GLSL", "GSAP", "Framer Motion"] },
+    { label: "Core Front-End", items: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Vue.js"] },
+    { label: "UI/UX", items: ["Figma", "Design Systems", "Responsive Design", "Material UI"] },
+    { label: "Engineering & Infra", items: ["Clean Code", "Security by Design (OWASP)", "AI-driven SDD", "Docker / Portainer", "CI/CD"] },
+    { label: "Back-end & Mobile", items: ["Laravel / PHP", "Flutter", "Python", "SQL"] },
+  ],
+  education: {
+    degree: "Systems Analysis and Development",
+    institution: "University of Passo Fundo (UPF)",
+    conclusion: "Expected 12/2026",
+  },
+  language: "English — Intermediate B2 (EF Test)",
   experiences: [
     {
       id: 1,
       period: "AUG 2025 - PRESENT",
       company: "Rede Notre Dame",
       role: "Mid-level Front-End / Full-Stack",
-      description: "Architectural design of web and mobile systems using Vue.js, Laravel, and Flutter. Achieved a score of 100 in Google Lighthouse (Performance and SEO). Development of Identity Provider (IdP) for secure SSO via NGINX reverse proxy. Docker-first (CI/CD) standardization and refactoring of mission-critical legacy systems.",
-      skills: ["Vue.js", "Typescript", "Figma", "UI/UX Design", "Laravel", "Flutter", "Docker", "Single Sign-On (SSO)", "CI/CD", "NGINX"]
+      description: "Architected Vue.js and React applications with a modular design system, reaching a score of 100 on Google Lighthouse. Built the centralized identity provider (IdP) for SSO, with requests secured behind an NGINX proxy. Docker/Portainer environments and critical modernization of legacy PHP applications (7.2 to 8.3).",
+      skills: ["Vue.js", "React", "TypeScript", "Figma", "Laravel", "Docker", "Single Sign-On (SSO)", "NGINX"],
+      highlight: "Lighthouse 100",
     },
     {
       id: 2,
       period: "FEB 2025 - JUL 2025",
       company: "Veplex",
       role: "Front-End / Full-Stack",
-      description: "Complete UI/UX and responsive design restructuring using React.js and Vue.js integrated with Laravel back-end. High-fidelity prototyping (Figma) and development of complex BI dashboards focused on logistics sector management. Integration of Artificial Intelligence tools in pair-programming workflow.",
-      skills: ["React.js", "Vue.js", "Typescript", "Figma", "UI/UX Design", "Laravel", "AI (SDD)", "Docker", "BI"]
+      description: "Rebuilt the entire design foundation (React and Vue.js coupled with Laravel), solving critical visual bottlenecks across multiple devices. Prototyped and rendered complex data matrices for BI dashboards in the distribution sector, ensuring response time and visual fluidity.",
+      skills: ["React", "Vue.js", "TypeScript", "Figma", "Laravel", "BI"],
     },
     {
       id: 3,
       period: "OCT 2024 - JAN 2025",
       company: "Sinapsys",
       role: "Front-End & Mobile",
-      description: "Cross-platform mobile development using Flutter, focused on UX via Figma. Maintenance and evolution of legacy corporate back-ends (ASP.NET, VB.NET). SQL query performance optimization by creating operational indexes and triggers.",
-      skills: ["Flutter", "Figma", "UI/UX Design", "ASP.NET", "VB.NET", "SQL"]
+      description: "UX restructuring and advanced mobile development with Flutter. Kept transactional stability in corporate ASP.NET/.NET ecosystems and optimized performance of complex SQL queries.",
+      skills: ["Flutter", "Figma", "UI/UX", "ASP.NET", "SQL"],
     },
     {
       id: 4,
       period: "MAY 2023 - JUN 2024",
-      company: "IM9 Inteligência",
+      company: "IM9 Inteligência em Mobilidade",
       role: "Front-End",
-      description: "70% reduction in loading time of legacy React.js applications through advanced code splitting and bundle size optimization. Development of real-time telemetry dashboards via Server-Sent Events (SSE) with massive client-side processing.",
-      skills: ["React.js", "Figma", "UI/UX Design", "Typescript", "Web Vitals", "SSE", "Code Splitting"]
-    }
+      description: "Led the refactoring of a React application that cut the loading time of the main interfaces by 70%, through code splitting and advanced compression. Real-time panels with Server-Sent Events (SSE) for vehicle telemetry, with processing and sanitization on the front-end.",
+      skills: ["React", "TypeScript", "Web Vitals", "SSE", "Code Splitting"],
+      highlight: "−70% load time",
+    },
   ],
-  education: {
-    degree: "Systems Analysis and Development (ADS)",
-    institution: "University of Passo Fundo (UPF)",
-    conclusion: "12/2026"
-  },
-  skills: [
-    "React.js", "Next.js", "Vue.js", "Tailwind CSS", "Framer Motion",
-    "JavaScript", "TypeScript", "Flutter", "Laravel", "PHP", 
-    "Docker", "Portainer", "CI/CD", "SQL", "Figma", "UI/UX",
-    "Single Sign-On (SSO)", "Clean Code", "OWASP", "SDD", "Git"
-  ]
 };
 
-export function getResume(locale: 'pt' | 'en') {
+export type Resume = typeof RESUME_PT;
+
+export function getResume(locale: 'pt' | 'en'): Resume {
   return locale === 'pt' ? RESUME_PT : RESUME_EN;
 }

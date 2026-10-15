@@ -13,12 +13,15 @@ export function Preloader({ label }: { label: string }) {
   const setPreloaderDone = useUIStore((state) => state.setPreloaderDone);
 
   useEffect(() => {
-    if (window.matchMedia("(max-width: 768px)").matches) {
+    if (window.matchMedia("(max-width: 767px)").matches) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setProgress(100);
-      setIsLoading(false);
-      setPreloaderDone();
-      return;
+      // Remove num render seguinte para o AnimatePresence congelar o snapshot já em 100%.
+      const exit = setTimeout(() => {
+        setIsLoading(false);
+        setPreloaderDone();
+      }, 60);
+      return () => clearTimeout(exit);
     }
 
     // Progresso real: hidratação (20%), fontes carregadas (+40%) e contexto WebGL criado (+40%).
@@ -63,11 +66,11 @@ export function Preloader({ label }: { label: string }) {
           initial={{ y: 0 }}
           exit={{ y: "-100%" }}
           transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-          className="fixed inset-0 z-[50] bg-background flex flex-col items-center justify-center pointer-events-none"
+          className="fixed inset-0 z-[60] bg-background flex flex-col items-center justify-center pointer-events-none"
         >
           <div className="flex flex-col items-center gap-4">
-            <span aria-hidden="true" className="font-serif text-[var(--foreground)] text-4xl md:text-5xl font-bold tracking-widest flex items-center">
-              <span className="text-white mr-1">&gt;</span>_
+            <span aria-hidden="true" className="font-mono text-foreground text-4xl md:text-5xl font-bold tracking-widest flex items-center">
+              <span className="text-ink mr-1">&gt;</span>_
             </span>
             
             <div 
@@ -76,11 +79,11 @@ export function Preloader({ label }: { label: string }) {
               aria-valuemin={0} 
               aria-valuemax={100}
               aria-label={label}
-              className="text-white/40 font-mono text-sm tracking-[0.3em] mt-4 flex items-center gap-4"
+              className="text-ink/40 font-mono text-sm tracking-[0.3em] mt-4 flex items-center gap-4"
             >
-              <div aria-hidden="true" className="w-[100px] h-[1px] bg-white/10 relative overflow-hidden">
+              <div aria-hidden="true" className="w-[100px] h-[1px] bg-line relative overflow-hidden">
                 <motion.div 
-                  className="absolute top-0 left-0 h-full bg-[var(--foreground)]"
+                  className="absolute top-0 left-0 h-full bg-foreground"
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.1 }}
                 />

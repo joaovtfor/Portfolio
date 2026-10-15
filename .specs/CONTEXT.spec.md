@@ -1,21 +1,30 @@
 # SDD: Contexto, Design e Narrativa (Storytelling Scroller)
 
 ## 1. Visão Geral do Sistema
-O projeto é um portfólio de desenvolvedor arquitetado como uma Single Page Application (SPA) fluida. O padrão principal é o "Storytelling Scroller", onde não há mudança de páginas; toda a navegação e apresentação de conteúdo são guiadas e reveladas pelo scroll vertical do usuário, mirando um padrão de qualidade visual de premiações (Awwwards Top 10).
+O projeto é o portfólio de um **Creative Front-End Engineer** (WebGL, motion e interfaces de alta performance), arquitetado como um "Storytelling Scroller": a home é uma narrativa revelada pelo scroll vertical, mirando o padrão de premiações (Awwwards). Rotas secundárias (estudos de caso e experimentos do Lab) aprofundam o conteúdo sem quebrar a continuidade visual, graças a um shell persistente (fundo WebGL, header, cursor) e a view transitions.
 
 ## 2. Tema e Identidade Visual: "Monolito e Fluido"
 A direção de arte estabelece uma tensão visual entre infraestrutura sólida e front-end dinâmico.
-- **Cores Estritas:** Apenas `#000000` (Preto/Vazio/Monolito) e `#85E8EA` (Cyan/Energia). Variações visuais ocorrem apenas por opacidades e emissões de luz (*glow*).
-- **Tipografia:** Uma dualidade entre uma fonte estrutural, limpa e massiva (ex: Geist Sans ou Inter) para o texto principal, e uma fonte *monospace* (ex: Geist Mono) injetada nativamente pelo Next.js para dados técnicos e acentos de design.
+- **Paleta (tokens em `src/app/globals.css`):** `#000000` (background/monolito) e `#85E8EA` (foreground/energia) são as cores de marca. Para hierarquia tipográfica existem apenas tokens derivados: `ink` (texto principal), `muted`, `subtle`, `line` (bordas), `surface` e `danger` (erros). Brilhos usam `shadow-glow`/`drop-shadow-glow`. Nenhuma cor literal fora dos tokens.
+- **Tipografia (tríade):**
+  - *Display / "Monolito":* Playfair Display (serif, caixa alta) para nomes, títulos de seção e de projetos.
+  - *Voz técnica:* Geist Mono para labels, índices, períodos, métricas e microcopy de sistema (`>_`, `[ERRO]`).
+  - *Texto corrido:* Geist Sans.
+  - Tamanho mínimo de texto informativo: `text-xs` (12px). Escala fluida `--text-*` obrigatória.
+- **Motivo de marca:** o glifo `>_` (terminal) aparece no preloader, no header e na forma final das partículas na seção de contato.
 
 ## 3. Micro-interações e WebGL
-- **Background Interativo (Desktop):** Um shader GLSL rodando via WebGL/R3F simula um fluido negro que preenche a tela. Ele reage ao ponteiro do mouse, criando distorções sutis e emitindo uma refração Cyan nas bordas.
-- **Degradação Graciosa (Mobile e Bateria):** Devido ao alto custo computacional de shaders de fluido, dispositivos móveis e usuários com `prefers-reduced-motion` receberão um *fallback* hiper-otimizado. A sensação de "fluido" será mantida através de gradientes CSS sutis animados via transformações na GPU ou um shader 2D de baixíssima complexidade (ruído Perlin estático), prevenindo o consumo excessivo de bateria sem quebrar a identidade visual.
-- **Transições:** Interfaces surgem com precisão matemática através de máscaras conectadas ao scroll. Componentes acionáveis possuem estados de *focus/hover* magnéticos com *glow* limpo.
+- **Fundo persistente:** um único canvas WebGL vive no shell (layout) e sobrevive às navegações. Ele contém um shader de fundo fluido (ruído com *domain warping* e borda cyan reagindo ao ponteiro) e o motor de partículas GPGPU (ver `tasks/ParticleEngineTask.spec.md`).
+- **Narrativa 3D:** cada seção define uma forma-alvo para as partículas (morph guiado pelo scroll). O 3D conta a história; não é papel de parede.
+- **Degradação graciosa:** mobile usa menos partículas e shader mais leve; `prefers-reduced-motion` renderiza um frame estático sob demanda; falha de WebGL cai para o fundo CSS.
+- **Transições:** revelações conectadas ao scroll, botões magnéticos, cursor com rótulos contextuais e view transitions (elemento compartilhado) entre card e estudo de caso.
 
-## 4. Estrutura Narrativa (4 Dobras)
-A experiência do usuário é dividida em seções logicamente conectadas:
-1. **Hero (A Fundação):** 100vh. Impacto massivo com a tipografia de apresentação. Ponto de inicialização da interatividade do shader fluido de fundo.
-2. **Tech & About (A Engenharia):** Exposição da stack e da mentalidade pragmática. Blocos de texto que se revelam conforme a rolagem avança.
-3. **Projects (A Execução):** O scroll vertical nativo é interceptado (via GSAP) e transformado em um *scroller* horizontal. Cards de projeto limpos. O *hover* em um card distorce pontualmente o fluido 3D do background.
-4. **Contact (O Endpoint):** Formulário restrito e direto. Inputs que, quando focados, simulam terminais com contornos brilhantes em `#85E8EA`. Validado rigidamente antes do envio.
+## 4. Estrutura Narrativa (Home)
+1. **Hero (A Fundação):** statement de posicionamento + nome. Partículas formam o monolito.
+2. **Sobre (A Engenharia):** manifesto revelado palavra a palavra e stack agrupada.
+3. **Trabalhos (A Execução):** scroll horizontal (GSAP) com cards visuais que levam aos estudos de caso.
+4. **Lab (A Experimentação):** experimentos WebGL interativos.
+5. **Experiência (A Trajetória):** timeline com métricas em destaque.
+6. **Contato (O Endpoint):** formulário estilo terminal; partículas convergem no `>_`. Footer com redes, hora local e voltar ao topo.
+
+Persistente em todas as rotas: header mínimo (logo `>_`, navegação, índice da seção, PT/EN, CTA de contato) e menu flutuante no mobile.

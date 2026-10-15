@@ -10,6 +10,11 @@ const dictionaries = {
   en,
 };
 
+// Normaliza o segmento de rota `[locale]` (string) para um Locale suportado.
+export function toLocale(value: string | undefined): Locale {
+  return value === "en" ? "en" : defaultLocale;
+}
+
 export function getDictionary(locale: Locale) {
   return dictionaries[locale] ?? dictionaries[defaultLocale];
 }
