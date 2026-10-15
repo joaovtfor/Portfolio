@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUIStore } from "@/store/uiStore";
 
-export function Preloader() {
+// Teto de espera: o preloader nunca bloqueia o hero por mais que isso (ex.: GPU sem WebGL, rede lenta).
+const MAX_WAIT_MS = 4000;
+
+export function Preloader({ label }: { label: string }) {
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const setPreloaderDone = useUIStore((state) => state.setPreloaderDone);
@@ -18,14 +21,21 @@ export function Preloader() {
       return;
     }
 
+    // Progresso real: hidratação (20%), fontes carregadas (+40%) e contexto WebGL criado (+40%).
+    let fontsReady = false;
+    let timedOut = false;
+    document.fonts.ready.then(() => { fontsReady = true; });
+    const maxWait = setTimeout(() => { timedOut = true; }, MAX_WAIT_MS);
+
     let current = 0;
     let timeout: NodeJS.Timeout;
-    
+
     const interval = setInterval(() => {
-      current += Math.random() * 20;
-      
+      const sceneReady = useUIStore.getState().isSceneReady;
+      const target = timedOut ? 100 : 20 + (fontsReady ? 40 : 0) + (sceneReady ? 40 : 0);
+      current = Math.min(target, current + Math.max(1, (target - current) * 0.25));
+
       if (current >= 100) {
-        current = 100;
         setProgress(100);
         clearInterval(interval);
         
@@ -40,6 +50,7 @@ export function Preloader() {
 
     return () => {
       clearInterval(interval);
+      clearTimeout(maxWait);
       if (timeout) clearTimeout(timeout);
     };
   }, [setPreloaderDone]);
@@ -64,7 +75,7 @@ export function Preloader() {
               aria-valuenow={progress} 
               aria-valuemin={0} 
               aria-valuemax={100}
-              aria-label="Carregando"
+              aria-label={label}
               className="text-white/40 font-mono text-sm tracking-[0.3em] mt-4 flex items-center gap-4"
             >
               <div aria-hidden="true" className="w-[100px] h-[1px] bg-white/10 relative overflow-hidden">

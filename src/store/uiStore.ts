@@ -3,14 +3,17 @@ import { create } from 'zustand';
 interface UIState {
   interactivePositions: { id: string; x: number; y: number }[];
   isPreloaderDone: boolean;
+  isSceneReady: boolean;
   setInteractivePosition: (id: string, x: number, y: number) => void;
   clearInteractivePosition: (id: string) => void;
   setPreloaderDone: () => void;
+  setSceneReady: () => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
   interactivePositions: [],
   isPreloaderDone: false,
+  isSceneReady: false,
   setInteractivePosition: (id, x, y) =>
     set((state) => {
       const existing = state.interactivePositions.find((p) => p.id === id);
@@ -28,4 +31,5 @@ export const useUIStore = create<UIState>((set) => ({
       interactivePositions: state.interactivePositions.filter((p) => p.id !== id),
     })),
   setPreloaderDone: () => set({ isPreloaderDone: true }),
+  setSceneReady: () => set({ isSceneReady: true }),
 }));

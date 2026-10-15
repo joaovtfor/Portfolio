@@ -14,6 +14,8 @@ export function getContactSchema(dict: Dictionary) {
       .trim()
       .min(10, dict.contact.validation.messageMin)
       .max(1000, dict.contact.validation.messageMax),
+    // Honeypot anti-bot: campo invisível para humanos, deve chegar vazio.
+    website: z.string().max(200).optional(),
   });
 }
 

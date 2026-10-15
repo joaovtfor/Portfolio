@@ -74,8 +74,12 @@ export function ContactSection({ dict = pt }: { dict?: Dictionary }) {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 w-full">
-          
+        <form onSubmit={handleSubmit(onSubmit)} className="relative flex flex-col gap-6 w-full">
+          <div aria-hidden="true" className="absolute -left-[9999px] top-0 w-px h-px overflow-hidden">
+            <label htmlFor="website">Website</label>
+            <input {...register("website")} id="website" type="text" tabIndex={-1} autoComplete="off" />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
               <label htmlFor="name" className="text-xs uppercase tracking-widest text-neutral-500 font-bold">
@@ -186,7 +190,7 @@ export function ContactSection({ dict = pt }: { dict?: Dictionary }) {
               rel={link.label !== "Email" ? "noopener noreferrer" : undefined}
               className="group relative flex items-center justify-between p-6 border-r border-b border-white/10 overflow-hidden transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none"
             >
-              <div className="absolute inset-0 bg-white translate-y-[101%] group-hover:translate-y-0 transition-transform duration-300 ease-[0.16,1,0.3,1] z-0" />
+              <div className="absolute inset-0 bg-white translate-y-[101%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-0" />
 
               <span className="relative z-10 font-sans text-xs uppercase tracking-widest font-bold text-neutral-400 group-hover:text-black transition-colors duration-300">
                 {link.label}
@@ -202,7 +206,7 @@ export function ContactSection({ dict = pt }: { dict?: Dictionary }) {
                 strokeWidth="2" 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
-                className="relative z-10 text-neutral-500 group-hover:text-black transition-all duration-500 ease-[0.16,1,0.3,1] group-hover:translate-x-2 group-hover:-translate-y-2 group-hover:scale-110"
+                className="relative z-10 text-neutral-500 group-hover:text-black transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-2 group-hover:-translate-y-2 group-hover:scale-110"
               >
                 <line x1="7" y1="17" x2="17" y2="7"></line>
                 <polyline points="7 7 17 7 17 17"></polyline>

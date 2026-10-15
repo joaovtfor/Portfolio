@@ -16,11 +16,18 @@ export async function sendContactEmail(data: ContactFormData) {
       return { success: false, errorType: "validation" };
     }
 
-    const { name, email, message } = parsed.data;
+    const { name, email, message, website } = parsed.data;
 
+    // Bots que preenchem o honeypot recebem sucesso silencioso, sem disparo de e-mail.
+    if (website) {
+      return { success: true };
+    }
+
+    // `cf-connecting-ip` é definido pela Cloudflare e não pode ser forjado pelo cliente,
+    // ao contrário do primeiro item do `x-forwarded-for`.
+    // O Map abaixo é por isolate (best-effort); o limite global deve ficar numa regra de rate limiting do WAF.
     const headersList = await headers();
-    const rawIp = headersList.get("x-forwarded-for") || "anonymous";
-    const ip = rawIp.split(",")[0].trim();
+    const ip = headersList.get("cf-connecting-ip") || "anonymous";
     const now = Date.now();
     const limitRecord = rateLimitMap.get(ip) || { count: 0, lastReset: now };
 

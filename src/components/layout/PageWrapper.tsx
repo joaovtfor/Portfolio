@@ -25,8 +25,9 @@ export function PageWrapper({ children, dict = pt, locale = 'pt' }: { children: 
     const mediaQuery = window.matchMedia("(max-width: 768px)");
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mediaQuery.addEventListener("change", handler);
-    
+
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMobile(mediaQuery.matches);
     setMounted(true);
 
     return () => mediaQuery.removeEventListener("change", handler);
@@ -35,7 +36,7 @@ export function PageWrapper({ children, dict = pt, locale = 'pt' }: { children: 
   return (
     <main id="main-content" ref={rootRef} className="block w-full min-h-[100svh] relative bg-background overflow-clip">
       
-      <Preloader />
+      <Preloader label={dict.a11y.loading} />
       {!isMobile && mounted && <CustomCursor />}
 
       <motion.div 

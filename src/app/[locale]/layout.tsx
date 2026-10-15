@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "../globals.css";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
+import { getDictionary } from "@/dictionaries";
 
 export const runtime = 'edge';
 
@@ -73,6 +74,7 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const { locale } = await params;
+  const dict = getDictionary(locale === "en" ? "en" : "pt");
   return (
     <html
       lang={locale}
@@ -80,7 +82,7 @@ export default async function RootLayout({
     >
       <body>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:border focus:border-foreground focus:rounded focus:outline-none">
-          Skip to content
+          {dict.a11y.skipToContent}
         </a>
         <SmoothScrollProvider>
           {children}

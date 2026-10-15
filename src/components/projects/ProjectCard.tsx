@@ -63,22 +63,23 @@ export function ProjectCard({ project, cardRef, index, dict }: ProjectCardProps)
   const CardContent = (
     <div
       ref={setRefs}
-      data-active={isActive}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative flex-shrink-0 w-[75vw] sm:w-[320px] h-[220px] md:w-[600px] md:h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-2xl overflow-hidden group cursor-pointer bg-black/40 backdrop-blur-md"
+      className="relative flex-shrink-0 w-[75vw] sm:w-[320px] h-[220px] md:w-[600px] md:h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-2xl overflow-hidden cursor-pointer bg-black/40 backdrop-blur-md"
     >
-      <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 group-data-[active=true]:opacity-100 transition-opacity duration-300 md:duration-700 ease-out overflow-hidden">
-        <motion.img 
-          src={project.image} 
-          alt={project.title} 
+      <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 group-data-[active=true]:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 md:duration-700 ease-out overflow-hidden">
+        <motion.img
+          src={project.image}
+          alt={project.title}
+          loading="lazy"
+          decoding="async"
           style={{ x: mouseX, y: mouseY }}
-          className="w-[110%] h-[110%] -left-[5%] -top-[5%] absolute max-w-none object-cover scale-110 group-hover:scale-100 group-data-[active=true]:scale-100 transition-transform duration-500 md:duration-1000 ease-out" 
+          className="w-[110%] h-[110%] -left-[5%] -top-[5%] absolute max-w-none object-cover scale-110 group-hover:scale-100 group-data-[active=true]:scale-100 group-focus-within:scale-100 transition-transform duration-500 md:duration-1000 ease-out"
         />
         <div className="absolute inset-0 bg-black/70" />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center w-full px-4 transform-gpu transition-transform duration-300 md:duration-700 ease-out group-hover:-translate-y-6 group-data-[active=true]:-translate-y-6">
+      <div className="relative z-10 flex flex-col items-center w-full px-4 transform-gpu transition-transform duration-300 md:duration-700 ease-out group-hover:-translate-y-6 group-data-[active=true]:-translate-y-6 group-focus-within:-translate-y-6">
         <h3 className="text-2xl md:text-4xl font-serif text-white group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] group-data-[active=true]:drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] transition-all duration-500 text-center">
           {project.title}
         </h3>
@@ -119,13 +120,15 @@ export function ProjectCard({ project, cardRef, index, dict }: ProjectCardProps)
     </div>
   );
 
+  // O `group` fica no wrapper focável para que `group-focus-within` reaja ao foco por teclado.
   if (project.link && !project.isPrivate) {
     return (
-      <a 
-        href={project.link} 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        className="block flex-shrink-0 snap-center md:snap-align-none perspective-1000 transform-style-3d focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none rounded-2xl"
+      <a
+        href={project.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-active={isActive}
+        className="group block flex-shrink-0 snap-center md:snap-align-none perspective-1000 transform-style-3d focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none rounded-2xl"
       >
         {CardContent}
       </a>
@@ -133,7 +136,11 @@ export function ProjectCard({ project, cardRef, index, dict }: ProjectCardProps)
   }
 
   return (
-    <div className="block flex-shrink-0 snap-center md:snap-align-none perspective-1000 transform-style-3d focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none rounded-2xl">
+    <div
+      tabIndex={0}
+      data-active={isActive}
+      className="group block flex-shrink-0 snap-center md:snap-align-none perspective-1000 transform-style-3d focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none rounded-2xl"
+    >
       {CardContent}
     </div>
   );

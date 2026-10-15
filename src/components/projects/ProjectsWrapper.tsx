@@ -33,9 +33,52 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
     mm.add("(min-width: 768px)", () => {
       const scrollAmount = () => -(scrollContainer.scrollWidth - window.innerWidth);
 
+      // Métricas de layout (sem transform) recalculadas a cada refresh do ScrollTrigger (load/resize).
+      let containerBaseLeft = 0;
+      let cachedCards: ({ offsetLeft: number; offsetWidth: number } | null)[] = [];
+
+      const cacheMetrics = () => {
+        containerBaseLeft = scrollContainer.parentElement?.getBoundingClientRect().left ?? 0;
+        cachedCards = cardsRef.current.map((card) =>
+          card ? { offsetLeft: card.offsetLeft, offsetWidth: card.offsetWidth } : null
+        );
+      };
+
+      // Executa apenas quando o deslocamento horizontal muda (inclusive durante a suavização do scrub).
+      const updateCards = () => {
+        const containerLeft = containerBaseLeft + Number(gsap.getProperty(scrollContainer, "x"));
+        const windowCenter = window.innerWidth / 2;
+
+        cardsRef.current.forEach((card, i) => {
+          const cached = cachedCards[i];
+          if (!card || !cached) return;
+
+          const cardCenter = containerLeft + cached.offsetLeft + (cached.offsetWidth / 2);
+          const distance = cardCenter - windowCenter;
+          const progress = distance / (window.innerWidth * 0.8);
+
+          const rotateY = progress * -15;
+          const scale = 1 - Math.abs(progress) * 0.05;
+          const z = -Math.abs(progress) * 50;
+          const opacity = 1 - Math.abs(progress) * 0.2;
+          const zIndex = Math.round((1 - Math.abs(progress)) * 100);
+
+          gsap.set(card, {
+            rotateY,
+            scale,
+            z,
+            opacity,
+            zIndex,
+            transformPerspective: 1200,
+            transformOrigin: "center center"
+          });
+        });
+      };
+
       const tween = gsap.to(scrollContainer, {
         x: scrollAmount,
         ease: "none",
+        onUpdate: updateCards,
       });
 
       ScrollTrigger.create({
@@ -81,62 +124,16 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
               ease: "power2.out"
             });
           }
+        },
+        onRefresh: () => {
+          cacheMetrics();
+          updateCards();
         }
       });
 
-      let containerLeft = scrollContainer.getBoundingClientRect().left;
-      const cachedCards = cardsRef.current.map(card => {
-        if (!card) return null;
-        return {
-          offsetLeft: card.offsetLeft,
-          offsetWidth: card.offsetWidth
-        };
-      });
-
-      const updateMetrics = () => {
-        containerLeft = scrollContainer.getBoundingClientRect().left;
-      };
-
-      window.addEventListener("scroll", updateMetrics, { passive: true });
-      window.addEventListener("resize", updateMetrics, { passive: true });
-
-      const updateCards = () => {
-        if (!cardsRef.current || !scrollContainer) return;
-        
-        const windowCenter = window.innerWidth / 2;
-        
-        cardsRef.current.forEach((card, i) => {
-          if (!card || !cachedCards[i]) return;
-          
-          const cached = cachedCards[i]!;
-          const cardCenter = containerLeft + cached.offsetLeft + (cached.offsetWidth / 2);
-          const distance = cardCenter - windowCenter;
-          const progress = distance / (window.innerWidth * 0.8);
-          
-          const rotateY = progress * -15; 
-          const scale = 1 - Math.abs(progress) * 0.05; 
-          const z = -Math.abs(progress) * 50; 
-          const opacity = 1 - Math.abs(progress) * 0.2; 
-          const zIndex = Math.round((1 - Math.abs(progress)) * 100);
-          
-          gsap.set(card, {
-            rotateY,
-            scale,
-            z,
-            opacity,
-            zIndex,
-            transformPerspective: 1200,
-            transformOrigin: "center center"
-          });
-        });
-      };
-
-      gsap.ticker.add(updateCards);
-
       return () => {
-        gsap.ticker.remove(updateCards);
-        window.removeEventListener("scroll", updateMetrics);
-        window.removeEventListener("resize", updateMetrics);
+        // Transforms aplicados nos callbacks não são registrados no contexto do matchMedia.
+        gsap.set(cardsRef.current.filter(Boolean), { clearProps: "transform,opacity,zIndex" });
       };
     });
 

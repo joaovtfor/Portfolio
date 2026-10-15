@@ -15,7 +15,7 @@ export default function WebGLBackground({ eventSource, isMobile }: WebGLBackgrou
   return (
     <WebGLScene eventSource={eventSource as RefObject<HTMLElement>}>
       {isMobile ? <MobileFluidMesh /> : <FluidMesh />}
-      <Particles />
+      <Particles isMobile={isMobile} />
     </WebGLScene>
   );
 }

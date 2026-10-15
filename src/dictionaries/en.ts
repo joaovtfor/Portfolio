@@ -50,6 +50,7 @@ export const en = {
   a11y: {
     skipToContent: "Skip to main content",
     toggleMenu: "Toggle menu",
+    loading: "Loading",
   },
   notFound: {
     message: "Signal lost. The route does not exist.",

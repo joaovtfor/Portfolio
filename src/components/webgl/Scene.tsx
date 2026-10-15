@@ -1,8 +1,10 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useUIStore } from "@/store/uiStore";
 
 interface WebGLSceneProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
@@ -11,27 +13,8 @@ interface WebGLSceneProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function WebGLScene({ children, className, eventSource, ...props }: WebGLSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setInView(entry.isIntersecting);
-      },
-      {
-        threshold: 0,
-        rootMargin: "50px",
-      }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
+  const shouldReduceMotion = useReducedMotion();
+  const setSceneReady = useUIStore((state) => state.setSceneReady);
 
   return (
     <div
@@ -43,9 +26,12 @@ export function WebGLScene({ children, className, eventSource, ...props }: WebGL
       <Canvas
         eventSource={(eventSource || containerRef) as unknown as React.RefObject<HTMLElement>}
         eventPrefix="client"
-        frameloop={inView ? "always" : "never"}
+        // O canvas é um fundo fixo, sempre visível: o loop só para em abas ocultas (rAF).
+        // Com reduced motion, renderiza sob demanda (frame estático).
+        frameloop={shouldReduceMotion ? "demand" : "always"}
         dpr={[1, 1.5]}
         camera={{ position: [0, 0, 5], fov: 45 }}
+        onCreated={setSceneReady}
         style={{
           position: "absolute",
           top: 0,

@@ -50,6 +50,7 @@ export const pt = {
   a11y: {
     skipToContent: "Pular para o conteúdo principal",
     toggleMenu: "Abrir menu",
+    loading: "Carregando",
   },
   notFound: {
     message: "Sinal perdido. A rota não existe.",

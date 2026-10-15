@@ -1,75 +1,53 @@
 "use client";
 
 import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { useReducedMotion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import * as THREE from "three";
 import { useUIStore } from "@/store/uiStore";
 
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
 const vertexShader = `
 uniform float uTime;
-uniform vec2 uMouseWorld;
-uniform vec2 uAttractor;
-uniform float uHasAttractor;
-
 attribute float aSize;
 attribute float aSpeed;
-
 varying float vAlpha;
+varying float vDepth;
 
 void main() {
-    vec3 pos = position;
-    
-    pos.x += sin(uTime * aSpeed + pos.y) * 0.8;
-    pos.y += cos(uTime * aSpeed + pos.x) * 0.8;
-    
-    if (uHasAttractor > 0.5) {
-        float distToAttractor = distance(pos.xy, uAttractor);
-        float effectRadius = 5.0; 
-        
-        if (distToAttractor < effectRadius) {
-            float pull = 1.0 - smoothstep(0.0, effectRadius, distToAttractor);
-            vec2 dir = normalize(uAttractor - pos.xy);
-            
-            pos.xy += dir * pull * 0.8;
-            pos.z += pull * 1.5;
-            
-            pos.z += pull * aSize * 0.5;
-        }
-    }
-
-    float dist = distance(pos.xy, uMouseWorld);
-    float radius = 2.5; 
-    
-    if (dist < radius) {
-        float force = pow((radius - dist) / radius, 2.0); 
-        vec2 dir = normalize(pos.xy - uMouseWorld);
-        
-        pos.xy += dir * force * 2.0;
-        pos.z += force * 1.5;
-    }
-
-    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-    gl_Position = projectionMatrix * mvPosition;
-    
-    gl_PointSize = aSize * (35.0 / -mvPosition.z);
-    
-    float baseAlpha = 0.2 + 0.8 * abs(sin(uTime * aSpeed * 2.0 + pos.x));
-    
-    float depthAlpha = smoothstep(-25.0, -2.0, mvPosition.z);
-    vAlpha = baseAlpha * depthAlpha;
+  vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+  gl_Position = projectionMatrix * mvPosition;
+  
+  gl_PointSize = aSize * (34.0 / -mvPosition.z);
+  
+  float depthFactor = smoothstep(-24.0, -1.5, mvPosition.z);
+  float twinkle = 0.5 + 0.5 * abs(sin(uTime * aSpeed * 2.0 + position.x));
+  vAlpha = depthFactor * twinkle;
+  vDepth = depthFactor;
 }
 `;
 
 const fragmentShader = `
-varying float vAlpha;
 uniform vec3 uColor;
+varying float vAlpha;
+varying float vDepth;
 
 void main() {
-    float dist = distance(gl_PointCoord, vec2(0.5));
-    if (dist > 0.5) discard;
-    float alpha = (0.5 - dist) * 2.0 * vAlpha;
-    gl_FragColor = vec4(uColor, alpha);
+  vec2 coord = gl_PointCoord - vec2(0.5);
+  float dist = length(coord);
+  if (dist > 0.5) discard;
+  
+  float core = smoothstep(0.5, 0.05, dist);
+  float glow = smoothstep(0.5, 0.0, dist) * 0.35;
+  float alpha = (core + glow) * vAlpha;
+  
+  vec3 finalColor = mix(uColor * 0.75, uColor, vDepth);
+  gl_FragColor = vec4(finalColor, alpha);
 }
 `;
 
@@ -78,90 +56,181 @@ function prng(seed: number) {
   return x - Math.floor(x);
 }
 
-export function Particles() {
+interface ParticlesProps {
+  isMobile?: boolean;
+}
+
+export function Particles({ isMobile = false }: ParticlesProps) {
   const { viewport } = useThree();
+  const geometryRef = useRef<THREE.BufferGeometry>(null);
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const groupRef = useRef<THREE.Group>(null);
-  
-  const count = 1500;
+  const scrollData = useRef({ progress: 0 });
 
-  const [positions, sizes, speeds] = useMemo(() => {
-    const pos = new Float32Array(count * 3);
+  const count = isMobile ? 800 : 2600;
+
+  const [basePositions, currentPositions, sizes, speeds] = useMemo(() => {
+    const base = new Float32Array(count * 3);
+    const current = new Float32Array(count * 3);
     const siz = new Float32Array(count);
     const spd = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
-      pos[i * 3] = (prng(i * 3) - 0.5) * 35;
-      pos[i * 3 + 1] = (prng(i * 3 + 1) - 0.5) * 35;
-      pos[i * 3 + 2] = (prng(i * 3 + 2) - 0.5) * 25;
+      const i3 = i * 3;
 
-      siz[i] = prng(i * 7) * 3.5 + 1.0;
-      spd[i] = prng(i * 11) * 0.4 + 0.1;
+      const x = (prng(i * 3) - 0.5) * 38;
+      const y = (prng(i * 3 + 1) - 0.5) * 28;
+      const z = (prng(i * 3 + 2) - 0.5) * 22 - 2;
+
+      base[i3] = x;
+      base[i3 + 1] = y;
+      base[i3 + 2] = z;
+
+      current[i3] = x;
+      current[i3 + 1] = y;
+      current[i3 + 2] = z;
+
+      siz[i] = prng(i * 7) * 2.2 + 1.0;
+      spd[i] = prng(i * 11) * 0.35 + 0.1;
     }
 
-    return [pos, siz, spd];
+    return [base, current, siz, spd];
   }, [count]);
 
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uMouseWorld: { value: new THREE.Vector2(0, 0) },
-      uColor: { value: (() => {
-        if (typeof document !== 'undefined') {
-          const fg = getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim();
-          if (fg) return new THREE.Color(fg);
-        }
-        return new THREE.Color(0.64, 0.83, 0.84);
-      })() },
-      uAttractor: { value: new THREE.Vector2(0, 0) },
-      uHasAttractor: { value: 0.0 },
+      uColor: {
+        value: (() => {
+          if (typeof document !== "undefined") {
+            const fg = getComputedStyle(document.documentElement).getPropertyValue("--foreground").trim();
+            if (fg) return new THREE.Color(fg);
+          }
+          return new THREE.Color(0.52, 0.91, 0.92);
+        })(),
+      },
     }),
     []
   );
 
   const shouldReduceMotion = useReducedMotion();
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const trigger = ScrollTrigger.create({
+      start: 0,
+      end: "max",
+      onUpdate: (self) => {
+        scrollData.current.progress = self.progress;
+      },
+    });
+
+    return () => {
+      trigger.kill();
+    };
+  }, []);
+
   useFrame((state) => {
-    if (!materialRef.current) return;
-    
+    if (!geometryRef.current || !materialRef.current) return;
+
     if (!shouldReduceMotion) {
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
     }
-    
-    if (!shouldReduceMotion) {
-      if (groupRef.current) {
-        groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, (state.pointer.y * Math.PI) / 8, 0.03);
-        groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, (state.pointer.x * Math.PI) / 8, 0.03);
-      }
+
+    if (!shouldReduceMotion && groupRef.current) {
+      const targetPosZ = Math.sin(scrollData.current.progress * Math.PI) * 1.5;
+      const targetRotY = scrollData.current.progress * 0.15;
+      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetPosZ, 0.04);
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.04);
     }
-    
-    const targetX = (state.pointer.x * viewport.width) / 2;
-    const targetY = (state.pointer.y * viewport.height) / 2;
-    const lerpFactor = 0.1;
-    materialRef.current.uniforms.uMouseWorld.value.x += (targetX - materialRef.current.uniforms.uMouseWorld.value.x) * lerpFactor;
-    materialRef.current.uniforms.uMouseWorld.value.y += (targetY - materialRef.current.uniforms.uMouseWorld.value.y) * lerpFactor;
+
+    const pointerWorldX = (state.pointer.x * viewport.width) / 2;
+    const pointerWorldY = (state.pointer.y * viewport.height) / 2;
 
     const interactivePos = useUIStore.getState().interactivePositions[0];
-    
+    let hasAttractor = false;
+    let attractorX = 0;
+    let attractorY = 0;
+
     if (interactivePos) {
+      hasAttractor = true;
       const ndcX = (interactivePos.x / state.size.width) * 2 - 1;
       const ndcY = -(interactivePos.y / state.size.height) * 2 + 1;
-      
-      const worldX = (ndcX * viewport.width) / 2;
-      const worldY = (ndcY * viewport.height) / 2;
-      
-      materialRef.current.uniforms.uAttractor.value.set(worldX, worldY);
-      materialRef.current.uniforms.uHasAttractor.value += (1.0 - materialRef.current.uniforms.uHasAttractor.value) * 0.1;
-    } else {
-      materialRef.current.uniforms.uHasAttractor.value += (0.0 - materialRef.current.uniforms.uHasAttractor.value) * 0.1;
+      attractorX = (ndcX * viewport.width) / 2;
+      attractorY = (ndcY * viewport.height) / 2;
     }
+
+    const posAttr = geometryRef.current.attributes.position;
+    const positions = posAttr.array as Float32Array;
+
+    const time = shouldReduceMotion ? 0 : state.clock.elapsedTime;
+    const mouseRadius = 4.5;
+    const mouseRadiusSq = mouseRadius * mouseRadius;
+    const lerpFactor = 0.075;
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      const baseX = basePositions[i3];
+      const baseY = basePositions[i3 + 1];
+      const baseZ = basePositions[i3 + 2];
+
+      const speed = speeds[i];
+      let targetX = baseX + Math.sin(time * speed + baseY) * 0.35;
+      let targetY = baseY + Math.cos(time * speed + baseX) * 0.35;
+      let targetZ = baseZ;
+
+      let currX = positions[i3];
+      let currY = positions[i3 + 1];
+      let currZ = positions[i3 + 2];
+
+      if (!shouldReduceMotion) {
+        const dxMouse = currX - pointerWorldX;
+        const dyMouse = currY - pointerWorldY;
+        const distSqMouse = dxMouse * dxMouse + dyMouse * dyMouse;
+
+        if (distSqMouse < mouseRadiusSq && distSqMouse > 0.0001) {
+          const distMouse = Math.sqrt(distSqMouse);
+          const norm = 1.0 - distMouse / mouseRadius;
+          const push = norm * norm * 4.2;
+          const invDist = 1.0 / distMouse;
+
+          targetX += dxMouse * invDist * push;
+          targetY += dyMouse * invDist * push;
+          targetZ += (baseZ >= -4.0 ? -1.0 : 1.0) * push * 1.6;
+        }
+
+        if (hasAttractor) {
+          const dxAttr = attractorX - currX;
+          const dyAttr = attractorY - currY;
+          const distSqAttr = dxAttr * dxAttr + dyAttr * dyAttr;
+
+          if (distSqAttr < 36.0 && distSqAttr > 0.0001) {
+            const distAttr = Math.sqrt(distSqAttr);
+            const pull = (1.0 - distAttr / 6.0) * 1.5;
+            targetX += (dxAttr / distAttr) * pull;
+            targetY += (dyAttr / distAttr) * pull;
+          }
+        }
+      }
+
+      currX += (targetX - currX) * lerpFactor;
+      currY += (targetY - currY) * lerpFactor;
+      currZ += (targetZ - currZ) * lerpFactor;
+
+      positions[i3] = currX;
+      positions[i3 + 1] = currY;
+      positions[i3 + 2] = currZ;
+    }
+
+    posAttr.needsUpdate = true;
   });
 
   return (
     <group ref={groupRef}>
       <points>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" count={count} args={[positions, 3]} />
+        <bufferGeometry ref={geometryRef}>
+          <bufferAttribute attach="attributes-position" count={count} args={[currentPositions, 3]} />
           <bufferAttribute attach="attributes-aSize" count={count} args={[sizes, 1]} />
           <bufferAttribute attach="attributes-aSpeed" count={count} args={[speeds, 1]} />
         </bufferGeometry>
@@ -172,7 +241,7 @@ export function Particles() {
           uniforms={uniforms}
           transparent={true}
           depthWrite={false}
-          blending={THREE.AdditiveBlending} 
+          blending={THREE.AdditiveBlending}
         />
       </points>
     </group>

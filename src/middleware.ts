@@ -20,6 +20,26 @@ const cspHeader = `
   ${!isDev ? "upgrade-insecure-requests;" : ""}
 `.replace(/\s{2,}/g, ' ').trim();
 
+// Escolhe o idioma suportado de maior peso (q) no Accept-Language.
+// Sem header (ex.: crawlers) usa o padrão; idiomas não suportados caem em inglês.
+function negotiateLocale(acceptLanguage: string | null): string {
+  if (!acceptLanguage) return defaultLocale;
+
+  const ranked = acceptLanguage
+    .split(',')
+    .map((part) => {
+      const [tag, ...params] = part.trim().toLowerCase().split(';');
+      const qParam = params.find((p) => p.trim().startsWith('q='));
+      const q = qParam ? Number.parseFloat(qParam.trim().slice(2)) : 1;
+      return { language: tag.split('-')[0], q: Number.isNaN(q) ? 0 : q };
+    })
+    .filter(({ q }) => q > 0)
+    .sort((a, b) => b.q - a.q);
+
+  const match = ranked.find(({ language }) => locales.includes(language));
+  return match ? match.language : 'en';
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -45,14 +65,7 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
-  const acceptLanguage = request.headers.get('accept-language');
-  let localeToRedirect = defaultLocale;
-  
-  if (acceptLanguage) {
-    if (acceptLanguage.includes('en')) {
-      localeToRedirect = 'en';
-    }
-  }
+  const localeToRedirect = negotiateLocale(request.headers.get('accept-language'));
 
   request.nextUrl.pathname = `/${localeToRedirect}${pathname}`;
   return NextResponse.redirect(request.nextUrl);

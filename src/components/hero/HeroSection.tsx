@@ -22,9 +22,10 @@ export function HeroSection({ dict, resume }: HeroSectionProps) {
 
   const handleScrollToContact = () => {
     if (lenis) {
-      lenis.scrollTo("#contact", { 
-        duration: 8.0, 
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) 
+      lenis.scrollTo("#contact", {
+        duration: 1.8,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        immediate: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
       });
     } else {
       const contactEl = document.getElementById("contact");
