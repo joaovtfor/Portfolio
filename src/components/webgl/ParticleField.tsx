@@ -74,6 +74,7 @@ function createSimulation(gl: THREE.WebGLRenderer, side: number, initial: Float3
     uScrollVelocity: { value: 0 },
     uPointer: { value: new THREE.Vector2(10, 10) },
     uPointerStrength: { value: 0 },
+    uPointerVelocity: { value: new THREE.Vector2() },
     uAttractor: { value: new THREE.Vector3() },
     uViewProjection: { value: new THREE.Matrix4() },
     uAspect: { value: 1 },
@@ -150,7 +151,7 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
 
   const progress = useRef(0);
   const clickTarget = useRef(0);
-  const pointer = useRef({ lastMove: -Infinity, strength: 0, touching: false });
+  const pointer = useRef({ lastMove: -Infinity, strength: 0, touching: false, previous: new THREE.Vector2(), velocity: new THREE.Vector2() });
 
   // Força do ponteiro: ativa após movimento recente (mouse) ou enquanto há toque.
   useEffect(() => {
@@ -196,7 +197,7 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
     // Progresso narrativo suavizado; `sequence` mapeia cada passo para uma forma.
     const targetProgress = driver === "click" ? clickTarget.current : frame.progress;
     const sequence = driver === "click" ? null : frame.sequence;
-    progress.current += (targetProgress - progress.current) * (1 - Math.exp(-dt * 3));
+    progress.current += (targetProgress - progress.current) * (1 - Math.exp(-dt * 7));
     if (shouldReduceMotion) progress.current = targetProgress;
 
     const step = Math.max(0, progress.current);
@@ -217,9 +218,19 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
       return;
     }
 
-    const now = performance.now();
-    const pointerActive = pointer.current.touching || now - pointer.current.lastMove < 1500;
-    pointer.current.strength += ((pointerActive ? 1 : 0) - pointer.current.strength) * (1 - Math.exp(-dt * 4));
+    // Força do cursor proporcional à sua velocidade (NDC/s, corrigida pelo aspect ratio):
+    // ataque rápido (~40 ms) e soltura suave (~250 ms); parado, só um resíduo sutil.
+    const current = pointer.current;
+    const aspect = state.size.width / Math.max(state.size.height, 1);
+    const instantX = ((state.pointer.x - current.previous.x) / dt) * aspect;
+    const instantY = (state.pointer.y - current.previous.y) / dt;
+    current.previous.copy(state.pointer);
+    current.velocity.lerp({ x: instantX, y: instantY }, 1 - Math.exp(-dt * 12));
+    const speed = current.velocity.length();
+    const recentlyMoved = performance.now() - current.lastMove < 1500;
+    const targetStrength = current.touching ? 1 : recentlyMoved ? Math.min(0.15 + speed * 0.45, 1.5) : 0;
+    const rate = targetStrength > current.strength ? 25 : 4;
+    current.strength += (targetStrength - current.strength) * (1 - Math.exp(-dt * rate));
 
     const attractor = useUIStore.getState().interactivePositions[0];
 
@@ -232,7 +243,8 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
     velocityUniforms.uFlow.value = THREE.MathUtils.lerp(SHAPE_STYLE.flow[from], SHAPE_STYLE.flow[to], morph);
     velocityUniforms.uScrollVelocity.value += (frame.velocity - velocityUniforms.uScrollVelocity.value) * (1 - Math.exp(-dt * 6));
     velocityUniforms.uPointer.value.copy(state.pointer);
-    velocityUniforms.uPointerStrength.value = pointer.current.strength;
+    velocityUniforms.uPointerStrength.value = current.strength;
+    velocityUniforms.uPointerVelocity.value.copy(current.velocity).clampLength(0, 3);
     velocityUniforms.uAspect.value = state.size.width / Math.max(state.size.height, 1);
     velocityUniforms.uViewProjection.value.multiplyMatrices(state.camera.projectionMatrix, state.camera.matrixWorldInverse);
 

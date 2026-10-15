@@ -12,6 +12,7 @@ uniform float uFlow;
 uniform float uScrollVelocity;
 uniform vec2 uPointer;
 uniform float uPointerStrength;
+uniform vec2 uPointerVelocity;
 uniform vec3 uAttractor;
 uniform mat4 uViewProjection;
 uniform float uAspect;
@@ -27,10 +28,11 @@ void main() {
 
   // Mola em direção à forma-alvo; a rigidez varia por partícula para o morph não andar em bloco.
   vec3 target = mix(texture2D(uShapeA, uv).xyz, texture2D(uShapeB, uv).xyz, uMorph);
-  vec3 force = (target - position) * mix(2.5, 5.0, seed);
+  vec3 force = (target - position) * mix(6.0, 10.0, seed);
 
-  // Fluxo de curl noise; a velocidade do scroll agita o campo.
-  float flow = uFlow + uScrollVelocity * 0.6;
+  // Fluxo de curl noise (escalado junto com a rigidez para manter o aspecto líquido);
+  // a velocidade do scroll agita o campo.
+  float flow = (uFlow + uScrollVelocity * 0.6) * 1.6;
   force += curlNoise(position * 0.35 + vec3(0.0, 0.0, uTime * 0.08)) * flow;
 
   // Ponteiro em espaço de tela (projeção view-projection), corrigido pelo aspect ratio.
@@ -39,8 +41,10 @@ void main() {
   vec2 toParticle = (ndc - uPointer) * vec2(uAspect, 1.0);
   float pointerDistance = length(toParticle);
   float influence = (1.0 - smoothstep(0.0, 0.32, pointerDistance)) * uPointerStrength;
-  force.xy += (toParticle / max(pointerDistance, 0.0001)) * influence * 9.0;
-  force.z += influence * 3.0;
+  // Força proporcional à velocidade do cursor: empurra para fora e arrasta um rastro na direção do movimento.
+  force.xy += (toParticle / max(pointerDistance, 0.0001)) * influence * 20.0;
+  force.xy += uPointerVelocity * influence * 6.0;
+  force.z += influence * 6.0;
 
   // Atrator do card em hover: puxa e orbita ao redor da coordenada do card.
   if (uAttractor.z > 0.001) {
@@ -48,11 +52,11 @@ void main() {
     float attractorDistance = max(length(toAttractor), 0.0001);
     float pull = (1.0 - smoothstep(0.0, 0.6, attractorDistance)) * uAttractor.z;
     vec2 direction = toAttractor / attractorDistance;
-    force.xy += (direction * 3.0 + vec2(-direction.y, direction.x) * 4.0) * pull;
+    force.xy += (direction * 7.0 + vec2(-direction.y, direction.x) * 9.0) * pull;
   }
 
   velocity += force * uDelta;
-  velocity *= exp(-3.2 * uDelta);
+  velocity *= exp(-5.0 * uDelta);
   gl_FragColor = vec4(velocity, 1.0);
 }
 `;
