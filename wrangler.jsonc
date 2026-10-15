@@ -10,7 +10,9 @@
 	},
 	"observability": {
 		"enabled": true
-	}
+	},
+	// Worker Previews: cada branch não-produção (ex.: develop) ganha um ambiente via `wrangler preview`.
+	"previews": {}
 	// Páginas são dinâmicas (CSP com nonce): sem ISR, logo sem R2/incremental cache.
 	// Segredos (RESEND_API_KEY) via `wrangler secret put`; localmente em `.dev.vars`.
 }
