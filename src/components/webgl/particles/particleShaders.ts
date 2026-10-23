@@ -29,7 +29,24 @@ uniform vec4 uMilestones[6];
 uniform float uRopeDepth;
 uniform vec2 uRopeHalf;
 
+// Modelos que "olham" para o cursor: centro (xyz) e raio de influência (w; 0 = forma sem modelo)
+// das formas A e B, e a rotação suavizada de cada uma.
+uniform vec4 uLookA;
+uniform vec4 uLookB;
+uniform mat3 uLookRotationA;
+uniform mat3 uLookRotationB;
+
 ${CURL_NOISE}
+
+// Gira o alvo em torno do centro do modelo; a poeira longe do modelo não é afetada.
+// "follow" indica o quanto a partícula pertence ao modelo (mola mais rígida para acompanhar o cursor).
+vec3 lookTarget(vec3 target, vec4 anchor, mat3 rotation, out float follow) {
+  follow = 0.0;
+  if (anchor.w <= 0.0) return target;
+  vec3 local = target - anchor.xyz;
+  follow = 1.0 - smoothstep(anchor.w, anchor.w * 1.5, length(local));
+  return mix(target, anchor.xyz + rotation * local, follow);
+}
 
 vec3 ropeWorld(vec2 ndc) {
   return vec3(ndc * uRopeHalf, uRopeDepth);
@@ -93,10 +110,16 @@ void main() {
   vec3 targetB = texture2D(uShapeB, uv).xyz;
   if (uRopeA > 0.5) targetA = ropeTarget(targetA, ropeParams, lockA);
   if (uRopeB > 0.5) targetB = ropeTarget(targetB, ropeParams, lockB);
+  float followA;
+  float followB;
+  targetA = lookTarget(targetA, uLookA, uLookRotationA, followA);
+  targetB = lookTarget(targetB, uLookB, uLookRotationB, followB);
   vec3 target = mix(targetA, targetB, uMorph);
   float lock = mix(lockA, lockB, uMorph);
+  float follow = mix(followA, followB, uMorph);
   // Partículas travadas na corda: mola mais rígida e quase sem ruído (leitura de linha única).
-  vec3 force = (target - position) * mix(6.0, 10.0, seed) * (1.0 + lock * 1.2);
+  // Partículas de modelo: mola mais rígida para a rotação de "olhar" quase não ter atraso.
+  vec3 force = (target - position) * mix(6.0, 10.0, seed) * (1.0 + lock * 1.2 + follow * 2.0);
 
   // Fluxo de curl noise (escalado junto com a rigidez para manter o aspecto líquido);
   // a velocidade do scroll agita o campo.

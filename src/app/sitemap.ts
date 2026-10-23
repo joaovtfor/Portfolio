@@ -2,15 +2,11 @@ import { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 import { locales } from "@/dictionaries";
 import { getProjects } from "@/data/projects";
-import { LAB_EXPERIMENTS } from "@/data/lab";
 
+// O Lab (/labs) é área de testes de layout e fica de fora (noindex).
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
-  const paths = [
-    "",
-    ...getProjects("pt").map((project) => `/work/${project.slug}`),
-    ...LAB_EXPERIMENTS.map((slug) => `/lab/${slug}`),
-  ];
+  const paths = ["", ...getProjects("pt").map((project) => `/work/${project.slug}`)];
 
   return locales.flatMap((locale) =>
     paths.map((path) => ({

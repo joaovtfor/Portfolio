@@ -1,4 +1,4 @@
-export const LAB_EXPERIMENTS = ["flow-field", "liquid-image"] as const;
+export const LAB_EXPERIMENTS = ["flow-field", "liquid-image", "background-studio"] as const;
 
 export type LabSlug = (typeof LAB_EXPERIMENTS)[number];
 

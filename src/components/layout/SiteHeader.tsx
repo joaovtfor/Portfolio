@@ -10,9 +10,11 @@ import { SCENES, useSceneStore, type SceneName } from "@/store/sceneStore";
 const NAV_ITEMS: { id: SceneName; key: keyof Dictionary["nav"] }[] = [
   { id: "about", key: "about" },
   { id: "work", key: "work" },
-  { id: "lab", key: "lab" },
   { id: "experience", key: "experience" },
 ];
+
+// O Lab saiu da home (vive em /labs, para testes): a forma continua em SCENES, mas não conta no índice.
+const HOME_SCENES: SceneName[] = SCENES.filter((scene) => scene !== "lab");
 
 interface SiteHeaderProps {
   dict: Dictionary;
@@ -29,8 +31,8 @@ export function SiteHeader({ dict, locale, name }: SiteHeaderProps) {
   const isHome = pathname === `/${locale}`;
   const nextLocale: Locale = locale === "pt" ? "en" : "pt";
   const localizedPath = `/${nextLocale}${pathname.slice(locale.length + 1)}`;
-  const sectionNumber = String(SCENES.indexOf(activeScene) + 1).padStart(2, "0");
-  const sectionTotal = String(SCENES.length).padStart(2, "0");
+  const sectionNumber = String(HOME_SCENES.indexOf(activeScene) + 1).padStart(2, "0");
+  const sectionTotal = String(HOME_SCENES.length).padStart(2, "0");
 
   // Na home, rola com Lenis; nas demais rotas o Link navega para `/{locale}#secao`.
   const scrollToSection = (id: SceneName | "top") => (event: React.MouseEvent) => {

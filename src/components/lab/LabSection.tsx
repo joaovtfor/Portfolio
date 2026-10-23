@@ -20,10 +20,9 @@ export function LabSection({ dict, locale }: LabSectionProps) {
     >
       <div className="w-full max-w-[1440px] mx-auto px-6 md:px-12 lg:px-20">
         <div className="max-w-xl">
-          <p aria-hidden="true" className="font-mono text-xs uppercase tracking-widest text-subtle">04 —</p>
-          <h2 id="lab-title" className="mt-3 text-3xl md:text-4xl font-serif text-ink tracking-[0.1em] uppercase">
+          <h1 id="lab-title" className="text-3xl md:text-4xl font-serif text-ink tracking-[0.1em] uppercase">
             {dict.lab.title}
-          </h2>
+          </h1>
           <p className="mt-4 text-muted font-sans text-sm md:text-base leading-relaxed">{dict.lab.description}</p>
         </div>
 
@@ -39,7 +38,7 @@ export function LabSection({ dict, locale }: LabSectionProps) {
                 transition={{ duration: 0.8, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
               >
                 <Link
-                  href={`/${locale}/lab/${slug}`}
+                  href={`/${locale}/labs/${slug}`}
                   data-cursor-label={dict.cursor.open}
                   className="group relative flex flex-col justify-between min-h-[280px] md:min-h-[340px] p-8 md:p-10 rounded-2xl border border-line bg-surface/40 backdrop-blur-md overflow-hidden hover:border-foreground/50 focus-visible:border-foreground transition-colors duration-500 focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none"
                 >
@@ -51,7 +50,7 @@ export function LabSection({ dict, locale }: LabSectionProps) {
                     <p className="font-mono text-xs uppercase tracking-widest text-foreground">
                       {experiment.techniques.join(" · ")}
                     </p>
-                    <h3 className="mt-4 font-serif text-3xl md:text-4xl uppercase text-ink">{experiment.title}</h3>
+                    <h2 className="mt-4 font-serif text-3xl md:text-4xl uppercase text-ink">{experiment.title}</h2>
                     <p className="mt-4 max-w-sm font-sans text-sm text-muted leading-relaxed">{experiment.description}</p>
                   </div>
 

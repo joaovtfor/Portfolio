@@ -2,7 +2,6 @@ export const pt = {
   nav: {
     about: "Sobre",
     work: "Trabalhos",
-    lab: "Lab",
     experience: "Experiência",
     contact: "Contato",
     home: "Início",
@@ -57,6 +56,23 @@ export const pt = {
         description: "Distorção de imagem por shader, com ondulação guiada pela velocidade do ponteiro e separação RGB.",
         instructions: "Mova o ponteiro rápido sobre a imagem para criar ondas.",
         techniques: ["Fragment shader", "Velocity field", "RGB shift"],
+      },
+      "background-studio": {
+        title: "Background Studio",
+        description: "Variações do fundo do site lado a lado, atrás das partículas reais: fluido, matriz de pontos, topográfico, aurora e terminal.",
+        instructions: "Teclas 1–5 trocam o fundo, P liga/desliga as partículas. Clique para alternar a forma.",
+        techniques: ["Domain warping", "Isolinhas", "Multi-pass"],
+      },
+    },
+    studio: {
+      controls: "Variações do fundo",
+      particles: "Partículas",
+      variants: {
+        fluid: "Fluido",
+        dots: "Pontos",
+        topographic: "Topográfico",
+        aurora: "Aurora",
+        terminal: "Terminal",
       },
     },
   },

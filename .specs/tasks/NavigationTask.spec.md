@@ -9,7 +9,7 @@ Manter, entre navegações, os elementos que dão continuidade à experiência: 
 - `SceneDirector` (Client, sem UI): lê os elementos `[data-scene]` e publica no `sceneStore` (Zustand) a seção ativa e o progresso/velocidade transitórios. Nunca manipula objetos 3D.
 
 ## 3. Coreografias
-- Header fixo com `mix-blend-difference`: logo `>_`, links (Sobre, Trabalhos, Lab, Experiência), índice "0N / 06" em Geist Mono, PT/EN e CTA Contato. Links usam Lenis para rolar; fora da home levam a `/{locale}#secao`.
+- Header fixo com `mix-blend-difference`: logo `>_`, links (Sobre, Trabalhos, Experiência), índice "0N / 05" em Geist Mono (o Lab vive em `/labs`, fora da home e do índice), PT/EN e CTA Contato. Links usam Lenis para rolar; fora da home levam a `/{locale}#secao`.
 - Footer: nome, ano, hora local de Passo Fundo (atualizada por minuto), redes e "voltar ao topo".
 - Cursor: rótulo contextual a partir de `data-cursor-label`.
 

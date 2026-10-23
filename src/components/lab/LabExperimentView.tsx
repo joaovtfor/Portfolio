@@ -11,6 +11,7 @@ import { useUIStore } from "@/store/uiStore";
 
 const FlowFieldExperiment = dynamic(() => import("./experiments/FlowFieldExperiment"), { ssr: false });
 const LiquidImageExperiment = dynamic(() => import("./experiments/LiquidImageExperiment"), { ssr: false });
+const BackgroundStudioExperiment = dynamic(() => import("./experiments/BackgroundStudioExperiment"), { ssr: false });
 
 interface LabExperimentViewProps {
   dict: Dictionary;
@@ -33,17 +34,17 @@ export function LabExperimentView({ dict, locale, slug }: LabExperimentViewProps
   return (
     <section data-scene="lab" aria-labelledby="experiment-title" className="relative w-full h-[100svh] overflow-hidden bg-background">
       <div className="absolute inset-0">
-        {slug === "flow-field" ? (
-          <FlowFieldExperiment isMobile={isMobile} fallback={dict.lab.webglError} />
-        ) : (
-          <LiquidImageExperiment fallback={dict.lab.webglError} />
+        {slug === "flow-field" && <FlowFieldExperiment isMobile={isMobile} fallback={dict.lab.webglError} />}
+        {slug === "liquid-image" && <LiquidImageExperiment fallback={dict.lab.webglError} />}
+        {slug === "background-studio" && (
+          <BackgroundStudioExperiment isMobile={isMobile} fallback={dict.lab.webglError} labels={dict.lab.studio} />
         )}
       </div>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 px-6 pt-24 pb-24 md:p-12 flex flex-col md:flex-row md:items-end justify-between gap-8 bg-gradient-to-t from-background/90 via-background/40 to-transparent">
         <div className="max-w-md">
           <Link
-            href={`/${locale}#lab`}
+            href={`/${locale}/labs`}
             className="pointer-events-auto inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted hover:text-ink transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none"
           >
             <span aria-hidden="true">←</span> {dict.lab.back}

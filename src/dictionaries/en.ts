@@ -4,7 +4,6 @@ export const en: typeof pt = {
   nav: {
     about: "About",
     work: "Work",
-    lab: "Lab",
     experience: "Experience",
     contact: "Contact",
     home: "Home",
@@ -59,6 +58,23 @@ export const en: typeof pt = {
         description: "Shader-based image distortion, with ripples driven by pointer velocity and RGB split.",
         instructions: "Move the pointer quickly over the image to create waves.",
         techniques: ["Fragment shader", "Velocity field", "RGB shift"],
+      },
+      "background-studio": {
+        title: "Background Studio",
+        description: "The site's background variations side by side, behind the real particles: fluid, dot matrix, topographic, aurora and terminal.",
+        instructions: "Keys 1–5 switch the background, P toggles the particles. Click to switch shapes.",
+        techniques: ["Domain warping", "Isolines", "Multi-pass"],
+      },
+    },
+    studio: {
+      controls: "Background variations",
+      particles: "Particles",
+      variants: {
+        fluid: "Fluid",
+        dots: "Dots",
+        topographic: "Topographic",
+        aurora: "Aurora",
+        terminal: "Terminal",
       },
     },
   },

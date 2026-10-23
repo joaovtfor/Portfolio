@@ -7,7 +7,7 @@ Renderizar a primeira dobra (100svh) com impacto visual imediato ("Monolito"): s
 - `HeroSection` (Client Component - coreografia de entrada após o preloader).
 - `HeroTitle` (Client Component - animação letra a letra via Framer Motion).
 - `HeroButton` (Client Component - CTA "Ver trabalhos", rola até `#work`).
-- O fundo WebGL **não** pertence ao hero: vive no shell (ver `NavigationTask.spec.md`). A seção marca `data-scene="hero"` para o motor de partículas formar o monolito.
+- O fundo WebGL **não** pertence ao hero: vive no shell (ver `NavigationTask.spec.md`). A seção marca `data-scene="hero"` para o motor de partículas formar o logo do React (modelo `.glb`).
 
 ## 3. Comportamento
 - Statement e metadados (cargo, foco, stack) usam a voz técnica (Geist Mono), mínimo `text-xs`.

@@ -86,13 +86,15 @@ export function AboutSection({ dict, resume }: AboutSectionProps) {
           </dl>
         </div>
 
-        <div className="md:col-span-4 lg:col-start-9 md:pt-16">
+        {/* Desktop: a stack fica fixa (sticky, logo abaixo do header) num painel compacto enquanto o texto
+            rola; o icosaedro de partículas ocupa o espaço livre abaixo dele (forma `about` em shapes.ts). */}
+        <div className="md:col-span-4 lg:col-start-9 md:self-start md:sticky md:top-24 md:rounded-2xl md:border md:border-line md:bg-background/30 md:backdrop-blur-md md:px-6 md:py-5">
           <h3 className="font-mono text-xs uppercase tracking-widest text-subtle">{dict.about.stackTitle}</h3>
-          <ul className="mt-6 flex flex-col divide-y divide-line border-y border-line">
+          <ul className="mt-6 md:mt-3 flex flex-col divide-y divide-line border-y border-line">
             {resume.skillGroups.map((group) => (
-              <li key={group.label} className="py-5">
+              <li key={group.label} className="py-5 md:py-2.5">
                 <p className="font-mono text-xs uppercase tracking-widest text-foreground">{group.label}</p>
-                <p className="mt-2 font-sans text-sm leading-relaxed text-muted">
+                <p className="mt-2 md:mt-1 font-sans text-sm md:text-xs leading-relaxed text-muted">
                   {group.items.join(" · ")}
                 </p>
               </li>

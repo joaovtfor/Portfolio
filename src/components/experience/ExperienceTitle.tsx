@@ -53,7 +53,7 @@ export function ExperienceTitle({ dict, resume, locale }: ExperienceTitleProps) 
       transition={{ duration: 1, ease: "easeOut" }}
       className="w-full md:w-1/2 flex flex-col items-center md:items-start md:sticky md:top-[30svh] h-fit self-start pt-12 md:pt-0 md:pl-4 lg:pl-8 z-20"
     >
-      <p aria-hidden="true" className="font-mono text-xs uppercase tracking-widest text-subtle">05 —</p>
+      <p aria-hidden="true" className="font-mono text-xs uppercase tracking-widest text-subtle">04 —</p>
       <h2 id="experience-title" className="mt-3 text-3xl lg:text-4xl font-serif text-ink tracking-[0.1em] text-center md:text-left uppercase break-words w-full">
         {dict.experience.title}
       </h2>

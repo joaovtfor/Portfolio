@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 import { GPUComputationRenderer, type Variable } from "three/examples/jsm/misc/GPUComputationRenderer.js";
 import { EXPERIENCE_SHAPE, generateShapes, MAX_MILESTONES, SHAPE_STYLE } from "./particles/shapes";
+import { loadModels, type ModelSet } from "./particles/models";
 import {
   positionShader,
   renderFragmentShader,
@@ -33,6 +34,10 @@ const MAX_ROPE_VERTICES = 12;
 // Profundidade da corda e meia-altura visível nessa profundidade (câmera em z=5, fov 45°).
 const ROPE_DEPTH = -3;
 const ROPE_HALF_HEIGHT = (5 - ROPE_DEPTH) * Math.tan(Math.PI / 8);
+// Os modelos "olham" para o cursor projetado num plano à frente deles: quanto maior a distância,
+// mais sutil a rotação (4 unidades ≈ até 35° nas bordas da tela no desktop).
+const LOOK_DISTANCE = 4;
+const UP = new THREE.Vector3(0, 1, 0);
 
 interface RenderUniforms {
   [uniform: string]: THREE.IUniform;
@@ -92,6 +97,10 @@ function createSimulation(gl: THREE.WebGLRenderer, side: number, initial: Float3
     uMilestones: { value: Array.from({ length: MAX_MILESTONES }, () => new THREE.Vector4()) },
     uRopeDepth: { value: ROPE_DEPTH },
     uRopeHalf: { value: new THREE.Vector2(ROPE_HALF_HEIGHT, ROPE_HALF_HEIGHT) },
+    uLookA: { value: new THREE.Vector4() },
+    uLookB: { value: new THREE.Vector4() },
+    uLookRotationA: { value: new THREE.Matrix3() },
+    uLookRotationB: { value: new THREE.Matrix3() },
   });
 
   const error = gpu.init();
@@ -114,14 +123,32 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
   // Formas regeneradas apenas quando a proporção muda de forma perceptível.
   const aspect = Math.round((size.width / Math.max(size.height, 1)) * 10) / 10;
 
+  // Modelos .glb carregados em segundo plano: até chegarem, as formas deles são nuvens soltas,
+  // e as partículas se condensam no modelo quando ele fica pronto.
+  const [models, setModels] = useState<ModelSet | null>(null);
+  useEffect(() => {
+    let active = true;
+    loadModels()
+      .then((loaded) => {
+        if (!active) return;
+        setModels(loaded);
+        invalidate();
+      })
+      .catch((error: unknown) => console.warn("[ParticleField] Modelos indisponíveis:", error));
+    return () => {
+      active = false;
+    };
+  }, [invalidate]);
+
   const generated = useMemo(() => {
-    const { shapes, ropeParams } = generateShapes(side, aspect);
+    const { shapes, ropeParams, anchors } = generateShapes(side, aspect, models);
     return {
       shapeTextures: shapes.map((data) => createDataTexture(data, side)),
       ropeTexture: createDataTexture(ropeParams, side),
+      anchors,
     };
-  }, [side, aspect]);
-  const { shapeTextures, ropeTexture } = generated;
+  }, [side, aspect, models]);
+  const { shapeTextures, ropeTexture, anchors } = generated;
   useEffect(
     () => () => {
       generated.shapeTextures.forEach((texture) => texture.dispose());
@@ -177,6 +204,14 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
   const ropeFill = useRef(0);
   const clickTarget = useRef(0);
   const pointer = useRef({ lastMove: -Infinity, strength: 0, touching: false, previous: new THREE.Vector2(), velocity: new THREE.Vector2() });
+  // Rotação suavizada de cada forma em direção ao cursor (só as formas com modelo usam).
+  const look = useRef({
+    rotations: Array.from({ length: SHAPE_COUNT }, () => new THREE.Quaternion()),
+    target: new THREE.Quaternion(),
+    matrix: new THREE.Matrix4(),
+    center: new THREE.Vector3(),
+    cursor: new THREE.Vector3(),
+  });
 
   // Força do ponteiro: ativa após movimento recente (mouse) ou enquanto há toque.
   useEffect(() => {
@@ -247,10 +282,14 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
     // ataque rápido (~40 ms) e soltura suave (~250 ms); parado, só um resíduo sutil.
     const current = pointer.current;
     const aspect = state.size.width / Math.max(state.size.height, 1);
-    const instantX = ((state.pointer.x - current.previous.x) / dt) * aspect;
-    const instantY = (state.pointer.y - current.previous.y) / dt;
-    current.previous.copy(state.pointer);
-    current.velocity.lerp({ x: instantX, y: instantY }, 1 - Math.exp(-dt * 12));
+    // `delta` pode vir 0 (frames com o mesmo timestamp): dividir por ele gera NaN, e um único NaN
+    // nos uniforms contamina todas as partículas de forma permanente (NaN * 0 continua NaN).
+    if (dt > 0) {
+      const instantX = ((state.pointer.x - current.previous.x) / dt) * aspect;
+      const instantY = (state.pointer.y - current.previous.y) / dt;
+      current.previous.copy(state.pointer);
+      current.velocity.lerp({ x: instantX, y: instantY }, 1 - Math.exp(-dt * 12));
+    }
     const speed = current.velocity.length();
     const recentlyMoved = performance.now() - current.lastMove < 1500;
     const targetStrength = current.touching ? 1 : recentlyMoved ? Math.min(0.15 + speed * 0.45, 1.5) : 0;
@@ -311,6 +350,29 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
       const active = milestone?.reached ? 1 : 0;
       uniform.w += (active - uniform.w) * (1 - Math.exp(-dt * 4));
     });
+
+    // Modelos olham para o cursor: a frente (+z) aponta para o raio do ponteiro cruzando um plano
+    // LOOK_DISTANCE à frente do centro de cada modelo.
+    const { rotations, target, matrix, center, cursor } = look.current;
+    const camera = state.camera;
+    anchors.forEach((anchor, index) => {
+      if (!anchor) return;
+      center.set(anchor[0], anchor[1], anchor[2]);
+      cursor.set(state.pointer.x, state.pointer.y, 0.5).unproject(camera).sub(camera.position).normalize();
+      const distance = (center.z + LOOK_DISTANCE - camera.position.z) / Math.min(cursor.z, -1e-3);
+      cursor.multiplyScalar(distance).add(camera.position);
+      target.setFromRotationMatrix(matrix.lookAt(cursor, center, UP));
+      // Suavização curta (~60 ms): só tira o tremor, sem atraso perceptível.
+      rotations[index].slerp(target, 1 - Math.exp(-dt * 16));
+    });
+    const applyLook = (shape: number, anchorUniform: THREE.Vector4, rotationUniform: THREE.Matrix3) => {
+      const anchor = anchors[shape];
+      if (anchor) anchorUniform.fromArray(anchor);
+      else anchorUniform.set(0, 0, 0, 0);
+      rotationUniform.setFromMatrix4(matrix.makeRotationFromQuaternion(rotations[shape]));
+    };
+    applyLook(from, velocityUniforms.uLookA.value, velocityUniforms.uLookRotationA.value);
+    applyLook(to, velocityUniforms.uLookB.value, velocityUniforms.uLookRotationB.value);
 
     simulation.position.material.uniforms.uDelta.value = dt;
     simulation.gpu.compute();

@@ -79,7 +79,7 @@ export function ContactSection({ dict }: { dict: Dictionary }) {
       <div className="w-full max-w-2xl mx-auto flex flex-col gap-12">
 
         <div className="flex flex-col gap-4 text-center md:text-left">
-          <p aria-hidden="true" className="font-mono text-xs uppercase tracking-widest text-subtle">06 —</p>
+          <p aria-hidden="true" className="font-mono text-xs uppercase tracking-widest text-subtle">05 —</p>
           <h2 id="contact-title" className="text-4xl md:text-6xl font-serif text-ink tracking-[0.1em] uppercase">
             {dict.contact.title}
           </h2>

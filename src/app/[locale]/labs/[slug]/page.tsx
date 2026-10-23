@@ -12,16 +12,11 @@ export async function generateMetadata({ params }: { params: LabParams }): Promi
   const locale = toLocale(rawLocale);
   const experiment = getDictionary(locale).lab.experiments[slug];
 
+  // Área de testes de layout: fora do sitemap e dos buscadores.
   return {
-    title: `Lab — ${experiment.title}`,
+    title: `Labs — ${experiment.title}`,
     description: experiment.description,
-    alternates: {
-      canonical: `/${locale}/lab/${slug}`,
-      languages: {
-        "pt-BR": `/pt/lab/${slug}`,
-        "en-US": `/en/lab/${slug}`,
-      },
-    },
+    robots: { index: false, follow: false },
   };
 }
 
