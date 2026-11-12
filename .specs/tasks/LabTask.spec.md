@@ -11,7 +11,7 @@
 ## 3. Experimentos
 1. **flow-field:** o motor GPGPU em modo playground (curl noise, força do ponteiro, clique alterna formas).
 2. **liquid-image:** distorção de imagem por shader com ondulação guiada pela velocidade do ponteiro e separação RGB.
-3. **background-studio:** compara variações do fundo do site (`BackgroundMesh` com `variant`) atrás do motor de partículas real: `fluid` (atual), `dots` (matriz de pontos com ondulação no ponteiro), `topographic` (curvas de nível de um relevo suave próprio, com colina sob o ponteiro; sem o passo de fluido), `aurora` (manchas suaves, sem o passo de fluido) e `terminal` (varredura CRT sutil + grão). Barra de botões acessível (`aria-pressed`), teclas 1–5 trocam a variação e P liga/desliga as partículas. O site continua com `fluid` até a escolha final.
+3. **background-studio:** compara variações do fundo do site (`BackgroundMesh` com `variant`) atrás do motor de partículas real: `fluid` (atual), `dots` (matriz de pontos com ondulação no ponteiro), `topographic` (curvas de nível de um relevo suave próprio, com colina sob o ponteiro; sem o passo de fluido), `aurora` (manchas suaves, sem o passo de fluido), `terminal` (varredura CRT sutil + grão), `ascii` (campo como grade de caracteres `. : - + #`), `grid` (blueprint com linhas mestras e pulso), `oscilloscope` (traços com ondas que crescem perto do ponteiro), `rain` (colunas de blocos caindo devagar) e `void` (só grão e vinheta). Barra de botões acessível (`aria-pressed`), teclas 1–9 e 0 trocam a variação e P liga/desliga as partículas. O estúdio abre no fundo atual do site (`SITE_BACKGROUND`, hoje `terminal`).
 
 ## 4. Critérios de Aceite
 - Overlay com título, instruções e botão de voltar acessíveis por teclado.

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useReducedMotion } from "framer-motion";
-import { BACKGROUND_VARIANTS, BackgroundMesh, type BackgroundVariant } from "@/components/webgl/BackgroundMesh";
+import { BACKGROUND_VARIANTS, BackgroundMesh, SITE_BACKGROUND, type BackgroundVariant } from "@/components/webgl/BackgroundMesh";
 import { ParticleField } from "@/components/webgl/ParticleField";
 import { AdaptiveDpr } from "@/components/webgl/AdaptiveDpr";
 
@@ -17,18 +17,21 @@ interface BackgroundStudioExperimentProps {
   };
 }
 
+/** Tecla de atalho da variação: 1–9 e depois 0 (a décima). */
+const shortcutKey = (index: number) => String((index + 1) % 10);
+
 // Compara as variações do fundo do site atrás das partículas reais (o clique alterna a forma).
-// Teclas 1–5 trocam a variação; P liga/desliga as partículas.
+// Teclas 1–9 e 0 trocam a variação; P liga/desliga as partículas. Começa no fundo atual do site.
 export default function BackgroundStudioExperiment({ isMobile, fallback, labels }: BackgroundStudioExperimentProps) {
   const shouldReduceMotion = useReducedMotion();
-  const [variant, setVariant] = useState<BackgroundVariant>("fluid");
+  const [variant, setVariant] = useState<BackgroundVariant>(SITE_BACKGROUND);
   const [showParticles, setShowParticles] = useState(true);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
-      const index = Number(event.key) - 1;
-      if (index >= 0 && index < BACKGROUND_VARIANTS.length) setVariant(BACKGROUND_VARIANTS[index]);
+      const index = BACKGROUND_VARIANTS.findIndex((_, i) => shortcutKey(i) === event.key);
+      if (index >= 0) setVariant(BACKGROUND_VARIANTS[index]);
       if (event.key.toLowerCase() === "p") setShowParticles((visible) => !visible);
     };
     window.addEventListener("keydown", onKey);
@@ -63,7 +66,7 @@ export default function BackgroundStudioExperiment({ isMobile, fallback, labels 
             onClick={() => setVariant(name)}
             className="rounded-full px-3 py-2 text-muted transition-colors duration-300 hover:text-ink aria-pressed:bg-foreground aria-pressed:text-background focus-visible:ring-2 focus-visible:ring-foreground focus:outline-none"
           >
-            <span aria-hidden="true" className="hidden md:inline opacity-50">{i + 1} </span>
+            <span aria-hidden="true" className="hidden md:inline opacity-50">{shortcutKey(i)} </span>
             {labels.variants[name]}
           </button>
         ))}

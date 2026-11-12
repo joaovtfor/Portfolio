@@ -41,14 +41,33 @@ interface SceneFrame {
   rope: RopeFrame;
 }
 
+/** Área livre na viewport (frações 0–1, origem no topo esquerdo) onde o modelo da seção Sobre deve caber. */
+export interface ViewportSlot {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
 interface SceneState {
   activeScene: SceneName;
   frame: SceneFrame;
+  /** Desktop: espaço abaixo do painel fixo da stack (AboutSection); null usa o posicionamento padrão. */
+  aboutSlot: ViewportSlot | null;
   setActiveScene: (scene: SceneName) => void;
+  setAboutSlot: (slot: ViewportSlot | null) => void;
 }
 
-export const useSceneStore = create<SceneState>((set) => ({
+const sameSlot = (a: ViewportSlot | null, b: ViewportSlot | null) =>
+  a === b || (!!a && !!b && a.left === b.left && a.top === b.top && a.right === b.right && a.bottom === b.bottom);
+
+export const useSceneStore = create<SceneState>((set, get) => ({
   activeScene: 'hero',
   frame: { progress: 0, sequence: [0], velocity: 0, rope: { path: [], cumulative: [], fill: 0, milestones: [] } },
+  aboutSlot: null,
   setActiveScene: (activeScene) => set({ activeScene }),
+  // Só muda em resize: cada mudança regenera as formas, então valores iguais não disparam update.
+  setAboutSlot: (aboutSlot) => {
+    if (!sameSlot(get().aboutSlot, aboutSlot)) set({ aboutSlot });
+  },
 }));

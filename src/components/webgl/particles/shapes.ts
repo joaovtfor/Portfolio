@@ -3,6 +3,7 @@
 // Hero, Sobre e Contato vêm de modelos .glb amostrados (models.ts); as demais são procedurais.
 
 import type { ModelPoints, ModelSet } from "./models";
+import type { ViewportSlot } from "@/store/sceneStore";
 
 const CAMERA_Z = 5;
 const HALF_FOV_TAN = Math.tan((45 / 2) * (Math.PI / 180));
@@ -59,16 +60,31 @@ function heroPlacement(frame: Frame): Placement {
     : { center: [0, 0, zc], width: frame.halfW(zc) * 1.1, height: frame.halfH(zc) * 1.1 };
 }
 
-// Sobre: icosaedro compacto. No desktop fica no espaço livre abaixo do painel fixo da stack
-// (coluna direita, que ocupa ~56% da altura a partir do header — ver AboutSection).
-function aboutPlacement(frame: Frame): Placement {
+// Sobre: icosaedro compacto. No desktop ocupa o espaço livre abaixo do painel fixo da stack, medido
+// pelo DOM (`aboutSlot`, frações da viewport): o tamanho acompanha a altura da tela.
+/** Margem para a rotação de "olhar": o icosaedro girado projeta até ~1,2× a sua caixa. */
+const ABOUT_SLOT_FILL = 0.8;
+
+function aboutPlacement(frame: Frame, slot: ViewportSlot | null): Placement {
   const zc = -2.5;
   if (frame.compact) {
     const size = frame.halfW(zc) * 1.4;
     return { center: [0, frame.halfH(zc) * 0.3, zc], width: size, height: size };
   }
-  const size = frame.halfH(zc) * 0.46;
-  return { center: [frame.halfW(zc) * 0.62, -frame.halfH(zc) * 0.66, zc], width: size, height: size };
+  if (!slot) {
+    const size = frame.halfH(zc) * 0.46;
+    return { center: [frame.halfW(zc) * 0.62, -frame.halfH(zc) * 0.66, zc], width: size, height: size };
+  }
+  const toX = (fraction: number) => (fraction * 2 - 1) * frame.halfW(zc);
+  const toY = (fraction: number) => (1 - fraction * 2) * frame.halfH(zc);
+  const width = toX(slot.right) - toX(slot.left);
+  const height = Math.max(toY(slot.top) - toY(slot.bottom), 0);
+  const size = Math.min(width, height) * ABOUT_SLOT_FILL;
+  return {
+    center: [(toX(slot.left) + toX(slot.right)) / 2, (toY(slot.top) + toY(slot.bottom)) / 2, zc],
+    width: size,
+    height: size,
+  };
 }
 
 // Contato: terminal à direita do formulário (acima dele no mobile), sem passar da borda da tela.
@@ -177,7 +193,13 @@ export interface GeneratedShapes {
   anchors: (Vec4 | null)[];
 }
 
-export function generateShapes(side: number, aspect: number, models: ModelSet | null): GeneratedShapes {
+export function generateShapes(
+  side: number,
+  aspect: number,
+  models: ModelSet | null,
+  aboutSlot: ViewportSlot | null
+): GeneratedShapes {
+  const placeAbout = (frame: Frame) => aboutPlacement(frame, aboutSlot);
   const count = side * side;
   const rand = mulberry32(1337);
   const frame: Frame = {
@@ -202,7 +224,7 @@ export function generateShapes(side: number, aspect: number, models: ModelSet | 
   const [hero, about, contact] = [models?.hero ?? null, models?.about ?? null, models?.contact ?? null];
   const builders = [
     modelBuilder(hero, heroPlacement),
-    modelBuilder(about, aboutPlacement),
+    modelBuilder(about, placeAbout),
     waveGrid,
     torusKnot,
     ropeWaiting,
@@ -216,7 +238,7 @@ export function generateShapes(side: number, aspect: number, models: ModelSet | 
     const radius = Math.hypot(...model.extent) * fitScale(model, placement);
     return [...placement.center, radius];
   };
-  const anchors = [anchorFor(hero, heroPlacement), anchorFor(about, aboutPlacement), null, null, null, anchorFor(contact, contactPlacement)];
+  const anchors = [anchorFor(hero, heroPlacement), anchorFor(about, placeAbout), null, null, null, anchorFor(contact, contactPlacement)];
 
   // 55% das partículas (não-poeira) formam a corda, 20% os anéis e o restante fica em espera.
   const ropeParams = new Float32Array(count * 4);

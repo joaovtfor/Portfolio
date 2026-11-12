@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Desktop com pouca altura (notebooks, janelas reduzidas): layouts fixos compactam o espaçamento. */
+@custom-variant short (@media (min-width: 48rem) and (max-height: 47.5rem));
+
 /* Tokens de marca ("Monolito e Fluido") e derivados de hierarquia. Únicas cores literais do projeto. */
 :root {
   --background: #000000;

@@ -140,14 +140,17 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
     };
   }, [invalidate]);
 
+  // Espaço medido pelo DOM para o modelo da seção Sobre (muda só em resize).
+  const aboutSlot = useSceneStore((state) => state.aboutSlot);
+
   const generated = useMemo(() => {
-    const { shapes, ropeParams, anchors } = generateShapes(side, aspect, models);
+    const { shapes, ropeParams, anchors } = generateShapes(side, aspect, models, aboutSlot);
     return {
       shapeTextures: shapes.map((data) => createDataTexture(data, side)),
       ropeTexture: createDataTexture(ropeParams, side),
       anchors,
     };
-  }, [side, aspect, models]);
+  }, [side, aspect, models, aboutSlot]);
   const { shapeTextures, ropeTexture, anchors } = generated;
   useEffect(
     () => () => {

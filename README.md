@@ -4,7 +4,7 @@ A storytelling portfolio where engineering and motion are the same craft: a GPU-
 
 ## ✨ Features
 
-- **Narrative WebGL:** 65k particles simulated on the GPU (GPGPU ping-pong textures + curl noise). Each section defines a target shape (React logo, icosahedron, wave grid, torus knot, the Experience rope, a `>_` terminal) and the scroll morphs between them. The hero, about and contact shapes are sampled from `.glb` models and turn to look at the cursor. A domain-warped fluid shader renders the background at quarter resolution.
+- **Narrative WebGL:** 65k particles simulated on the GPU (GPGPU ping-pong textures + curl noise). Each section defines a target shape (React logo, icosahedron, wave grid, torus knot, the Experience rope, a `>_` terminal) and the scroll morphs between them. The hero, about and contact shapes are sampled from `.glb` models and turn to look at the cursor. The background is a subtle CRT "terminal" shader (a quarter-resolution domain-warped fluid under scanlines and grain); nine other variants live in the Background Studio lab.
 - **Persistent shell:** the WebGL canvas, header, cursor and preloader survive route changes; case studies open with shared-element view transitions.
 - **Case studies & Labs:** `/[locale]/work/[slug]` deep dives; `/[locale]/labs` is an unlinked, `noindex` playground for WebGL experiments and layout tests (`/[locale]/labs/[slug]` full screen).
 - **Graceful degradation:** lighter simulation on mobile, adaptive DPR, static frame for `prefers-reduced-motion`, CSS fallback when WebGL is unavailable.

@@ -10,7 +10,7 @@ Segunda dobra ("A Engenharia"): manifesto curto de posicionamento, resumo profis
 ## 3. Coreografias
 - Manifesto revelado palavra a palavra com GSAP ScrollTrigger (`scrub`). Com `prefers-reduced-motion`, texto exibido sem animação.
 - Grupos de stack (Criativo, Core, Engenharia, Back-end & Mobile) com labels em Geist Mono.
-- **Sticky scroll (desktop):** a coluna da stack fica fixa (`sticky`, logo abaixo do header) num painel compacto e translúcido (`bg-background/30`, `backdrop-blur-md`) enquanto manifesto, resumo e formação rolam. O icosaedro de partículas, também compacto, ocupa o espaço livre abaixo do painel, centralizado na coluna (posição em `aboutPlacement`, `shapes.ts`). No mobile (coluna única) o fluxo é normal.
+- **Sticky scroll (desktop):** a coluna da stack fica fixa (`sticky`, logo abaixo do header) num painel compacto e translúcido (`bg-background/30`, `backdrop-blur-md`) enquanto manifesto, resumo e formação rolam. O icosaedro de partículas ocupa o espaço livre abaixo do painel: `AboutSection` mede o painel (topo fixo + altura) em resize (com debounce) e publica `sceneStore.aboutSlot` (frações da viewport); o motor regenera a forma `about` para caber nesse espaço com folga para a rotação, então o tamanho acompanha a altura da tela. Em telas baixas (variante `short`: desktop com altura ≤ 760px) o painel compacta espaçamentos. No mobile (coluna única) o fluxo é normal e o slot é nulo.
 
 ## 4. Critérios de Aceite
 - `<h2>` da seção; contraste AA para texto corrido; mínimo `text-xs`.

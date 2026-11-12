@@ -14,7 +14,7 @@ A direção de arte estabelece uma tensão visual entre infraestrutura sólida e
 - **Motivo de marca:** o glifo `>_` (terminal) aparece no preloader, no header e na forma final das partículas na seção de contato (modelo 3D do terminal).
 
 ## 3. Micro-interações e WebGL
-- **Fundo persistente:** um único canvas WebGL vive no shell (layout) e sobrevive às navegações. Ele contém um shader de fundo fluido (ruído com *domain warping* e borda cyan reagindo ao ponteiro) e o motor de partículas GPGPU (ver `tasks/ParticleEngineTask.spec.md`).
+- **Fundo persistente:** um único canvas WebGL vive no shell (layout) e sobrevive às navegações. Ele contém o shader de fundo "Terminal" (fluido com *domain warping* bem apagado sob linhas de varredura CRT, faixa de refresh lenta e grão; reage ao ponteiro; variações comparadas em `/labs/background-studio`) e o motor de partículas GPGPU (ver `tasks/ParticleEngineTask.spec.md`).
 - **Narrativa 3D:** cada seção define uma forma-alvo para as partículas (morph guiado pelo scroll). O 3D conta a história; não é papel de parede.
 - **Degradação graciosa:** mobile usa menos partículas e shader mais leve; `prefers-reduced-motion` renderiza um frame estático sob demanda; falha de WebGL cai para o fundo CSS.
 - **Transições:** revelações conectadas ao scroll, botões magnéticos, cursor com rótulos contextuais e view transitions (elemento compartilhado) entre card e estudo de caso.

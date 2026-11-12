@@ -52,9 +52,26 @@ void main() {
 }
 `;
 
-/** Variações do fundo (o Lab "Background Studio" compara todas; o site usa "fluid"). */
-export const BACKGROUND_VARIANTS = ["fluid", "dots", "topographic", "aurora", "terminal"] as const;
+/** Variações do fundo (o Lab "Background Studio" compara todas). A ordem define o VARIANT do shader. */
+export const BACKGROUND_VARIANTS = [
+  "fluid",
+  "dots",
+  "topographic",
+  "aurora",
+  "terminal",
+  "ascii",
+  "grid",
+  "oscilloscope",
+  "rain",
+  "void",
+] as const;
 export type BackgroundVariant = (typeof BACKGROUND_VARIANTS)[number];
+
+/** Fundo usado no site (e variação inicial do Background Studio). */
+export const SITE_BACKGROUND: BackgroundVariant = "terminal";
+
+/** Variações que leem o campo de fluido; as demais pulam o passo de baixa resolução. */
+const FIELD_VARIANTS: readonly BackgroundVariant[] = ["fluid", "dots", "terminal", "ascii"];
 
 // Passo 2 (resolução cheia): cada variação lê o campo de baixa resolução (r = fluido, g = lente do
 // ponteiro) e emite o token foreground sobre o background. A variação é escolhida em tempo de compilação.
@@ -77,6 +94,27 @@ ${SIMPLEX_2D}
 float hash(vec2 p) {
   return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
 }
+
+// Retângulo [lo, hi] em coordenadas locais da célula (0–1, y para cima).
+float box(vec2 p, vec2 lo, vec2 hi) {
+  return step(lo.x, p.x) * step(p.x, hi.x) * step(lo.y, p.y) * step(p.y, hi.y);
+}
+
+#if VARIANT == 5
+// Rampa de caracteres desenhada com retângulos: (vazio) . : - + #
+float glyphMask(int glyph, vec2 p) {
+  if (glyph == 1) return box(p, vec2(0.4, 0.15), vec2(0.6, 0.27));
+  if (glyph == 2) return box(p, vec2(0.4, 0.15), vec2(0.6, 0.27)) + box(p, vec2(0.4, 0.6), vec2(0.6, 0.72));
+  if (glyph == 3) return box(p, vec2(0.2, 0.45), vec2(0.8, 0.55));
+  if (glyph == 4) return max(box(p, vec2(0.2, 0.45), vec2(0.8, 0.55)), box(p, vec2(0.45, 0.2), vec2(0.55, 0.8)));
+  if (glyph >= 5) {
+    float horizontal = max(box(p, vec2(0.15, 0.33), vec2(0.85, 0.41)), box(p, vec2(0.15, 0.59), vec2(0.85, 0.67)));
+    float vertical = max(box(p, vec2(0.3, 0.15), vec2(0.38, 0.85)), box(p, vec2(0.62, 0.15), vec2(0.7, 0.85)));
+    return max(horizontal, vertical);
+  }
+  return 0.0;
+}
+#endif
 
 void main() {
   vec3 color = uBase;
@@ -139,7 +177,7 @@ void main() {
   color += uColor * glow * 0.13;
   vignetteStrength = 0.45;
 
-#else
+#elif VARIANT == 4
   // Terminal (CRT): fluido bem apagado sob linhas de varredura, faixa de refresh lenta e grão animado.
   vec4 fieldSample = texture2D(uField, vUv);
   float body = smoothstep(-0.35, 0.75, fieldSample.r);
@@ -149,6 +187,69 @@ void main() {
   color += uColor * (body * 0.035 + fieldSample.g * 0.03 + band * 0.03) * mix(0.55, 1.0, scan);
   vignetteStrength = 0.35;
   grainAmount = 3.0;
+
+#elif VARIANT == 5
+  // ASCII: o campo vira uma grade de caracteres; a densidade do glifo segue o fluido e a lente do ponteiro.
+  vec2 cellSize = vec2(9.0, 15.0) * uPixelRatio;
+  vec2 cellId = floor(gl_FragCoord.xy / cellSize);
+  vec2 cellUv = (cellId + 0.5) * cellSize / uResolution;
+  vec4 fieldSample = texture2D(uField, cellUv);
+  float level = clamp(smoothstep(-0.3, 0.8, fieldSample.r) * 0.75 + fieldSample.g * 0.6, 0.0, 0.999);
+  float mask = glyphMask(int(level * 6.0), fract(gl_FragCoord.xy / cellSize));
+  color += uColor * mask * mix(0.08, 0.4, level);
+
+#elif VARIANT == 6
+  // Grade (blueprint): linhas finas a cada 32px e mestras a cada 160px; acendem perto do ponteiro
+  // e um pulso lento atravessa as mestras a partir do centro.
+  vec2 px = gl_FragCoord.xy / uPixelRatio;
+  vec2 minorDistance = abs(fract(px / 32.0 + 0.5) - 0.5) * 32.0;
+  vec2 majorDistance = abs(fract(px / 160.0 + 0.5) - 0.5) * 160.0;
+  float minor = 1.0 - smoothstep(0.0, 1.0, min(minorDistance.x, minorDistance.y));
+  float major = 1.0 - smoothstep(0.0, 1.2, min(majorDistance.x, majorDistance.y));
+  vec2 p = (vUv - 0.5) * vec2(uAspect, 1.0);
+  vec2 toPointer = p - pointer;
+  float near = exp(-dot(toPointer, toPointer) / 0.03);
+  float pulse = 0.5 + 0.5 * sin(uTime * 0.6 - length(p) * 6.0);
+  color += uColor * (minor * (0.03 + near * 0.12) + major * (0.06 + near * 0.15 + pulse * 0.025));
+
+#elif VARIANT == 7
+  // Osciloscópio: traços horizontais com ondas lentas; perto do ponteiro a amplitude cresce.
+  vec2 p = (vUv - 0.5) * vec2(uAspect, 1.0);
+  float glow = 0.0;
+  for (int i = 0; i < 7; i++) {
+    float fi = float(i);
+    float baseY = (fi - 3.0) * 0.13;
+    float dx = p.x - pointer.x;
+    float dy = baseY - pointer.y;
+    float amplitude = 0.012 + exp(-dx * dx / 0.08 - dy * dy / 0.05) * 0.06;
+    float y = baseY
+      + sin(p.x * (6.0 + fi * 1.3) + uTime * (0.6 + fi * 0.15) + fi) * amplitude
+      + sin(p.x * 23.0 - uTime * 1.7 + fi * 2.0) * amplitude * 0.25;
+    // Distância ao traço em px CSS: 1 unidade de p.y = altura da viewport.
+    float distancePx = abs(p.y - y) * uResolution.y / uPixelRatio;
+    glow += exp(-distancePx * distancePx / 1.5) * 0.6 + exp(-distancePx / 10.0) * 0.08;
+  }
+  color += uColor * glow * 0.18;
+
+#elif VARIANT == 8
+  // Chuva: algumas colunas de blocos ("caracteres") caem devagar, com rastro que apaga para cima.
+  vec2 cellSize = vec2(14.0, 18.0) * uPixelRatio;
+  vec2 cellId = floor(gl_FragCoord.xy / cellSize);
+  vec2 local = fract(gl_FragCoord.xy / cellSize);
+  float columnOn = step(0.45, hash(vec2(cellId.x, 3.3)));
+  float speed = 0.04 + hash(vec2(cellId.x, 1.7)) * 0.08;
+  float rows = uResolution.y / cellSize.y;
+  float head = (1.0 - fract(uTime * speed + hash(vec2(cellId.x, 9.1)))) * (rows + 20.0) - 10.0;
+  float behind = cellId.y - head;
+  float trail = behind >= 0.0 ? exp(-behind * 0.18) : 0.0;
+  float headGlow = step(0.0, behind) * step(behind, 1.0);
+  float glyphOn = step(0.35, hash(cellId + floor(uTime * 2.0)));
+  float block = box(local, vec2(0.2, 0.15), vec2(0.8, 0.85));
+  color += uColor * block * columnOn * (trail * glyphOn * 0.12 + headGlow * 0.25);
+
+#else
+  // Vazio: só o background com grão e vinheta; as partículas carregam a cena.
+  grainAmount = 2.0;
 #endif
 
   float vignette = smoothstep(1.25, 0.25, length((vUv - 0.5) * vec2(1.0, 1.2)) * 1.4);
@@ -170,7 +271,7 @@ interface BackgroundMeshProps {
   variant?: BackgroundVariant;
 }
 
-export function BackgroundMesh({ quality, variant = "fluid" }: BackgroundMeshProps) {
+export function BackgroundMesh({ quality, variant = SITE_BACKGROUND }: BackgroundMeshProps) {
   const gl = useThree((state) => state.gl);
   const size = useThree((state) => state.size);
   const shouldReduceMotion = useReducedMotion();
@@ -239,8 +340,7 @@ export function BackgroundMesh({ quality, variant = "fluid" }: BackgroundMeshPro
     [target]
   );
   const defines = useMemo(() => ({ VARIANT: BACKGROUND_VARIANTS.indexOf(variant) }), [variant]);
-  // Aurora e topográfico não usam o campo de fluido: o passo de baixa resolução é pulado.
-  const needsField = variant !== "aurora" && variant !== "topographic";
+  const needsField = FIELD_VARIANTS.includes(variant);
 
   // Ponteiro suavizado; em telas de toque usa o giroscópio quando disponível (Android).
   const pointer = useRef(new THREE.Vector2());
