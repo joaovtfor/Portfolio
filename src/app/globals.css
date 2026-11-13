@@ -34,6 +34,8 @@
   --ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-quart-in-out: cubic-bezier(0.76, 0, 0.24, 1);
 
+  --animate-intro-rise: intro-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+
   --text-xs: clamp(0.75rem, 0.1vw + 0.72rem, 0.8rem);
   --text-sm: clamp(0.8rem, 0.17vw + 0.76rem, 0.89rem);
   --text-base: clamp(1rem, 0.34vw + 0.91rem, 1.19rem);
@@ -97,6 +99,21 @@
   ::view-transition-new(*) {
     animation: none !important;
   }
+}
+
+/* Abertura (Preloader): cada letra do nome sobe de trás da máscara. É CSS puro para começar no
+   primeiro paint, antes da hidratação. */
+@keyframes intro-rise {
+  from {
+    transform: translateY(130%) rotate(5deg);
+  }
+}
+
+/* Letras só em contorno: o preenchimento na cor do fundo cobre a metade interna do traço. */
+@utility text-outline {
+  color: var(--background);
+  -webkit-text-stroke: max(1.5px, 0.014em) var(--foreground);
+  paint-order: stroke fill;
 }
 
 /* Esmaece as bordas laterais do trilho horizontal de projetos (máscara usa só o alfa). */

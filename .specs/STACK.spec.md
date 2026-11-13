@@ -15,6 +15,7 @@
 
 ## 3. Segurança By Design (OWASP)
 - **Proxy (`src/proxy.ts`):** CSP com `nonce` por request (`'strict-dynamic'`), exigindo renderização dinâmica das páginas. Headers estáticos de segurança (HSTS, nosniff, frame, referrer, permissions) ficam em `next.config.ts`.
+- **Idioma da rota:** o matcher do proxy ignora caminhos com ponto (arquivos de `public/`), então eles chegam ao segmento `[locale]` sem CSP. O layout valida o segmento com `isLocale` e responde 404 para qualquer valor fora de `pt`/`en` (ex.: `/sw.js`, `/favicon.ico`); a home nunca é servida fora de `/pt` e `/en`.
 - **Validação E2E:** `Zod` usado de forma isomórfica (Client e Server). Nenhuma payload avança para o Resend sem passar pelo schema.
 - **Anti-abuso:** honeypot no formulário, rate limit por `cf-connecting-ip` (best-effort por isolate) e, para um limite mais forte, o binding de Rate Limiting do Workers (regras de rate limiting do WAF só filtram por método a partir do plano Business).
 

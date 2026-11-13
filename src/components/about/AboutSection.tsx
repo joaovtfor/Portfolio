@@ -1,14 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import type { Dictionary } from "@/dictionaries";
 import type { Resume } from "@/data/resume";
 import { useSceneStore } from "@/store/sceneStore";
-
-gsap.registerPlugin(ScrollTrigger);
+import { RevealText } from "@/components/ui/RevealText";
 
 interface AboutSectionProps {
   dict: Dictionary;
@@ -19,8 +15,6 @@ interface AboutSectionProps {
 const SLOT_GAP = 24;
 
 export function AboutSection({ dict, resume }: AboutSectionProps) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const manifestoRef = useRef<HTMLParagraphElement>(null);
   const stackRef = useRef<HTMLDivElement>(null);
 
   // Publica no sceneStore o espaço livre abaixo do painel fixo (posição em que ele fica preso), para o
@@ -67,35 +61,8 @@ export function AboutSection({ dict, resume }: AboutSectionProps) {
     };
   }, []);
 
-  // Manifesto revelado palavra a palavra; o texto integral permanece no DOM (só a opacidade muda).
-  useGSAP(() => {
-    const mm = gsap.matchMedia();
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const words = manifestoRef.current?.querySelectorAll("[data-word]");
-      if (!words?.length) return;
-
-      gsap.fromTo(
-        words,
-        { opacity: 0.12 },
-        {
-          opacity: 1,
-          ease: "none",
-          stagger: 0.1,
-          scrollTrigger: {
-            trigger: manifestoRef.current,
-            start: "top 80%",
-            end: "bottom 45%",
-            scrub: true,
-          },
-        }
-      );
-    });
-    return () => mm.revert();
-  }, { scope: sectionRef });
-
   return (
     <section
-      ref={sectionRef}
       id="about"
       data-scene="about"
       aria-labelledby="about-title"
@@ -108,13 +75,11 @@ export function AboutSection({ dict, resume }: AboutSectionProps) {
             {dict.about.title}
           </h2>
 
-          <p ref={manifestoRef} className="mt-8 font-serif text-2xl md:text-3xl lg:text-4xl leading-tight text-ink">
-            {resume.manifesto.split(" ").map((word, i) => (
-              <span key={i} data-word className="inline-block mr-[0.25em]">
-                {word}
-              </span>
-            ))}
-          </p>
+          {/* Frase de abertura revelada palavra a palavra (RevealText). */}
+          <RevealText
+            text={resume.manifesto}
+            className="mt-8 font-serif text-2xl md:text-3xl lg:text-4xl leading-tight text-ink"
+          />
 
           <p className="mt-10 max-w-2xl font-sans text-sm md:text-base leading-relaxed text-muted">
             {resume.summary}

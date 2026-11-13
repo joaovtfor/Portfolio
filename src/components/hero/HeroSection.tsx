@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useLenis } from "lenis/react";
 
@@ -15,9 +16,18 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ dict, name, info }: HeroSectionProps) {
-  const isPreloaderDone = useUIStore((state) => state.isPreloaderDone);
+  const curtainClosed = useUIStore((state) => state.introPhase === "playing");
+  // Verdadeiro na primeira carga (montado sob a cortina da abertura); falso ao voltar para a home.
+  const [fromIntro] = useState(() => useUIStore.getState().introPhase !== "done");
   const lenis = useLenis();
   const reduceMotion = useReducedMotion();
+
+  // Sob a cortina o texto já nasce pintado (não atrasa o LCP) e só assenta quando ela abre,
+  // acompanhando a metade que o descobre. Ao voltar para a home não há cortina: ele entra com fade.
+  const rest = { opacity: 1, y: 0 };
+  const textStart = fromIntro ? { opacity: 1, y: 28 } : { opacity: 0, y: 12 };
+  const metaStart = fromIntro ? { opacity: 1, y: -28 } : { opacity: 0, y: 20 };
+  const settle = reduceMotion ? { duration: 0 } : { delay: 0.3, duration: 1.1, ease: [0.16, 1, 0.3, 1] as const };
 
   const handleScrollToWork = () => {
     if (lenis) {
@@ -42,9 +52,9 @@ export function HeroSection({ dict, name, info }: HeroSectionProps) {
       <div className="relative z-10 flex flex-col w-full h-full max-w-[1440px] mx-auto pointer-events-none px-6 pt-24 pb-6 md:px-12 md:pt-28 md:pb-12">
 
         <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={isPreloaderDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
-          transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
+          initial={textStart}
+          animate={curtainClosed ? textStart : rest}
+          transition={fromIntro ? settle : { delay: 0.3, duration: 0.8, ease: "easeOut" }}
           className="max-w-xl font-mono text-xs md:text-sm uppercase tracking-widest text-muted leading-relaxed"
         >
           <span aria-hidden="true" className="text-foreground">&gt; </span>
@@ -52,13 +62,13 @@ export function HeroSection({ dict, name, info }: HeroSectionProps) {
         </motion.p>
 
         <div className="flex-1 flex items-center justify-center">
-          <HeroTitle name={name} />
+          <HeroTitle name={name} fromIntro={fromIntro} />
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isPreloaderDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ delay: 1.4, duration: 1.0, ease: "easeOut" }}
+          initial={metaStart}
+          animate={curtainClosed ? metaStart : rest}
+          transition={fromIntro ? settle : { delay: 1.4, duration: 1.0, ease: "easeOut" }}
           className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 w-full pointer-events-auto"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >

@@ -24,7 +24,7 @@ export const en: typeof pt = {
   projects: {
     title: "Work",
     private: "Private",
-    description: "Combining refined design and scalable code to deliver <highlight>unique digital solutions</highlight>, converting complexity into conversion and performance.",
+    description: "Real projects I worked on. <highlight>Open a card</highlight> to see what I delivered and the technologies used.",
     mobileHint: "Swipe to explore",
     viewCase: "View case study",
   },
@@ -86,7 +86,7 @@ export const en: typeof pt = {
   experience: {
     title: "Experience",
     years: "years",
-    description: "... on a journey dedicated to building robust architectures and high-performance interfaces, merging cutting-edge design with software engineering.",
+    description: "building web and mobile interfaces, from prototype to deploy.",
     downloadCV: "Download CV",
   },
   contact: {

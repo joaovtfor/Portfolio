@@ -22,7 +22,7 @@ export const pt = {
   projects: {
     title: "Trabalhos",
     private: "Privado",
-    description: "Unindo design refinado e código escalável para entregar <highlight>soluções digitais únicas</highlight>, convertendo complexidade em conversão e performance.",
+    description: "Projetos reais em que atuei. <highlight>Abra um card</highlight> para ver o que entreguei e as tecnologias usadas.",
     mobileHint: "Deslize para explorar",
     viewCase: "Ver estudo de caso",
   },
@@ -84,7 +84,7 @@ export const pt = {
   experience: {
     title: "Experiência",
     years: "anos",
-    description: "... em uma jornada dedicada a construir arquiteturas robustas e interfaces de alta performance, unindo design de ponta à engenharia de software.",
+    description: "criando interfaces web e mobile, do protótipo ao deploy.",
     downloadCV: "Baixar Currículo",
   },
   contact: {

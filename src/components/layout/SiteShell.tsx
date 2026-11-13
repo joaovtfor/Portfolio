@@ -60,7 +60,7 @@ export function SiteShell({ children, dict, locale, info }: SiteShellProps) {
 
   return (
     <div ref={rootRef} className="relative">
-      <Preloader label={dict.a11y.loading} />
+      <Preloader label={dict.a11y.loading} name={info.shortName} />
       {hydrated && !isMobile && <CustomCursor />}
 
       <motion.div

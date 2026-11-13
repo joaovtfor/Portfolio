@@ -14,8 +14,8 @@ import {
   velocityShader,
 } from "./particles/particleShaders";
 import { readThemeColor } from "./theme";
+import { SceneWarmup } from "./SceneWarmup";
 import { SCENES, useSceneStore } from "@/store/sceneStore";
-import { useUIStore } from "@/store/uiStore";
 
 interface ParticleFieldProps {
   isMobile: boolean;
@@ -72,7 +72,10 @@ function createSimulation(gl: THREE.WebGLRenderer, side: number, initial: Float3
   gpu.setVariableDependencies(position, [position, velocity]);
   gpu.setVariableDependencies(velocity, [position, velocity]);
 
+  // Deslocamento da corda da Experiência no quadro, compartilhado pelos dois shaders.
+  const ropeShift = new THREE.Vector3();
   position.material.uniforms.uDelta = { value: 0 };
+  position.material.uniforms.uRopeShift = { value: ropeShift };
   Object.assign(velocity.material.uniforms, {
     uTime: { value: 0 },
     uDelta: { value: 0 },
@@ -84,7 +87,7 @@ function createSimulation(gl: THREE.WebGLRenderer, side: number, initial: Float3
     uPointer: { value: new THREE.Vector2(10, 10) },
     uPointerStrength: { value: 0 },
     uPointerVelocity: { value: new THREE.Vector2() },
-    uAttractor: { value: new THREE.Vector3() },
+    uAttractor: { value: new THREE.Vector4() },
     uViewProjection: { value: new THREE.Matrix4() },
     uAspect: { value: 1 },
     uRopeParams: { value: null },
@@ -97,6 +100,8 @@ function createSimulation(gl: THREE.WebGLRenderer, side: number, initial: Float3
     uMilestones: { value: Array.from({ length: MAX_MILESTONES }, () => new THREE.Vector4()) },
     uRopeDepth: { value: ROPE_DEPTH },
     uRopeHalf: { value: new THREE.Vector2(ROPE_HALF_HEIGHT, ROPE_HALF_HEIGHT) },
+    uRopeShift: { value: ropeShift },
+    uRopeTrack: { value: 0 },
     uLookA: { value: new THREE.Vector4() },
     uLookB: { value: new THREE.Vector4() },
     uLookRotationA: { value: new THREE.Matrix3() },
@@ -126,6 +131,8 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
   // Modelos .glb carregados em segundo plano: até chegarem, as formas deles são nuvens soltas,
   // e as partículas se condensam no modelo quando ele fica pronto.
   const [models, setModels] = useState<ModelSet | null>(null);
+  // Carregados ou não: a partir daqui as formas não mudam mais por causa dos modelos (ver `SceneWarmup`).
+  const [modelsSettled, setModelsSettled] = useState(false);
   useEffect(() => {
     let active = true;
     loadModels()
@@ -134,7 +141,10 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
         setModels(loaded);
         invalidate();
       })
-      .catch((error: unknown) => console.warn("[ParticleField] Modelos indisponíveis:", error));
+      .catch((error: unknown) => console.warn("[ParticleField] Modelos indisponíveis:", error))
+      .finally(() => {
+        if (active) setModelsSettled(true);
+      });
     return () => {
       active = false;
     };
@@ -205,6 +215,8 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
 
   const progress = useRef(0);
   const ropeFill = useRef(0);
+  // Primeiro vértice da corda no quadro anterior (NDC), para saber quanto ela rolou.
+  const ropeOrigin = useRef<{ x: number; y: number; count: number } | null>(null);
   const clickTarget = useRef(0);
   const pointer = useRef({ lastMove: -Infinity, strength: 0, touching: false, previous: new THREE.Vector2(), velocity: new THREE.Vector2() });
   // Rotação suavizada de cada forma em direção ao cursor (só as formas com modelo usam).
@@ -299,7 +311,6 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
     const rate = targetStrength > current.strength ? 25 : 4;
     current.strength += (targetStrength - current.strength) * (1 - Math.exp(-dt * rate));
 
-    const attractor = useUIStore.getState().interactivePositions[0];
 
     const velocityUniforms = simulation.velocity.material.uniforms;
     velocityUniforms.uTime.value = state.clock.elapsedTime;
@@ -315,13 +326,16 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
     velocityUniforms.uAspect.value = state.size.width / Math.max(state.size.height, 1);
     velocityUniforms.uViewProjection.value.multiplyMatrices(state.camera.projectionMatrix, state.camera.matrixWorldInverse);
 
+    // Vórtice do estudo de caso (pixels de viewport → NDC). Ao sair da página a força cai a 0 e o
+    // vórtice se desfaz no último lugar em que estava.
+    const vortex = frame.vortex;
     const attractorUniform = velocityUniforms.uAttractor.value;
-    const attractorTarget = attractor ? 1 : 0;
-    if (attractor) {
-      attractorUniform.x = (attractor.x / state.size.width) * 2 - 1;
-      attractorUniform.y = -(attractor.y / state.size.height) * 2 + 1;
+    if (vortex.strength > 0) {
+      attractorUniform.x = (vortex.x / state.size.width) * 2 - 1;
+      attractorUniform.y = -(vortex.y / state.size.height) * 2 + 1;
+      attractorUniform.w = (vortex.radius * 2) / Math.max(state.size.height, 1);
     }
-    attractorUniform.z += (attractorTarget - attractorUniform.z) * (1 - Math.exp(-dt * 5));
+    attractorUniform.z += (vortex.strength - attractorUniform.z) * (1 - Math.exp(-dt * 5));
 
     // Corda da Experiência: caminho e marcos medidos no DOM (pixels) convertidos para NDC.
     const rope = frame.rope;
@@ -334,10 +348,26 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
       ropePath[i].set((rope.path[i * 2] / width) * 2 - 1, 1 - (rope.path[i * 2 + 1] / height) * 2);
       ropeCum[i] = rope.cumulative[i] ?? 1;
     }
-    ropeFill.current += (rope.fill - ropeFill.current) * (1 - Math.exp(-dt * 10));
+    // Desktop: a ponta segue o scroll sem suavização, para a construção não ficar atrás da timeline.
+    ropeFill.current = isMobile ? ropeFill.current + (rope.fill - ropeFill.current) * (1 - Math.exp(-dt * 10)) : rope.fill;
     velocityUniforms.uRopeCount.value = vertexCount;
     velocityUniforms.uRopeFill.value = ropeFill.current;
-    velocityUniforms.uRopeHalf.value.set(ROPE_HALF_HEIGHT * aspect, ROPE_HALF_HEIGHT);
+    // Proporção exata da tela (não a arredondada das formas): a corda precisa cair sobre os nós do DOM.
+    const ropeHalf: THREE.Vector2 = velocityUniforms.uRopeHalf.value;
+    ropeHalf.set(ROPE_HALF_HEIGHT * (width / height), ROPE_HALF_HEIGHT);
+
+    // Desktop: a corda já construída e os anéis rolam junto com a página quadro a quadro, sem o
+    // atraso (e o vaivém) da mola. Saltos grandes (resize, troca de rota) não contam como scroll.
+    velocityUniforms.uRopeTrack.value = isMobile ? 0 : 1;
+    const shift: THREE.Vector3 = velocityUniforms.uRopeShift.value;
+    shift.set(0, 0, 0);
+    const origin = ropeOrigin.current;
+    if (!isMobile && vertexCount >= 2 && origin && origin.count === vertexCount) {
+      const dx = ropePath[0].x - origin.x;
+      const dy = ropePath[0].y - origin.y;
+      if (Math.abs(dx) < 0.6 && Math.abs(dy) < 0.6) shift.set(dx * ropeHalf.x, dy * ropeHalf.y, 0);
+    }
+    ropeOrigin.current = vertexCount >= 2 ? { x: ropePath[0].x, y: ropePath[0].y, count: vertexCount } : null;
     velocityUniforms.uRopeParams.value = ropeTexture;
     velocityUniforms.uRopeA.value = from === EXPERIENCE_SHAPE ? 1 : 0;
     velocityUniforms.uRopeB.value = to === EXPERIENCE_SHAPE ? 1 : 0;
@@ -385,21 +415,25 @@ export function ParticleField({ isMobile, driver = "scroll" }: ParticleFieldProp
   });
 
   return (
-    <points frustumCulled={false} renderOrder={1}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[placeholderPositions, 3]} />
-        <bufferAttribute attach="attributes-aReference" args={[references, 2]} />
-      </bufferGeometry>
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={renderVertexShader}
-        fragmentShader={renderFragmentShader}
-        uniforms={uniforms}
-        transparent
-        depthWrite={false}
-        depthTest={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
+    <>
+      {/* A cena só se declara pronta com os shaders compilados e os modelos já convertidos em formas. */}
+      <SceneWarmup hold={!modelsSettled} />
+      <points frustumCulled={false} renderOrder={1}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[placeholderPositions, 3]} />
+          <bufferAttribute attach="attributes-aReference" args={[references, 2]} />
+        </bufferGeometry>
+        <shaderMaterial
+          ref={materialRef}
+          vertexShader={renderVertexShader}
+          fragmentShader={renderFragmentShader}
+          uniforms={uniforms}
+          transparent
+          depthWrite={false}
+          depthTest={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+    </>
   );
 }

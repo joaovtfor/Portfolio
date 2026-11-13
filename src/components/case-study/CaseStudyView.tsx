@@ -5,6 +5,8 @@ import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
 import type { Dictionary, Locale } from "@/dictionaries";
 import type { Project } from "@/data/projects";
+import { RevealText } from "@/components/ui/RevealText";
+import { TechBadges } from "@/components/ui/TechBadges";
 
 interface CaseStudyViewProps {
   dict: Dictionary;
@@ -47,7 +49,12 @@ export function CaseStudyView({ dict, locale, project, position, next }: CaseStu
         </motion.h1>
         <motion.p variants={reveal} className="mt-5 font-mono text-xs md:text-sm uppercase tracking-widest text-foreground">
           {project.subtitle}
+          <span className="text-muted"> / {project.company}</span>
         </motion.p>
+        {/* Tecnologias logo no cabeçalho: visíveis antes da imagem e de qualquer scroll. */}
+        <motion.div variants={reveal} className="mt-6">
+          <TechBadges items={project.stack} label={dict.caseStudy.stack} />
+        </motion.div>
       </motion.header>
 
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 mt-12 md:mt-16">
@@ -75,7 +82,14 @@ export function CaseStudyView({ dict, locale, project, position, next }: CaseStu
           aria-labelledby="overview-title"
         >
           <h2 id="overview-title" className="font-mono text-xs uppercase tracking-widest text-subtle">{dict.caseStudy.overview}</h2>
-          <p className="mt-6 font-serif text-2xl md:text-3xl leading-snug text-ink">{project.description}</p>
+          {/* Mesmo efeito do Sobre, adaptado: o texto já chega legível e a revelação termina cedo. */}
+          <RevealText
+            text={project.description}
+            from={0.4}
+            start="top 90%"
+            end="top 55%"
+            className="mt-6 font-serif text-2xl md:text-3xl leading-snug text-ink"
+          />
 
           <h2 className="mt-16 font-mono text-xs uppercase tracking-widest text-subtle">{dict.caseStudy.highlights}</h2>
           <ol className="mt-6 flex flex-col border-t border-line">
@@ -93,19 +107,8 @@ export function CaseStudyView({ dict, locale, project, position, next }: CaseStu
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
           variants={reveal}
-          className="md:col-span-4 md:col-start-9 flex flex-col gap-12"
+          className="md:col-span-4 md:col-start-9"
         >
-          <div>
-            <h2 className="font-mono text-xs uppercase tracking-widest text-subtle">{dict.caseStudy.stack}</h2>
-            <ul className="mt-6 flex flex-wrap gap-2">
-              {project.stack.map((item) => (
-                <li key={item} className="px-3 py-1.5 rounded-full border border-line font-mono text-xs text-ink/80">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-
           <div>
             <h2 className="font-mono text-xs uppercase tracking-widest text-subtle">{dict.caseStudy.access}</h2>
             {project.link && !project.isPrivate ? (

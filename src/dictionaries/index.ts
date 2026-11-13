@@ -10,6 +10,11 @@ const dictionaries = {
   en,
 };
 
+// O segmento de rota `[locale]` é um idioma suportado?
+export function isLocale(value: string | undefined): value is Locale {
+  return locales.some((locale) => locale === value);
+}
+
 // Normaliza o segmento de rota `[locale]` (string) para um Locale suportado.
 export function toLocale(value: string | undefined): Locale {
   return value === "en" ? "en" : defaultLocale;

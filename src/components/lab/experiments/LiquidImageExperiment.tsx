@@ -5,6 +5,7 @@ import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 import { readThemeColor } from "@/components/webgl/theme";
+import { SceneWarmup } from "@/components/webgl/SceneWarmup";
 
 const IMAGE_SRC = "/projects/nomade-eq.webp";
 
@@ -120,6 +121,7 @@ export default function LiquidImageExperiment({ fallback }: { fallback: string }
     >
       <Suspense fallback={null}>
         <LiquidPlane />
+        <SceneWarmup />
       </Suspense>
     </Canvas>
   );

@@ -13,7 +13,7 @@ uniform float uScrollVelocity;
 uniform vec2 uPointer;
 uniform float uPointerStrength;
 uniform vec2 uPointerVelocity;
-uniform vec3 uAttractor;
+uniform vec4 uAttractor;
 uniform mat4 uViewProjection;
 uniform float uAspect;
 
@@ -28,6 +28,10 @@ uniform float uRopeFill;
 uniform vec4 uMilestones[6];
 uniform float uRopeDepth;
 uniform vec2 uRopeHalf;
+// Quanto a corda andou neste quadro (em unidades de mundo): ela rola junto com a página.
+uniform vec3 uRopeShift;
+// 1 no desktop: corda e anéis presos à timeline (sem atraso nem vaivém de mola); 0 no mobile.
+uniform float uRopeTrack;
 
 // Modelos que "olham" para o cursor: centro (xyz) e raio de influência (w; 0 = forma sem modelo)
 // das formas A e B, e a rotação suavizada de cada uma.
@@ -63,20 +67,26 @@ vec2 ropePoint(float t) {
   return uRopePath[max(uRopeCount - 1, 0)];
 }
 
-// Alvo dinâmico da partícula na forma Experiência; "lock" indica o quanto ela está "travada" na corda.
-vec3 ropeTarget(vec3 rest, vec4 params, inout float lock) {
+// Alvo dinâmico da partícula na forma Experiência. "lock": o quanto ela está travada na corda (menos ruído);
+// "ride": se rola junto com a página (corda construída e anéis; a frente de construção fica parada na tela);
+// "rigid": o quanto segue o alvo sem atraso (corda, anéis e o enxame perto da ponta).
+vec3 ropeTarget(vec3 rest, vec4 params, inout float lock, inout float ride, inout float rigid) {
   if (uRopeCount < 2) return rest;
 
   if (params.r > 0.5 && params.r < 1.5) {
     float t = params.g;
     if (t <= uRopeFill) {
       lock = 1.0;
+      ride = 1.0;
+      rigid = 1.0;
       vec3 jitter = vec3(params.a, fract(params.a * 7.13), fract(params.a * 3.71)) - 0.5;
       return ropeWorld(ropePoint(t)) + jitter * vec3(0.012, 0.012, 0.03);
     }
     // Frente de construção: enxame orbitando a ponta da corda.
     if (t < uRopeFill + 0.1) {
       float k = (t - uRopeFill) / 0.1;
+      // Perto da ponta o enxame já é rígido: a partícula trava na corda quase sem precisar convergir.
+      rigid = 1.0 - k;
       float angle = params.a * 6.2831 + uTime * 2.0;
       return ropeWorld(ropePoint(uRopeFill)) + vec3(cos(angle), sin(angle), sin(angle * 1.7)) * (0.04 + k * 0.45);
     }
@@ -87,6 +97,8 @@ vec3 ropeTarget(vec3 rest, vec4 params, inout float lock) {
     vec4 milestone = uMilestones[int(params.b + 0.5)];
     if (milestone.w < 0.05) return rest;
     lock = 0.6;
+    ride = 1.0;
+    rigid = 1.0;
     float angle = params.g * 6.2831 + uTime * (0.5 + params.a * 0.4);
     float radius = 0.1 * milestone.z * milestone.w;
     return ropeWorld(milestone.xy) + vec3(cos(angle) * radius, sin(angle) * radius * 0.3, sin(angle) * radius) + (params.a - 0.5) * 0.015;
@@ -106,10 +118,14 @@ void main() {
   vec4 ropeParams = texture2D(uRopeParams, uv);
   float lockA = 0.0;
   float lockB = 0.0;
+  float rideA = 0.0;
+  float rideB = 0.0;
+  float rigidA = 0.0;
+  float rigidB = 0.0;
   vec3 targetA = texture2D(uShapeA, uv).xyz;
   vec3 targetB = texture2D(uShapeB, uv).xyz;
-  if (uRopeA > 0.5) targetA = ropeTarget(targetA, ropeParams, lockA);
-  if (uRopeB > 0.5) targetB = ropeTarget(targetB, ropeParams, lockB);
+  if (uRopeA > 0.5) targetA = ropeTarget(targetA, ropeParams, lockA, rideA, rigidA);
+  if (uRopeB > 0.5) targetB = ropeTarget(targetB, ropeParams, lockB, rideB, rigidB);
   float followA;
   float followB;
   targetA = lookTarget(targetA, uLookA, uLookRotationA, followA);
@@ -117,9 +133,18 @@ void main() {
   vec3 target = mix(targetA, targetB, uMorph);
   float lock = mix(lockA, lockB, uMorph);
   float follow = mix(followA, followB, uMorph);
+  // Quem rola com a corda é deslocado junto com ela no shader de posição (sem atraso de mola no
+  // scroll); a mola só vê o que sobra (cursor, construção, entrada na seção).
+  float ride = mix(rideA, rideB, uMorph) * uRopeTrack;
+  float rigid = mix(rigidA, rigidB, uMorph) * uRopeTrack;
+  vec3 riding = position + uRopeShift * ride;
   // Partículas travadas na corda: mola mais rígida e quase sem ruído (leitura de linha única).
   // Partículas de modelo: mola mais rígida para a rotação de "olhar" quase não ter atraso.
-  vec3 force = (target - position) * mix(6.0, 10.0, seed) * (1.0 + lock * 1.2 + follow * 2.0);
+  float stiffness = mix(6.0, 10.0, seed) * (1.0 + lock * 1.2 + follow * 2.0);
+  // Corda presa à timeline (desktop): mola bem rígida e criticamente amortecida (ver o fim do shader),
+  // para cair sobre a linha e os nós quase de imediato, sem passar do ponto.
+  stiffness = mix(stiffness, 300.0, rigid);
+  vec3 force = (target - riding) * stiffness;
 
   // Fluxo de curl noise (escalado junto com a rigidez para manter o aspecto líquido);
   // a velocidade do scroll agita o campo.
@@ -133,33 +158,39 @@ void main() {
   float pointerDistance = length(toParticle);
   float influence = (1.0 - smoothstep(0.0, 0.32, pointerDistance)) * uPointerStrength;
   // Força proporcional à velocidade do cursor: empurra para fora e arrasta um rastro na direção do movimento.
-  force.xy += (toParticle / max(pointerDistance, 0.0001)) * influence * 20.0;
-  force.xy += uPointerVelocity * influence * 6.0;
-  force.z += influence * 6.0;
+  // Na corda rígida a força cresce na mesma proporção da mola, para o cursor ainda "explodir" a linha.
+  float push = influence * mix(1.0, 15.0, rigid);
+  force.xy += (toParticle / max(pointerDistance, 0.0001)) * push * 20.0;
+  force.xy += uPointerVelocity * push * 6.0;
+  force.z += push * 6.0;
 
-  // Atrator do card em hover: puxa e orbita ao redor da coordenada do card.
+  // Vórtice do estudo de caso: puxa e orbita ao redor do ponto (xy), com força z e raio w
+  // (NDC corrigido pelo aspect ratio).
   if (uAttractor.z > 0.001) {
     vec2 toAttractor = (uAttractor.xy - ndc) * vec2(uAspect, 1.0);
     float attractorDistance = max(length(toAttractor), 0.0001);
-    float pull = (1.0 - smoothstep(0.0, 0.6, attractorDistance)) * uAttractor.z;
+    float pull = (1.0 - smoothstep(0.0, max(uAttractor.w, 0.05), attractorDistance)) * uAttractor.z;
     vec2 direction = toAttractor / attractorDistance;
     force.xy += (direction * 7.0 + vec2(-direction.y, direction.x) * 9.0) * pull;
   }
 
   velocity += force * uDelta;
-  velocity *= exp(-5.0 * uDelta);
-  gl_FragColor = vec4(velocity, 1.0);
+  velocity *= exp(-mix(5.0, 2.0 * sqrt(stiffness), rigid) * uDelta);
+  // w: quanto a partícula rola com a corda (lido pelo shader de posição).
+  gl_FragColor = vec4(velocity, ride);
 }
 `;
 
 export const positionShader = /* glsl */ `
 uniform float uDelta;
+uniform vec3 uRopeShift;
 
 void main() {
   vec2 uv = gl_FragCoord.xy / resolution.xy;
   vec4 position = texture2D(texturePosition, uv);
-  vec3 velocity = texture2D(textureVelocity, uv).xyz;
-  position.xyz += velocity * uDelta;
+  vec4 velocity = texture2D(textureVelocity, uv);
+  // A corda da Experiência acompanha o scroll quadro a quadro (velocity.w = quanto a partícula rola com ela).
+  position.xyz += velocity.xyz * uDelta + uRopeShift * velocity.w;
   gl_FragColor = position;
 }
 `;

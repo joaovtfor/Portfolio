@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CaseStudyView } from "@/components/case-study/CaseStudyView";
+import { CaseStudyVortex } from "@/components/case-study/CaseStudyVortex";
 import { getDictionary, toLocale } from "@/dictionaries";
 import { getProject, getProjects } from "@/data/projects";
 
@@ -41,12 +42,15 @@ export default async function CaseStudyPage({ params }: { params: CaseStudyParam
   const next = projects[(index + 1) % projects.length];
 
   return (
-    <CaseStudyView
-      dict={getDictionary(locale)}
-      locale={locale}
-      project={projects[index]}
-      position={{ index: index + 1, total: projects.length }}
-      next={{ slug: next.slug, title: next.title }}
-    />
+    <>
+      <CaseStudyView
+        dict={getDictionary(locale)}
+        locale={locale}
+        project={projects[index]}
+        position={{ index: index + 1, total: projects.length }}
+        next={{ slug: next.slug, title: next.title }}
+      />
+      <CaseStudyVortex />
+    </>
   );
 }

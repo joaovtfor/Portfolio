@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 import Script from "next/script";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "../globals.css";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
 import { SiteShell } from "@/components/layout/SiteShell";
-import { getDictionary, toLocale } from "@/dictionaries";
+import { getDictionary, isLocale, toLocale } from "@/dictionaries";
 import { getResume } from "@/data/resume";
 import { SITE_URL } from "@/lib/site";
 
@@ -83,7 +84,10 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }>) {
-  const locale = toLocale((await params).locale);
+  const { locale } = await params;
+  // Caminhos com ponto (ex.: /sw.js) não passam pelo proxy e chegam aqui com um "idioma" qualquer.
+  // Sem esta checagem a home seria servida com status 200 e sem CSP.
+  if (!isLocale(locale)) notFound();
   // Ler o nonce torna a renderização dinâmica, requisito da CSP com nonce (ver STACK.spec.md).
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const dict = getDictionary(locale);

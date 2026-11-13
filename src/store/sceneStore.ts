@@ -20,6 +20,15 @@ interface RopeMilestone {
 }
 
 /** Corda da Experiência publicada pelo DOM (ExperienceTask.spec.md). */
+/** Vórtice do estudo de caso (CaseStudyVortex), em pixels de viewport. */
+interface VortexFrame {
+  x: number;
+  y: number;
+  radius: number;
+  /** 0 sem vórtice; o motor de partículas suaviza a entrada e a saída. */
+  strength: number;
+}
+
 interface RopeFrame {
   /** Vértices do caminho em pixels de viewport: [x0, y0, x1, y1, ...]. Vazio fora da seção. */
   path: number[];
@@ -39,6 +48,7 @@ interface SceneFrame {
   /** Velocidade do scroll normalizada (0..1). */
   velocity: number;
   rope: RopeFrame;
+  vortex: VortexFrame;
 }
 
 /** Área livre na viewport (frações 0–1, origem no topo esquerdo) onde o modelo da seção Sobre deve caber. */
@@ -63,7 +73,13 @@ const sameSlot = (a: ViewportSlot | null, b: ViewportSlot | null) =>
 
 export const useSceneStore = create<SceneState>((set, get) => ({
   activeScene: 'hero',
-  frame: { progress: 0, sequence: [0], velocity: 0, rope: { path: [], cumulative: [], fill: 0, milestones: [] } },
+  frame: {
+    progress: 0,
+    sequence: [0],
+    velocity: 0,
+    rope: { path: [], cumulative: [], fill: 0, milestones: [] },
+    vortex: { x: 0, y: 0, radius: 0, strength: 0 },
+  },
   aboutSlot: null,
   setActiveScene: (activeScene) => set({ activeScene }),
   // Só muda em resize: cada mudança regenera as formas, então valores iguais não disparam update.

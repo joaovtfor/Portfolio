@@ -4,7 +4,6 @@ import { Canvas } from "@react-three/fiber";
 import { useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useUIStore } from "@/store/uiStore";
 
 interface WebGLSceneProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
@@ -15,7 +14,6 @@ interface WebGLSceneProps extends React.HTMLAttributes<HTMLDivElement> {
 export function WebGLScene({ children, className, eventSource, paused = false, ...props }: WebGLSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
-  const setSceneReady = useUIStore((state) => state.setSceneReady);
 
   // O canvas de fundo é fixo e sempre visível: o loop só para em abas ocultas (rAF) ou quando pausado
   // (ex.: experimento do Lab aberto). Com reduced motion, renderiza sob demanda (frame estático).
@@ -35,7 +33,6 @@ export function WebGLScene({ children, className, eventSource, paused = false, .
         dpr={[1, 1.5]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
         camera={{ position: [0, 0, 5], fov: 45 }}
-        onCreated={setSceneReady}
         style={{
           position: "absolute",
           top: 0,

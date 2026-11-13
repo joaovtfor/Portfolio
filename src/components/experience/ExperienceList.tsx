@@ -7,6 +7,7 @@ import { useIsTouch } from "@/hooks/useIsTouch";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useSceneStore } from "@/store/sceneStore";
 import type { ExperienceItem } from "@/data/resume";
+import { TechBadges } from "@/components/ui/TechBadges";
 
 interface ExperienceListProps {
   experiences: ExperienceItem[];
@@ -91,20 +92,17 @@ function ExperienceItemCard({ exp, i, total, reveal, foldSide, setCardRef, setDo
         {exp.role}
       </h3>
 
-      <p className="text-muted text-sm leading-relaxed mb-6 max-w-2xl font-sans transition-colors duration-500 group-hover:text-ink/80 group-data-[active=true]:text-ink/80">
-        {exp.description}
-      </p>
-
-      <ul className="flex flex-wrap items-center gap-y-1 font-mono text-xs text-subtle uppercase tracking-widest transition-colors duration-500 group-hover:text-muted group-data-[active=true]:text-muted">
-        {exp.skills.map((skill, index) => (
-          <li key={skill}>
-            {skill}
-            {index < exp.skills.length - 1 && (
-              <span aria-hidden="true" className="text-ink/20 mx-2">&bull;</span>
-            )}
+      {/* Entregas em frases curtas (uma por linha) no lugar do parágrafo: leitura rápida para recrutadores. */}
+      <ul className="mb-6 max-w-2xl flex flex-col gap-2 font-sans text-sm leading-relaxed text-muted transition-colors duration-500 group-hover:text-ink/80 group-data-[active=true]:text-ink/80">
+        {exp.bullets.map((bullet) => (
+          <li key={bullet} className="flex gap-3">
+            <span aria-hidden="true" className="mt-[0.6em] h-1 w-1 shrink-0 rounded-full bg-foreground" />
+            <span>{bullet}</span>
           </li>
         ))}
       </ul>
+
+      <TechBadges items={exp.skills} />
     </motion.li>
   );
 }

@@ -5,8 +5,8 @@ import Link from "next/link";
 import { motion, useMotionValue, useSpring, useInView } from "framer-motion";
 import type { Dictionary, Locale } from "@/dictionaries";
 import type { Project } from "@/data/projects";
-import { useUIStore } from "@/store/uiStore";
 import { useIsTouch } from "@/hooks/useIsTouch";
+import { TechBadges } from "@/components/ui/TechBadges";
 
 interface ProjectCardProps {
   project: Project;
@@ -28,9 +28,6 @@ export function ProjectCard({ project, cardRef, index, dict, locale }: ProjectCa
   const isInView = useInView(internalRef, { margin: "0px -40% 0px -40%" });
   const isTouch = useIsTouch();
 
-  const setInteractivePosition = useUIStore((s) => s.setInteractivePosition);
-  const clearInteractivePosition = useUIStore((s) => s.clearInteractivePosition);
-
   const isActive = isTouch ? isInView : false;
 
   const setRefs = (el: HTMLDivElement | null) => {
@@ -44,13 +41,11 @@ export function ProjectCard({ project, cardRef, index, dict, locale }: ProjectCa
     const centerY = rect.top + rect.height / 2;
     x.set((e.clientX - centerX) * -0.04);
     y.set((e.clientY - centerY) * -0.04);
-    setInteractivePosition(project.slug, centerX, centerY);
   };
 
   const handleMouseLeave = () => {
     x.set(0);
     y.set(0);
-    clearInteractivePosition(project.slug);
   };
 
   // O `group` fica no link focável para que `group-focus-visible` reaja ao teclado.
@@ -82,20 +77,30 @@ export function ProjectCard({ project, cardRef, index, dict, locale }: ProjectCa
           <div className="absolute inset-0 bg-background/75 group-hover:bg-background/55 group-data-[active=true]:bg-background/55 group-focus-visible:bg-background/55 transition-colors duration-500" />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center w-full px-4 transform-gpu transition-transform duration-300 md:duration-700 ease-out group-hover:-translate-y-6 group-data-[active=true]:-translate-y-6 group-focus-visible:-translate-y-6">
-          <h3 className="text-2xl md:text-4xl font-serif text-ink group-hover:drop-shadow-ink group-data-[active=true]:drop-shadow-ink transition-all duration-500 text-center">
+        {/* No mobile o card mostra só título, subtítulo e badges; a descrição aparece a partir de md (hover/foco). */}
+        <div className="relative z-10 flex flex-col items-center w-full px-4 max-md:-translate-y-4 transform-gpu transition-transform duration-300 md:duration-700 ease-out md:group-hover:-translate-y-6 md:group-data-[active=true]:-translate-y-6 md:group-focus-visible:-translate-y-6">
+          {/* Tamanho que mantém o título em uma linha: sobra altura para a descrição e os badges sem sobreposição. */}
+          <h3 className="text-xl md:text-3xl font-serif text-ink group-hover:drop-shadow-ink group-data-[active=true]:drop-shadow-ink transition-all duration-500 text-center">
             {project.title}
           </h3>
           <span className="mt-4 md:mt-6 font-mono text-xs tracking-[0.2em] text-muted uppercase text-center group-hover:text-foreground group-data-[active=true]:text-foreground group-focus-visible:text-foreground group-hover:drop-shadow-glow transition-colors duration-500">
             {project.subtitle}
           </span>
 
-          <div className="absolute top-full mt-4 w-[90%] md:w-[75%] opacity-0 group-hover:opacity-100 group-data-[active=true]:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300 md:duration-700 delay-100 ease-out">
-            <p className="text-xs md:text-sm text-muted font-sans text-center leading-relaxed">
+          <div className="hidden md:block absolute top-full mt-4 w-[75%] opacity-0 group-hover:opacity-100 group-data-[active=true]:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-700 delay-100 ease-out">
+            <p className="text-sm text-muted font-sans text-center leading-relaxed">
               {project.description}
             </p>
           </div>
         </div>
+
+        {/* Tecnologias sempre visíveis (sem hover): as 3 primeiras da stack e "+N" para o restante. */}
+        <TechBadges
+          items={project.stack}
+          label={dict.caseStudy.stack}
+          max={3}
+          className="absolute bottom-4 md:bottom-6 inset-x-0 z-20 justify-center px-4"
+        />
 
         {project.isPrivate && (
           <div className="absolute top-5 left-1/2 -translate-x-1/2 flex items-center justify-center gap-2 px-3 h-7 bg-ink/5 border border-line rounded-full text-ink/70 font-mono text-xs uppercase tracking-widest backdrop-blur-md z-20">

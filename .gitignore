@@ -45,6 +45,9 @@ next-env.d.ts
 **/.pnpm-store
 .pnpm-store/**
 
+# anotações pessoais para o currículo (não publicar)
+/docs/curriculo-log.md
+
 # cloudflare / opennext
 .open-next/
 .wrangler/

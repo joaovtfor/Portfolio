@@ -6,6 +6,7 @@ import { useReducedMotion } from "framer-motion";
 import { BACKGROUND_VARIANTS, BackgroundMesh, SITE_BACKGROUND, type BackgroundVariant } from "@/components/webgl/BackgroundMesh";
 import { ParticleField } from "@/components/webgl/ParticleField";
 import { AdaptiveDpr } from "@/components/webgl/AdaptiveDpr";
+import { SceneWarmup } from "@/components/webgl/SceneWarmup";
 
 interface BackgroundStudioExperimentProps {
   isMobile: boolean;
@@ -51,6 +52,7 @@ export default function BackgroundStudioExperiment({ isMobile, fallback, labels 
         <BackgroundMesh quality={isMobile ? "low" : "high"} variant={variant} />
         {showParticles && <ParticleField isMobile={isMobile} driver="click" />}
         <AdaptiveDpr />
+        <SceneWarmup />
       </Canvas>
 
       <div
