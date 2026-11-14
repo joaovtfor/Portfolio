@@ -1,37 +1,23 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface WebGLSceneProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   eventSource?: React.RefObject<HTMLElement | null>;
+  paused?: boolean;
 }
 
-export function WebGLScene({ children, className, eventSource, ...props }: WebGLSceneProps) {
+export function WebGLScene({ children, className, eventSource, paused = false, ...props }: WebGLSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setInView(entry.isIntersecting);
-      },
-      {
-        threshold: 0,
-        rootMargin: "50px",
-      }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
+  // O canvas de fundo é fixo e sempre visível: o loop só para em abas ocultas (rAF) ou quando pausado
+  // (ex.: experimento do Lab aberto). Com reduced motion, renderiza sob demanda (frame estático).
+  const frameloop = paused ? "never" : shouldReduceMotion ? "demand" : "always";
 
   return (
     <div
@@ -43,8 +29,9 @@ export function WebGLScene({ children, className, eventSource, ...props }: WebGL
       <Canvas
         eventSource={(eventSource || containerRef) as unknown as React.RefObject<HTMLElement>}
         eventPrefix="client"
-        frameloop={inView ? "always" : "never"}
+        frameloop={frameloop}
         dpr={[1, 1.5]}
+        gl={{ antialias: false, powerPreference: "high-performance" }}
         camera={{ position: [0, 0, 5], fov: 45 }}
         style={{
           position: "absolute",

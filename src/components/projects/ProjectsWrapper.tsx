@@ -5,18 +5,31 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { ProjectCard } from "./ProjectCard";
-import { Dictionary } from "@/dictionaries";
+import type { Dictionary, Locale } from "@/dictionaries";
+import type { Project } from "@/data/projects";
 
 gsap.registerPlugin(ScrollTrigger);
 
-import { getProjects } from "@/data/projects";
-
 interface ProjectsWrapperProps {
   dict: Dictionary;
-  projects: ReturnType<typeof getProjects>;
+  projects: Project[];
+  locale: Locale;
 }
 
-export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
+// Converte "texto <highlight>destaque</highlight> texto" em nós React (sem innerHTML).
+function renderHighlight(text: string) {
+  const [before, rest = ""] = text.split("<highlight>");
+  const [highlight, after = ""] = rest.split("</highlight>");
+  return (
+    <>
+      {before}
+      {highlight && <span className="text-foreground font-medium">{highlight}</span>}
+      {after}
+    </>
+  );
+}
+
+export function ProjectsWrapper({ dict, projects, locale }: ProjectsWrapperProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -33,9 +46,52 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
     mm.add("(min-width: 768px)", () => {
       const scrollAmount = () => -(scrollContainer.scrollWidth - window.innerWidth);
 
+      // Métricas de layout (sem transform) recalculadas a cada refresh do ScrollTrigger (load/resize).
+      let containerBaseLeft = 0;
+      let cachedCards: ({ offsetLeft: number; offsetWidth: number } | null)[] = [];
+
+      const cacheMetrics = () => {
+        containerBaseLeft = scrollContainer.parentElement?.getBoundingClientRect().left ?? 0;
+        cachedCards = cardsRef.current.map((card) =>
+          card ? { offsetLeft: card.offsetLeft, offsetWidth: card.offsetWidth } : null
+        );
+      };
+
+      // Executa apenas quando o deslocamento horizontal muda (inclusive durante a suavização do scrub).
+      const updateCards = () => {
+        const containerLeft = containerBaseLeft + Number(gsap.getProperty(scrollContainer, "x"));
+        const windowCenter = window.innerWidth / 2;
+
+        cardsRef.current.forEach((card, i) => {
+          const cached = cachedCards[i];
+          if (!card || !cached) return;
+
+          const cardCenter = containerLeft + cached.offsetLeft + (cached.offsetWidth / 2);
+          const distance = cardCenter - windowCenter;
+          const progress = distance / (window.innerWidth * 0.8);
+
+          const rotateY = progress * -15;
+          const scale = 1 - Math.abs(progress) * 0.05;
+          const z = -Math.abs(progress) * 50;
+          const opacity = 1 - Math.abs(progress) * 0.2;
+          const zIndex = Math.round((1 - Math.abs(progress)) * 100);
+
+          gsap.set(card, {
+            rotateY,
+            scale,
+            z,
+            opacity,
+            zIndex,
+            transformPerspective: 1200,
+            transformOrigin: "center center"
+          });
+        });
+      };
+
       const tween = gsap.to(scrollContainer, {
         x: scrollAmount,
         ease: "none",
+        onUpdate: updateCards,
       });
 
       ScrollTrigger.create({
@@ -81,62 +137,16 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
               ease: "power2.out"
             });
           }
+        },
+        onRefresh: () => {
+          cacheMetrics();
+          updateCards();
         }
       });
 
-      let containerLeft = scrollContainer.getBoundingClientRect().left;
-      const cachedCards = cardsRef.current.map(card => {
-        if (!card) return null;
-        return {
-          offsetLeft: card.offsetLeft,
-          offsetWidth: card.offsetWidth
-        };
-      });
-
-      const updateMetrics = () => {
-        containerLeft = scrollContainer.getBoundingClientRect().left;
-      };
-
-      window.addEventListener("scroll", updateMetrics, { passive: true });
-      window.addEventListener("resize", updateMetrics, { passive: true });
-
-      const updateCards = () => {
-        if (!cardsRef.current || !scrollContainer) return;
-        
-        const windowCenter = window.innerWidth / 2;
-        
-        cardsRef.current.forEach((card, i) => {
-          if (!card || !cachedCards[i]) return;
-          
-          const cached = cachedCards[i]!;
-          const cardCenter = containerLeft + cached.offsetLeft + (cached.offsetWidth / 2);
-          const distance = cardCenter - windowCenter;
-          const progress = distance / (window.innerWidth * 0.8);
-          
-          const rotateY = progress * -15; 
-          const scale = 1 - Math.abs(progress) * 0.05; 
-          const z = -Math.abs(progress) * 50; 
-          const opacity = 1 - Math.abs(progress) * 0.2; 
-          const zIndex = Math.round((1 - Math.abs(progress)) * 100);
-          
-          gsap.set(card, {
-            rotateY,
-            scale,
-            z,
-            opacity,
-            zIndex,
-            transformPerspective: 1200,
-            transformOrigin: "center center"
-          });
-        });
-      };
-
-      gsap.ticker.add(updateCards);
-
       return () => {
-        gsap.ticker.remove(updateCards);
-        window.removeEventListener("scroll", updateMetrics);
-        window.removeEventListener("resize", updateMetrics);
+        // Transforms aplicados nos callbacks não são registrados no contexto do matchMedia.
+        gsap.set(cardsRef.current.filter(Boolean), { clearProps: "transform,opacity,zIndex" });
       };
     });
 
@@ -146,29 +156,31 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
   return (
     <section 
       ref={sectionRef} 
-      className="relative w-full h-[70vh] md:h-screen bg-transparent z-20 pointer-events-none"
+      id="work"
+      data-scene="work"
+      aria-labelledby="work-title"
+      className="relative w-full h-[80svh] md:h-screen bg-transparent z-20 pointer-events-none"
     >
       <div 
-        className="w-full h-full flex items-center overflow-x-auto md:overflow-hidden snap-x snap-mandatory hide-scrollbar"
-        style={{ 
-          perspective: "1500px",
-          WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)",
-          maskImage: "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)" 
-        }}
+        className="w-full h-full flex items-center overflow-x-auto md:overflow-hidden snap-x snap-mandatory mask-fade-x"
+        style={{ perspective: "1500px" }}
       >
         <div 
           ref={scrollRef} 
           className="relative flex items-center h-full w-max px-8 md:pl-[12vw] md:pr-[calc(50vw-300px)] gap-6 md:gap-10 pointer-events-auto"
         >
-          <div className="flex-shrink-0 flex flex-col justify-center w-[300px] md:w-[400px] mr-2 md:mr-16 snap-center md:snap-align-none">
-            <h2 className="text-[clamp(2.5rem,5vw,4rem)] font-serif text-white tracking-[0.1em] select-none uppercase">
+          <div className="flex-shrink-0 flex flex-col justify-center w-[260px] md:w-[480px] mr-2 md:mr-16 snap-center md:snap-align-none">
+            <p aria-hidden="true" className="font-mono text-xs uppercase tracking-widest text-subtle">03 —</p>
+            <h2 id="work-title" className="mt-3 text-3xl md:text-4xl font-serif text-ink tracking-[0.1em] uppercase">
               {dict.projects.title}
             </h2>
-            <p className="text-neutral-400 font-sans text-[clamp(0.875rem,2vw,1rem)] mt-2 leading-relaxed" dangerouslySetInnerHTML={{ __html: dict.projects.description.replace('<highlight>', '<span class="text-[var(--foreground)] font-medium">').replace('</highlight>', '</span>') }} />
+            <p className="text-muted font-sans text-sm md:text-base mt-3 leading-relaxed">
+              {renderHighlight(dict.projects.description)}
+            </p>
             
-            <div className="flex md:hidden items-center gap-3 mt-8 text-neutral-500 animate-pulse">
-              <span className="text-[10px] tracking-widest uppercase font-bold font-sans">{dict.projects.mobileHint}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex md:hidden items-center gap-3 mt-8 text-subtle animate-pulse">
+              <span className="font-mono text-xs tracking-widest uppercase font-bold">{dict.projects.mobileHint}</span>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14"/>
                 <path d="m12 5 7 7-7 7"/>
               </svg>
@@ -177,9 +189,10 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
 
           {projects.map((project, i) => (
             <ProjectCard 
-              key={project.id}
+              key={project.slug}
               project={project} 
               dict={dict}
+              locale={locale}
               index={String(i + 1).padStart(2, "0")}
               cardRef={(el) => { cardsRef.current[i] = el; }} 
             />
@@ -189,11 +202,11 @@ export function ProjectsWrapper({ dict, projects }: ProjectsWrapperProps) {
 
       <div 
         ref={progressBarContainerRef}
-        className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 w-[80vw] max-w-[1200px] h-[1px] bg-white/10 z-30 pointer-events-none opacity-0"
+        className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 w-[80vw] max-w-[1200px] h-[1px] bg-line z-30 pointer-events-none opacity-0"
       >
         <div 
           ref={progressBarRef} 
-          className="w-full h-full bg-[var(--foreground)] origin-left shadow-[0_0_10px_var(--foreground)]" 
+          className="w-full h-full bg-foreground origin-left shadow-glow-strong" 
           style={{ transform: "scaleX(0)" }}
         />
       </div>

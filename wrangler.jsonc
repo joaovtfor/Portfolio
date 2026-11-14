@@ -1,0 +1,18 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "portfolio",
+	"compatibility_date": "2026-10-01",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"observability": {
+		"enabled": true
+	},
+	// Worker Previews: cada branch não-produção (ex.: develop) ganha um ambiente via `wrangler preview`.
+	"previews": {}
+	// Páginas são dinâmicas (CSP com nonce): sem ISR, logo sem R2/incremental cache.
+	// Segredos (RESEND_API_KEY) via `wrangler secret put`; localmente em `.dev.vars`.
+}

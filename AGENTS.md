@@ -16,5 +16,5 @@ Mantenha foco absoluto na segurança. Nunca sugira ou implemente trechos de cód
 - Respeite as políticas de CSP configuradas no Middleware.
 
 ## 5. Adesão Estrita ao Design System
-- Agentes devem obrigatoriamente utilizar os tokens definidos no `tailwind.config.ts`.
-- É terminantemente proibido injetar cores hexadecimais *hardcoded* (`#000000`, `#85E8EA`) nas classes utilitárias ou no CSS inline. Use as variáveis do tema (`bg-background`, `text-foreground`, `shadow-glow`).
+- Agentes devem obrigatoriamente utilizar os tokens definidos no bloco `@theme` de `src/app/globals.css` (Tailwind v4, CSS-first).
+- É terminantemente proibido injetar cores hexadecimais *hardcoded* (`#000000`, `#85E8EA`) nas classes utilitárias ou no CSS inline. Use as variáveis do tema (`bg-background`, `text-foreground`, `text-ink`, `text-muted`, `border-line`, `shadow-glow`). Em JS/GLSL, leia as cores das CSS custom properties (`--foreground`, `--ink` etc.).

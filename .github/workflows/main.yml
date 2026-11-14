@@ -4,20 +4,19 @@ on:
   pull_request:
     branches: ["main", "develop"]
   push:
-    branches: ["main"]
+    branches: ["main", "develop"]
 
 jobs:
   quality-gate:
-    name: Lint & Type Check
+    name: Lint, Type Check & Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
+      # Versão lida do campo `packageManager` do package.json
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 11.22.0
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
@@ -29,7 +28,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check Typings
-        run: pnpm tsc --noEmit
+        run: pnpm run type-check
 
       - name: Run ESLint
         run: pnpm run lint
+
+      - name: Build Worker (OpenNext)
+        run: pnpm run build:worker

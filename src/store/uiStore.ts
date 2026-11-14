@@ -1,31 +1,25 @@
 import { create } from 'zustand';
 
+/**
+ * Abertura do site (Preloader, só na primeira carga): em "playing" a cortina cobre a tela,
+ * em "revealing" ela está abrindo e em "done" o nome já foi entregue ao Hero.
+ */
+export type IntroPhase = 'playing' | 'revealing' | 'done';
+
 interface UIState {
-  interactivePositions: { id: string; x: number; y: number }[];
-  isPreloaderDone: boolean;
-  setInteractivePosition: (id: string, x: number, y: number) => void;
-  clearInteractivePosition: (id: string) => void;
-  setPreloaderDone: () => void;
+  introPhase: IntroPhase;
+  isSceneReady: boolean;
+  backgroundPaused: boolean;
+  setIntroPhase: (phase: IntroPhase) => void;
+  setSceneReady: () => void;
+  setBackgroundPaused: (paused: boolean) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
-  interactivePositions: [],
-  isPreloaderDone: false,
-  setInteractivePosition: (id, x, y) =>
-    set((state) => {
-      const existing = state.interactivePositions.find((p) => p.id === id);
-      if (existing && existing.x === x && existing.y === y) return state;
-      
-      return {
-        interactivePositions: [
-          ...state.interactivePositions.filter((p) => p.id !== id),
-          { id, x, y },
-        ],
-      };
-    }),
-  clearInteractivePosition: (id) =>
-    set((state) => ({
-      interactivePositions: state.interactivePositions.filter((p) => p.id !== id),
-    })),
-  setPreloaderDone: () => set({ isPreloaderDone: true }),
+  introPhase: 'playing',
+  isSceneReady: false,
+  backgroundPaused: false,
+  setIntroPhase: (introPhase) => set({ introPhase }),
+  setSceneReady: () => set({ isSceneReady: true }),
+  setBackgroundPaused: (backgroundPaused) => set({ backgroundPaused }),
 }));
